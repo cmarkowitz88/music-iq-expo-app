@@ -10,7 +10,7 @@ export default function CustomButton(props) {
   
   return (
     //<Pressable style={styles.button} onPress={ ()=> setOutputText('New Text')}>
-    <Pressable style={styles.button} onPress={ btnPress}>
+    <Pressable style={styles.button} onPress={btnPress}>
       <Text style={styles.text}>{props.text}</Text>
     </Pressable>
   );

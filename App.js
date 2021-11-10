@@ -5,12 +5,17 @@ import { StyleSheet, Text, View, Button, Image, Alert, Pressable } from 'react-n
 import CustomButton from './button'
 import getQuestions from './src/GetQuestions';
 import api from './src/GetQuestions2';
+import QuestionText from './src/QuestionText';
 
 //export default function App() {
 const IndexPage = () => {
 
 let [game_questions, setGameQuestions] = useState();
-let [question_text, setQuestionText] = useState("This is where the question will live.");
+let [question_text, setQuestionText] = useState("");
+let [answer1_text, setAnswer1Text] = useState();
+let [answer2_text, setAnswer2Text] = useState();
+let [answer3_text, setAnswer3Text] = useState();
+let [answer4_text, setAnswer4Text] = useState();
 
 
 useEffect(() => {
@@ -23,33 +28,18 @@ useEffect(() => {
     const response = await fetch("http://127.0.0.1:3000/getQuestions");
     const data = await response.json();
     setGameQuestions(data);
-    setQuestionText(data[0].Question)
+    setQuestionText(data[0].Question);
+    setAnswer1Text(data[0].Answer1);
     console.log(data);
   }
-  
 
-  // const questions = async () => {
-
-  //   const response = await axios('http://127.0.0.1:3000/getQuestions')
-  //   setQuestions(response.data);
-  //   question_text = game_questions[0].Question;
-  //   console.log(response.data)
-  // };
-  // questions();
-
-  //goGetQuestions();
-  //console.log(game_questions[1]);
-  // api.getData()
-  //   .then((response) => {
-  //     game_questions = response.data;
-  //     console.log("Got Data from function again!!")
-  //     console.log(game_questions[0]);
-  //     setQuestionText(game_questions[0].Question);
-  // })
-  // .catch((error) => {
-  //   console.log(error)
-  // })
 }, []);
+
+let  setGameScreen = () =>{
+  console.log("In game screen");
+  setQuestionText(game_questions[0].Question);
+
+}
 
 async function goGetQuestions() {
 
@@ -70,25 +60,20 @@ async function goGetQuestions() {
 }
 
 
-//goGetQuestions();
-
 
   return (
     <View style={styles.container}>
       <Image style={styles.image} source={require('./assets/MusicIQ-Logo.jpg')} />
       <View>
-      <Text style={styles.questionText}>{question_text}</Text>
-      
-      <Text style={styles.questionText}></Text>
-
+      <QuestionText questionText={question_text}></QuestionText>
       </View>
       <View style={[{width: "90%", margin:10, textAlign: "center"}]}>
         
-        <CustomButton  name='button1' text='Answer 1'  />
-        <CustomButton  name='button2' text='Answer 2' />
-        <CustomButton  name='button3' text='Answer 3' />
-        <CustomButton  name='button4' text='Answer 4' />
-        <Button onPress={goGetQuestions} title="Cllick ME"></Button>
+        <CustomButton  name='button1' text={answer1_text}  />
+        <CustomButton  name='button2' text={answer2_text} />
+        <CustomButton  name='button3' text={answer3_text} />
+        <CustomButton  name='button4' text={answer4_text} />
+        <Button onPress={goGetQuestions} title="Click ME"></Button>
         </View>
         
       
