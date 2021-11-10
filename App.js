@@ -30,6 +30,9 @@ useEffect(() => {
     setGameQuestions(data);
     setQuestionText(data[0].Question);
     setAnswer1Text(data[0].Answer1);
+    setAnswer2Text(data[0].Answer2);
+    setAnswer3Text(data[0].Answer3);
+    setAnswer4Text(data[0].Answer4);
     console.log(data);
   }
 
@@ -59,8 +62,6 @@ async function goGetQuestions() {
   })
 }
 
-
-
   return (
     <View style={styles.container}>
       <Image style={styles.image} source={require('./assets/MusicIQ-Logo.jpg')} />
@@ -68,7 +69,6 @@ async function goGetQuestions() {
       <QuestionText questionText={question_text}></QuestionText>
       </View>
       <View style={[{width: "90%", margin:10, textAlign: "center"}]}>
-        
         <CustomButton  name='button1' text={answer1_text}  />
         <CustomButton  name='button2' text={answer2_text} />
         <CustomButton  name='button3' text={answer3_text} />
