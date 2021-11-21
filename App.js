@@ -6,6 +6,7 @@ import CustomButton from './button'
 import getQuestions from './src/GetQuestions';
 import api from './src/GetQuestions2';
 import QuestionText from './src/QuestionText';
+import {Audio} from 'expo-av';
 
 //export default function App() {
 const IndexPage = () => {
@@ -16,12 +17,23 @@ let [answer1_text, setAnswer1Text] = useState();
 let [answer2_text, setAnswer2Text] = useState();
 let [answer3_text, setAnswer3Text] = useState();
 let [answer4_text, setAnswer4Text] = useState();
+let [audio, setAudio] = useState();
 
 
 useEffect(() => {
   console.log("In useEffect");
   
   getData();
+  playSound();
+
+  async function playSound() {
+    
+    const soundObj = new Audio.Sound()
+    let source = '/Users/craigmarkowitz/Documents/Development/Music_IQ/musiciq-audio/2.wav'
+    await soundObj.loadAsync(source)
+    await soundObj.playAsync()
+
+    }
 
   async function getData(){
     
@@ -34,6 +46,7 @@ useEffect(() => {
     setAnswer3Text(data[0].Answer3);
     setAnswer4Text(data[0].Answer4);
     console.log(data);
+
   }
 
 }, []);
