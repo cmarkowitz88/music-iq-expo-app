@@ -1,12 +1,11 @@
-import axios from 'axios';
 import { StatusBar } from 'expo-status-bar';
-import React, {useEffect, useState} from 'react';
-import { StyleSheet, Text, View, Button, Image, Alert, Pressable } from 'react-native';
-import CustomButton from './button'
-import getQuestions from './src/GetQuestions';
+import React, { useEffect, useState } from 'react';
+import { Audio } from 'expo-av';
+import {StyleSheet, View, Button, Image,} from 'react-native';
+import CustomButton from './button';
 import api from './src/GetQuestions2';
 import QuestionText from './src/QuestionText';
-import {Audio} from 'expo-av';
+
 
 //export default function App() {
 const IndexPage = () => {
@@ -19,22 +18,23 @@ let [answer3_text, setAnswer3Text] = useState();
 let [answer4_text, setAnswer4Text] = useState();
 let [file_path, setFilePath] = useState();
 
+async function playSound(filePath) {
+    
+  const soundObj = new Audio.Sound()
+  //const source = require('./assets/audio/2.wav') 
+  tmp = 'http://localhost:4566/music-iq.audio-files/' + filePath
+  const source = { uri: tmp};
+  await soundObj.loadAsync(source)
+  await soundObj.playAsync()
+
+  }
+
 
 useEffect(() => {
   console.log("In useEffect");
   
   getData();
   
-
-  async function playSound() {
-    
-    const soundObj = new Audio.Sound()
-    let source = require('./assets/audio/2.wav')
-    await soundObj.loadAsync(source)
-    await soundObj.playAsync()
-
-    }
-
   async function getData(){
     
     const response = await fetch("http://127.0.0.1:3000/getQuestions");
@@ -46,15 +46,15 @@ useEffect(() => {
     setAnswer3Text(data[0].Answer3);
     setAnswer4Text(data[0].Answer4);
     setFilePath(data[0].File_Path);
-    setFilePath("3.wav");
+    
     console.log(data);
-    playSound();
+    playSound(data[0].File_Path);
 
   }
 
 }, []);
 
-let  setGameScreen = () =>{
+const  setGameScreen = () =>{
   console.log("In game screen");
   setQuestionText(game_questions[0].Question);
 
