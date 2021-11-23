@@ -12,11 +12,18 @@ const IndexPage = () => {
 
 let [game_questions, setGameQuestions] = useState();
 let [question_text, setQuestionText] = useState("");
+let [correct_answer, setCorrectAnswer] = useState();
 let [answer1_text, setAnswer1Text] = useState();
 let [answer2_text, setAnswer2Text] = useState();
 let [answer3_text, setAnswer3Text] = useState();
 let [answer4_text, setAnswer4Text] = useState();
 let [file_path, setFilePath] = useState();
+
+const onPress = (val) =>{
+  //alert("hello")
+  console.log(val)
+ 
+}
 
 async function playSound(filePath) {
     
@@ -45,6 +52,7 @@ useEffect(() => {
     setAnswer2Text(data[0].Answer2);
     setAnswer3Text(data[0].Answer3);
     setAnswer4Text(data[0].Answer4);
+    setCorrectAnswer(data[0].Correct_Answer);
     setFilePath(data[0].File_Path);
     
     console.log(data);
@@ -85,10 +93,10 @@ async function goGetQuestions() {
       <QuestionText questionText={question_text}></QuestionText>
       </View>
       <View style={[{width: "90%", margin:10, textAlign: "center"}]}>
-        <CustomButton  name='button1' text={answer1_text}  />
-        <CustomButton  name='button2' text={answer2_text} />
-        <CustomButton  name='button3' text={answer3_text} />
-        <CustomButton  name='button4' text={answer4_text} />
+        <CustomButton  name='button1' text={answer1_text} onPress={() => onPress({answer1_text})} />
+        <CustomButton  name='button2' text={answer2_text} onPress={onPress}/>
+        <CustomButton  name='button3' text={answer3_text} onPress={onPress}/>
+        <CustomButton  name='button4' text={answer4_text} onPress={onPress}/>
         <Button onPress={goGetQuestions} title="Click ME"></Button>
         </View>
         
