@@ -1,10 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { Audio } from 'expo-av';
-import {StyleSheet, View, Button, Image,} from 'react-native';
+import {StyleSheet, View, Button, Image, Text} from 'react-native';
 import CustomButton from './button';
 import api from './src/GetQuestions2';
 import QuestionText from './src/QuestionText';
+import ScoreText from './src/ScoreText';
+//import TimerText from './src/Timer';
 
 
 //export default function App() {
@@ -18,9 +20,21 @@ let [answer2_text, setAnswer2Text] = useState();
 let [answer3_text, setAnswer3Text] = useState();
 let [answer4_text, setAnswer4Text] = useState();
 let [file_path, setFilePath] = useState();
+let [score, setScore] = useState(0);
+let [question_count, setQuestionCount] = useState(0);
+let [track_length, setTrackLength] = useState(0);
+let [time_left, setTimeLeft] = useState(0);
+
+let x = 20;
+
+
 
 const onPress = (val) =>{
-  //alert("hello")
+  selected_answer = val.answer1_text;
+  if (selected_answer == correct_answer){
+    setScore(prevScore => prevScore - 1);
+    console.log('Correct!')
+  }
   console.log(val)
  
 }
@@ -39,28 +53,48 @@ async function playSound(filePath) {
 
 useEffect(() => {
   console.log("In useEffect");
-  
   getData();
   
   async function getData(){
     
     const response = await fetch("http://127.0.0.1:3000/getQuestions");
     const data = await response.json();
-    setGameQuestions(data);
-    setQuestionText(data[0].Question);
-    setAnswer1Text(data[0].Answer1);
-    setAnswer2Text(data[0].Answer2);
-    setAnswer3Text(data[0].Answer3);
-    setAnswer4Text(data[0].Answer4);
-    setCorrectAnswer(data[0].Correct_Answer);
-    setFilePath(data[0].File_Path);
     
-    console.log(data);
-    playSound(data[0].File_Path);
+    // First time app is loaded we get the json payload and store it in state object for later use
+    setGameQuestions(data);
 
+    // First time app is loaded we need immediate access to data so we'll directly use data object
+    // For future requests we'll use game_questions array
+    setQuestionText(data[question_count].Question);
+    setAnswer1Text(data[question_count].Answer1);
+    setAnswer2Text(data[question_count].Answer2);
+    setAnswer3Text(data[question_count].Answer3);
+    setAnswer4Text(data[question_count].Answer4);
+    setCorrectAnswer(data[question_count].Correct_Answer);
+    setFilePath(data[question_count].File_Path);
+    setTrackLength(data[question_count].Track_Length);
+    setTimeLeft(data[question_count].Track_Length);
+    
+    //console.log(data);
+    playSound(data[question_count].File_Path);
+    setTimer();
   }
 
 }, []);
+
+function setTimer(){ 
+  setInterval(() => {
+  tmp =  time_left - 1;
+  
+  setTimeLeft(prevtimeLeft => prevtimeLeft - 1);
+  console.log(time_left)
+  
+  if (time_left == 0) {
+    clearInterval(oneSecInterval);
+  }
+  }, 1000);
+
+}
 
 const  setGameScreen = () =>{
   console.log("In game screen");
@@ -89,15 +123,18 @@ async function goGetQuestions() {
   return (
     <View style={styles.container}>
       <Image style={styles.image} source={require('./assets/MusicIQ-Logo.jpg')} />
+      <View><ScoreText text={score}></ScoreText></View>
+      {/*<View><TimerText> </TimerText></View>*/}
+      <View><Text style={styles.timer}>Time Left: {time_left} </Text></View>
       <View>
       <QuestionText questionText={question_text}></QuestionText>
       </View>
       <View style={[{width: "90%", margin:10, textAlign: "center"}]}>
         <CustomButton  name='button1' text={answer1_text} onPress={() => onPress({answer1_text})} />
-        <CustomButton  name='button2' text={answer2_text} onPress={onPress}/>
-        <CustomButton  name='button3' text={answer3_text} onPress={onPress}/>
-        <CustomButton  name='button4' text={answer4_text} onPress={onPress}/>
-        <Button onPress={goGetQuestions} title="Click ME"></Button>
+        <CustomButton  name='button2' text={answer2_text} onPress={() => onPress({answer2_text})}/>
+        <CustomButton  name='button3' text={answer3_text} onPress={() => onPress({answer3_text})}/>
+        <CustomButton  name='button4' text={answer4_text} onPress={() => onPress({answer4_text})}/>
+        {/*<Button onPress={goGetQuestions} title="Click ME"></Button>*/}
         </View>
         
       
@@ -116,7 +153,7 @@ const styles = StyleSheet.create({
   image: {
     resizeMode: 'contain',
     width: 370,
-    height: 200,
+    height: 170,
   },
   questionText:{
   color:'white',
@@ -125,7 +162,16 @@ const styles = StyleSheet.create({
   },
   myButton:{
     margin:25
-  }
+  },
+  timer:{
+    color:'purple',
+    fontSize:22,
+    marginLeft:1,
+    paddingBottom:15,
+    textAlign:'left',
+    flexDirection:'row',
+    fontWeight:'bold'
+    }
 });
 
 export default IndexPage
