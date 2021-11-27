@@ -25,7 +25,7 @@ let [question_count, setQuestionCount] = useState(0);
 let [track_length, setTrackLength] = useState(0);
 let [time_left, setTimeLeft] = useState(0);
 
-let x = 20;
+let tmpCnt = 0;
 
 
 
@@ -74,6 +74,7 @@ useEffect(() => {
     setFilePath(data[question_count].File_Path);
     setTrackLength(data[question_count].Track_Length);
     setTimeLeft(data[question_count].Track_Length);
+    tmpCnt = data[question_count].Track_Length;
     
     //console.log(data);
     playSound(data[question_count].File_Path);
@@ -83,13 +84,13 @@ useEffect(() => {
 }, []);
 
 function setTimer(){ 
-  setInterval(() => {
-  tmp =  time_left - 1;
+  oneSecInterval = setInterval(() => {
+  tmpCnt =  tmpCnt - 1;
   
   setTimeLeft(prevtimeLeft => prevtimeLeft - 1);
-  console.log(time_left)
+  console.log({tmpCnt});
   
-  if (time_left == 0) {
+  if (tmpCnt == 0) {
     clearInterval(oneSecInterval);
   }
   }, 1000);
