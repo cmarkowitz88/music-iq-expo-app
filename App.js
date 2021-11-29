@@ -26,6 +26,7 @@ let [track_length, setTrackLength] = useState(0);
 let [time_left, setTimeLeft] = useState(0);
 let [status_text, setStatusText] = useState('');
 let [is_correct, setIsCorrect] =  useState(false);
+let [btn_disabled_status, setBtn_disabled_status] = useState(false);
 
 let tmpCnt = 0;
 
@@ -34,6 +35,7 @@ let tmpCnt = 0;
 const onPress = (val) =>{
   selected_answer = val.answer1_text;
   clearInterval(oneSecInterval);
+  setBtn_disabled_status(true);
   
   if (selected_answer == correct_answer){
     setScore(prevScore => prevScore + 1);
@@ -141,10 +143,10 @@ async function goGetQuestions() {
       <QuestionText questionText={question_text}></QuestionText>
       </View>
       <View style={[{width: "90%", margin:10, textAlign: "center"}]}>
-        <CustomButton  name='button1' text={answer1_text} onPress={() => onPress({answer1_text})} />
-        <CustomButton  name='button2' text={answer2_text} onPress={() => onPress({answer2_text})}/>
-        <CustomButton  name='button3' text={answer3_text} onPress={() => onPress({answer3_text})}/>
-        <CustomButton  name='button4' text={answer4_text} onPress={() => onPress({answer4_text})}/>
+        <CustomButton  name='button1' text={answer1_text} disabled_status={btn_disabled_status} onPress={() => onPress({answer1_text})} />
+        <CustomButton  name='button2' text={answer2_text} disabled_status={btn_disabled_status} onPress={() => onPress({answer2_text})}/>
+        <CustomButton  name='button3' text={answer3_text} disabled_status={btn_disabled_status} onPress={() => onPress({answer3_text})}/>
+        <CustomButton  name='button4' text={answer4_text} disabled_status={btn_disabled_status} onPress={() => onPress({answer4_text})}/>
         {/*<Button onPress={goGetQuestions} title="Click ME"></Button>*/}
         </View>
 
