@@ -24,6 +24,8 @@ let [score, setScore] = useState(0);
 let [question_count, setQuestionCount] = useState(0);
 let [track_length, setTrackLength] = useState(0);
 let [time_left, setTimeLeft] = useState(0);
+let [status_text, setStatusText] = useState('');
+let [is_correct, setIsCorrect] =  useState(false);
 
 let tmpCnt = 0;
 
@@ -31,9 +33,17 @@ let tmpCnt = 0;
 
 const onPress = (val) =>{
   selected_answer = val.answer1_text;
+  clearInterval(oneSecInterval);
+  
   if (selected_answer == correct_answer){
-    setScore(prevScore => prevScore - 1);
+    setScore(prevScore => prevScore + 1);
+    setIsCorrect(true)
+    setStatusText("Correct")
     console.log('Correct!')
+  }
+  else{
+    setStatusText("Incorrect")
+    setIsCorrect(false)
   }
   console.log(val)
  
@@ -126,7 +136,7 @@ async function goGetQuestions() {
       <Image style={styles.image} source={require('./assets/MusicIQ-Logo.jpg')} />
       <View><ScoreText text={score}></ScoreText></View>
       {/*<View><TimerText> </TimerText></View>*/}
-      <View><Text style={styles.timer}>Time Left: {time_left} </Text></View>
+      <View><Text style={styles.timer}>Time Remaining: {time_left} </Text></View>
       <View>
       <QuestionText questionText={question_text}></QuestionText>
       </View>
@@ -137,6 +147,8 @@ async function goGetQuestions() {
         <CustomButton  name='button4' text={answer4_text} onPress={() => onPress({answer4_text})}/>
         {/*<Button onPress={goGetQuestions} title="Click ME"></Button>*/}
         </View>
+
+        <View><Text style={is_correct ? styles.statusTextCorrect : styles.statusTextIncorrect}>{status_text}</Text></View>
         
       
       <StatusBar style="auto" />
@@ -151,19 +163,35 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     alignItems: 'center'
   },
+
   image: {
     resizeMode: 'contain',
     width: 370,
     height: 170,
   },
+
   questionText:{
-  color:'white',
-  fontSize:20,
-  marginLeft:6,
+    color:'white',
+    fontSize:20,
+    marginLeft:6,
   },
+
+  statusTextCorrect:{
+    color:'green',
+    fontSize:28,
+    paddingTop:10
+  },
+
+  statusTextIncorrect:{
+    color: 'red',
+    fontSize:28,
+    paddingTop:10
+  },
+
   myButton:{
     margin:25
   },
+
   timer:{
     color:'purple',
     fontSize:22,
