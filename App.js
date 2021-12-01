@@ -27,6 +27,8 @@ let [time_left, setTimeLeft] = useState(0);
 let [status_text, setStatusText] = useState('');
 let [is_correct, setIsCorrect] =  useState(false);
 let [btn_disabled_status, setBtn_disabled_status] = useState(false);
+let [playback_object, setPlayBackObject] = useState(null);
+let [sound_object, setSoundObject] = useState(null);
 
 let tmpCnt = 0;
 
@@ -36,6 +38,7 @@ const onPress = (val) =>{
   selected_answer = val.answer1_text;
   clearInterval(oneSecInterval);
   setBtn_disabled_status(true);
+  playback_object.unloadAsync();
   
   if (selected_answer == correct_answer){
     setScore(prevScore => prevScore + 1);
@@ -53,12 +56,18 @@ const onPress = (val) =>{
 
 async function playSound(filePath) {
     
-  const soundObj = new Audio.Sound()
-  //const source = require('./assets/audio/2.wav') 
-  tmp = 'http://localhost:4566/music-iq.audio-files/' + filePath
-  const source = { uri: tmp};
-  await soundObj.loadAsync(source)
-  await soundObj.playAsync()
+  if(sound_object === null){
+    const soundObj = new Audio.Sound();
+    setPlayBackObject(soundObj);
+    //const source = require('./assets/audio/2.wav') 
+    tmp = 'http://localhost:4566/music-iq.audio-files/' + filePath
+    const source = { uri: tmp};
+    const status = await soundObj.loadAsync(source);
+    setSoundObject(status);
+    console.log(status);
+    await soundObj.playAsync();
+
+  }
 
   }
 
@@ -109,9 +118,10 @@ function setTimer(){
 
 }
 
-const  setGameScreen = () =>{
+const  nextQuestion = () =>{
+  setQuestionCount(question_count + 1);
   console.log("In game screen");
-  setQuestionText(game_questions[0].Question);
+  setQuestionText(game_questions[question_count].Question);
 
 }
 
@@ -147,12 +157,11 @@ async function goGetQuestions() {
         <CustomButton  name='button2' text={answer2_text} disabled_status={btn_disabled_status} onPress={() => onPress({answer2_text})}/>
         <CustomButton  name='button3' text={answer3_text} disabled_status={btn_disabled_status} onPress={() => onPress({answer3_text})}/>
         <CustomButton  name='button4' text={answer4_text} disabled_status={btn_disabled_status} onPress={() => onPress({answer4_text})}/>
-        {/*<Button onPress={goGetQuestions} title="Click ME"></Button>*/}
+        <Button onPress={nextQuestion} title="Next -->"></Button>
         </View>
 
         <View><Text style={is_correct ? styles.statusTextCorrect : styles.statusTextIncorrect}>{status_text}</Text></View>
         
-      
       <StatusBar style="auto" />
     </View>
   );
