@@ -6,7 +6,6 @@ import CustomButton from './button';
 import api from './src/GetQuestions2';
 import QuestionText from './src/QuestionText';
 import ScoreText from './src/ScoreText';
-//import TimerText from './src/Timer';
 
 
 //export default function App() {
@@ -32,10 +31,18 @@ let [sound_object, setSoundObject] = useState(null);
 
 let tmpCnt = 0;
 
+const onPress = (val) => {
+  let ans1 = val.answer1_text;
+  let ans2 = val.answer2_text;
+  let ans3 = val.answer3_text;
+  let ans4 = val.answer4_text;
 
+  if(ans1 != undefined) selected_answer = ans1;
+  else if(ans2 != undefined) selected_answer = ans2;
+  else if (ans3 != undefined) selected_answer = ans3;
+  else if (ans3 != undefined) selected_answer = ans4;
 
-const onPress = (val) =>{
-  selected_answer = val.answer1_text;
+  //selected_answer = val.answer1_text;
   clearInterval(oneSecInterval);
   setBtn_disabled_status(true);
   playback_object.unloadAsync();
@@ -51,6 +58,7 @@ const onPress = (val) =>{
     setIsCorrect(false)
   }
   console.log(val)
+  setSoundObject(null);
  
 }
 
@@ -66,8 +74,7 @@ async function playSound(filePath) {
     setSoundObject(status);
     console.log(status);
     await soundObj.playAsync();
-
-  }
+    }
 
   }
 
@@ -99,6 +106,7 @@ useEffect(() => {
     
     //console.log(data);
     playSound(data[question_count].File_Path);
+    setQuestionCount(question_count + 1);
     setTimer();
   }
 
@@ -118,10 +126,28 @@ function setTimer(){
 
 }
 
-const  nextQuestion = () =>{
-  setQuestionCount(question_count + 1);
+const  nextQuestion = () => {
+  
   console.log("In game screen");
+  console.log(question_count);
+  setBtn_disabled_status(false);
+ 
   setQuestionText(game_questions[question_count].Question);
+  setAnswer1Text(game_questions[question_count].Answer1);
+  setAnswer2Text(game_questions[question_count].Answer2);
+  setAnswer3Text(game_questions[question_count].Answer3);
+  setAnswer4Text(game_questions[question_count].Answer4);
+  setCorrectAnswer(game_questions[question_count].Correct_Answer);
+  setFilePath(game_questions[question_count].File_Path);
+  setTrackLength(game_questions[question_count].Track_Length);
+  setTimeLeft(game_questions[question_count].Track_Length);
+  tmpCnt = game_questions[question_count].Track_Length;
+    
+  //console.log(data);
+  playSound(game_questions[question_count].File_Path);
+  setQuestionCount(question_count + 1);
+  setTimer();
+  
 
 }
 
