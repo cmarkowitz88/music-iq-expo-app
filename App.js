@@ -87,27 +87,55 @@ useEffect(() => {
     
     const response = await fetch("http://127.0.0.1:3000/getQuestions");
     const data = await response.json();
+
+    
+    rndm_game_questions = randomize_questions(data);
     
     // First time app is loaded we get the json payload and store it in state object for later use
-    setGameQuestions(data);
+    //setGameQuestions(data);
+    setGameQuestions(rndm_game_questions);
 
     // First time app is loaded we need immediate access to data so we'll directly use data object
     // For future requests we'll use game_questions array
-    setQuestionText(data[question_count].Question);
-    setAnswer1Text(data[question_count].Answer1);
-    setAnswer2Text(data[question_count].Answer2);
-    setAnswer3Text(data[question_count].Answer3);
-    setAnswer4Text(data[question_count].Answer4);
-    setCorrectAnswer(data[question_count].Correct_Answer);
-    setFilePath(data[question_count].File_Path);
-    setTrackLength(data[question_count].Track_Length);
-    setTimeLeft(data[question_count].Track_Length);
-    tmpCnt = data[question_count].Track_Length;
+    setQuestionText(rndm_game_questions[question_count].Question);
+    setAnswer1Text(rndm_game_questions[question_count].Answer1);
+    setAnswer2Text(rndm_game_questions[question_count].Answer2);
+    setAnswer3Text(rndm_game_questions[question_count].Answer3);
+    setAnswer4Text(rndm_game_questions[question_count].Answer4);
+    setCorrectAnswer(rndm_game_questions[question_count].Correct_Answer);
+    setFilePath(rndm_game_questions[question_count].File_Path);
+    setTrackLength(rndm_game_questions[question_count].Track_Length);
+    setTimeLeft(rndm_game_questions[question_count].Track_Length);
+    tmpCnt = rndm_game_questions[question_count].Track_Length;
     
     //console.log(data);
-    playSound(data[question_count].File_Path);
+    playSound(rndm_game_questions[question_count].File_Path);
     setQuestionCount(question_count + 1);
     setTimer();
+  }
+
+  const randomize_questions = (in_array) => {
+
+    const num_questions = in_array.length;
+    let ary_list_of_indicies = [];
+    let question_array = [];
+    let new_index = -1
+
+    for(let x=0; x<num_questions;x++){
+        new_index = Math.floor(Math.random() * num_questions);
+
+        let t = ary_list_of_indicies.indexOf(new_index)
+      
+        while(ary_list_of_indicies.indexOf(new_index) > -1){
+            new_index = Math.floor(Math.random() * num_questions);
+      }
+      
+      ary_list_of_indicies.push(new_index);
+      question_array[new_index] = in_array[x];
+    }
+   
+    return question_array;
+    
   }
 
 }, []);
@@ -131,6 +159,7 @@ const  nextQuestion = () => {
   console.log("In game screen");
   console.log(question_count);
   setBtn_disabled_status(false);
+  setStatusText("")
  
   setQuestionText(game_questions[question_count].Question);
   setAnswer1Text(game_questions[question_count].Answer1);
