@@ -28,6 +28,7 @@ let [is_correct, setIsCorrect] =  useState(false);
 let [btn_disabled_status, setBtn_disabled_status] = useState(false);
 let [playback_object, setPlayBackObject] = useState(null);
 let [sound_object, setSoundObject] = useState(null);
+let [btn_color, setBtnColor] = useState('gray');
 
 let tmpCnt = 0;
 
@@ -208,10 +209,10 @@ async function goGetQuestions() {
       <QuestionText questionText={question_text}></QuestionText>
       </View>
       <View style={[{width: "90%", margin:10, textAlign: "center"}]}>
-        <CustomButton  name='button1' text={answer1_text} disabled_status={btn_disabled_status} onPress={() => onPress({answer1_text})} />
-        <CustomButton  name='button2' text={answer2_text} disabled_status={btn_disabled_status} onPress={() => onPress({answer2_text})}/>
-        <CustomButton  name='button3' text={answer3_text} disabled_status={btn_disabled_status} onPress={() => onPress({answer3_text})}/>
-        <CustomButton  name='button4' text={answer4_text} disabled_status={btn_disabled_status} onPress={() => onPress({answer4_text})}/>
+        <CustomButton  name='button1' text={answer1_text} color={btn_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer1_text})} />
+        <CustomButton  name='button2' text={answer2_text} color={btn_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer2_text})}/>
+        <CustomButton  name='button3' text={answer3_text} color={btn_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer3_text})}/>
+        <CustomButton  name='button4' text={answer4_text} color={btn_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer4_text})}/>
         <Button onPress={nextQuestion} title="Next -->"></Button>
         </View>
 

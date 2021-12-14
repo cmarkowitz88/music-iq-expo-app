@@ -3,28 +3,28 @@ import { Text, View, StyleSheet, Pressable } from 'react-native';
 
 //export default function CustomButton(props) {
   //const CustomButton = ({text, onPress}) => {
-    const CustomButton = ({onPress, text, disabled_status}) => {
+    const CustomButton = ({onPress, text, disabled_status,color}) => {
 
   //const btnPress = () =>{ alert(props.text) }
   
   
   return (
     //<Pressable style={styles.button} onPress={ ()=> setOutputText('New Text')}>
-    <Pressable style={styles.button} onPress={onPress} disabled={disabled_status}>
+    <Pressable style={styles.defaultButton} onPress={onPress} disabled={disabled_status} backgroundColor={color}>
       <Text style={styles.text}>{text}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
+  defaultButton: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 20,
     elevation: 3,
-    backgroundColor: 'gray',
+    //backgroundColor: {color},
     margin:10
   },
   text: {
