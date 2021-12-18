@@ -28,7 +28,11 @@ let [is_correct, setIsCorrect] =  useState(false);
 let [btn_disabled_status, setBtn_disabled_status] = useState(false);
 let [playback_object, setPlayBackObject] = useState(null);
 let [sound_object, setSoundObject] = useState(null);
-let [btn_color, setBtnColor] = useState('gray');
+let [btn1_color, setBtn1Color] = useState('gray');
+let [btn2_color, setBtn2Color] = useState('gray');
+let [btn3_color, setBtn3Color] = useState('gray');
+let [btn4_color, setBtn4Color] = useState('gray');
+let [btn_selected, setBtnSelected] = useState(0);
 
 let tmpCnt = 0;
 
@@ -37,18 +41,32 @@ const onPress = (val) => {
   let ans2 = val.answer2_text;
   let ans3 = val.answer3_text;
   let ans4 = val.answer4_text;
+  let btn_selected = 0;
 
-  if(ans1 != undefined) selected_answer = ans1;
-  else if(ans2 != undefined) selected_answer = ans2;
-  else if (ans3 != undefined) selected_answer = ans3;
-  else if (ans3 != undefined) selected_answer = ans4;
+  if(ans1 != undefined){
+    selected_answer = ans1;
+    btn_selected = 1;
+  }
+  else if(ans2 != undefined) {
+    selected_answer = ans2;
+    btn_selected = 2;
+  }
+  else if (ans3 != undefined) {
+    selected_answer = ans3;
+    btn_selected = 3;;
+  }
+  else if (ans4 != undefined) {
+    selected_answer = ans4;
+    btn_selected = 4;;
+  }
 
-  //selected_answer = val.answer1_text;
   clearInterval(oneSecInterval);
   setBtn_disabled_status(true);
   playback_object.unloadAsync();
   
   if (selected_answer == correct_answer){
+    //setBtn1Color('green')
+    highlightButtons('correct', btn_selected);
     setScore(prevScore => prevScore + 1);
     setIsCorrect(true)
     setStatusText("Correct")
@@ -62,6 +80,14 @@ const onPress = (val) => {
   setSoundObject(null);
  
 }
+
+const highlightButtons = (status, in_btn_selected) => {
+  if (in_btn_selected == 1 && status=='correct')setBtn1Color('green');
+  else if (in_btn_selected ==2 && status=='correct')setBtn2Color('green');
+  else if (in_btn_selected ==3 && status == 'correct')setBtn3Color('green');
+  else if (in_btn_selected ==4 && status=='correct')setBtn4Color('green');
+
+};
 
 async function playSound(filePath) {
     
@@ -209,15 +235,13 @@ async function goGetQuestions() {
       <QuestionText questionText={question_text}></QuestionText>
       </View>
       <View style={[{width: "90%", margin:10, textAlign: "center"}]}>
-        <CustomButton  name='button1' text={answer1_text} color={btn_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer1_text})} />
-        <CustomButton  name='button2' text={answer2_text} color={btn_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer2_text})}/>
-        <CustomButton  name='button3' text={answer3_text} color={btn_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer3_text})}/>
-        <CustomButton  name='button4' text={answer4_text} color={btn_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer4_text})}/>
+        <CustomButton  name='button1' text={answer1_text} color={btn1_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer1_text})} />
+        <CustomButton  name='button2' text={answer2_text} color={btn2_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer2_text})}/>
+        <CustomButton  name='button3' text={answer3_text} color={btn3_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer3_text})}/>
+        <CustomButton  name='button4' text={answer4_text} color={btn4_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer4_text})}/>
         <Button onPress={nextQuestion} title="Next -->"></Button>
         </View>
-
         <View><Text style={is_correct ? styles.statusTextCorrect : styles.statusTextIncorrect}>{status_text}</Text></View>
-        
       <StatusBar style="auto" />
     </View>
   );
