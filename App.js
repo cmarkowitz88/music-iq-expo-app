@@ -73,6 +73,7 @@ const onPress = (val) => {
     console.log('Correct!')
   }
   else{
+    highlightButtons('incorrect', btn_selected);
     setStatusText("Incorrect")
     setIsCorrect(false)
   }
@@ -82,12 +83,27 @@ const onPress = (val) => {
 }
 
 const highlightButtons = (status, in_btn_selected) => {
-  if (in_btn_selected == 1 && status=='correct')setBtn1Color('green');
-  else if (in_btn_selected ==2 && status=='correct')setBtn2Color('green');
-  else if (in_btn_selected ==3 && status == 'correct')setBtn3Color('green');
-  else if (in_btn_selected ==4 && status=='correct')setBtn4Color('green');
+  if(status=='correct'){
+    if (in_btn_selected == 1 )setBtn1Color('green');
+    else if (in_btn_selected ==2 )setBtn2Color('green');
+    else if (in_btn_selected ==3 )setBtn3Color('green');
+    else if (in_btn_selected ==4 )setBtn4Color('green');
+  }
+  else if (status=='incorrect'){
+    if (in_btn_selected == 1 )setBtn1Color('red');
+    else if (in_btn_selected ==2 )setBtn2Color('red');
+    else if (in_btn_selected ==3 )setBtn3Color('red');
+    else if (in_btn_selected ==4 )setBtn4Color('red');
+  }
+}
 
-};
+const resetButtons = () => {
+  setBtn1Color('gray');
+  setBtn2Color('gray');
+  setBtn3Color('gray');
+  setBtn3Color('gray');
+}
+
 
 async function playSound(filePath) {
     
@@ -187,6 +203,7 @@ const  nextQuestion = () => {
   console.log(question_count);
   setBtn_disabled_status(false);
   setStatusText("")
+  resetButtons();
  
   setQuestionText(game_questions[question_count].Question);
   setAnswer1Text(game_questions[question_count].Answer1);
