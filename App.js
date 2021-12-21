@@ -7,7 +7,6 @@ import api from './src/GetQuestions2';
 import QuestionText from './src/QuestionText';
 import ScoreText from './src/ScoreText';
 
-
 //export default function App() {
 const IndexPage = () => {
 
@@ -18,8 +17,11 @@ let [answer1_text, setAnswer1Text] = useState();
 let [answer2_text, setAnswer2Text] = useState();
 let [answer3_text, setAnswer3Text] = useState();
 let [answer4_text, setAnswer4Text] = useState();
+let [score_weight_multiplier, setScoreWeightMultiplier] = useState();
 let [file_path, setFilePath] = useState();
 let [score, setScore] = useState(0);
+let [round, setRound] = useState(0);
+let [round_question_cnt, setRoundQuestionCount] = useState(0);
 let [question_count, setQuestionCount] = useState(0);
 let [track_length, setTrackLength] = useState(0);
 let [time_left, setTimeLeft] = useState(0);
@@ -32,7 +34,6 @@ let [btn1_color, setBtn1Color] = useState('gray');
 let [btn2_color, setBtn2Color] = useState('gray');
 let [btn3_color, setBtn3Color] = useState('gray');
 let [btn4_color, setBtn4Color] = useState('gray');
-let [btn_selected, setBtnSelected] = useState(0);
 
 let tmpCnt = 0;
 
@@ -67,7 +68,8 @@ const onPress = (val) => {
   if (selected_answer == correct_answer){
     //setBtn1Color('green')
     highlightButtons('correct', btn_selected);
-    setScore(prevScore => prevScore + 1);
+    //setScore(prevScore => prevScore + 1);
+    calcScore(track_length, time_left,score_weight_multiplier)
     setIsCorrect(true)
     setStatusText("Correct")
     console.log('Correct!')
@@ -80,6 +82,13 @@ const onPress = (val) => {
   console.log(val)
   setSoundObject(null);
  
+}
+
+const calcScore = (in_track_length, user_time,score_weight_multiplier) =>{
+  let x = (Math.ceil(user_time / track_length * 100)) * score_weight_multiplier;
+  x = Math.round(x / 10) * 10;
+  setScore(prevScore => prevScore + x);
+
 }
 
 const highlightButtons = (status, in_btn_selected) => {
@@ -101,7 +110,7 @@ const resetButtons = () => {
   setBtn1Color('gray');
   setBtn2Color('gray');
   setBtn3Color('gray');
-  setBtn3Color('gray');
+  setBtn4Color('gray');
 }
 
 
@@ -130,7 +139,6 @@ useEffect(() => {
     
     const response = await fetch("http://127.0.0.1:3000/getQuestions");
     const data = await response.json();
-
     
     rndm_game_questions = randomize_questions(data);
     
@@ -149,7 +157,11 @@ useEffect(() => {
     setFilePath(rndm_game_questions[question_count].File_Path);
     setTrackLength(rndm_game_questions[question_count].Track_Length);
     setTimeLeft(rndm_game_questions[question_count].Track_Length);
+    setScoreWeightMultiplier(rndm_game_questions[question_count].Score);
     tmpCnt = rndm_game_questions[question_count].Track_Length;
+
+    // Set the counter for question counter per round. 10 questions per round and then will show results view
+    setRoundQuestionCount(round_question_cnt + 1);
     
     //console.log(data);
     playSound(rndm_game_questions[question_count].File_Path);
@@ -188,7 +200,7 @@ function setTimer(){
   tmpCnt =  tmpCnt - 1;
   
   setTimeLeft(prevtimeLeft => prevtimeLeft - 1);
-  console.log({tmpCnt});
+  //console.log({tmpCnt});
   
   if (tmpCnt == 0) {
     clearInterval(oneSecInterval);
@@ -215,6 +227,9 @@ const  nextQuestion = () => {
   setTrackLength(game_questions[question_count].Track_Length);
   setTimeLeft(game_questions[question_count].Track_Length);
   tmpCnt = game_questions[question_count].Track_Length;
+
+  // Increment counter for current question for this round
+  setRoundQuestionCount(round_question_cnt + 1);
     
   //console.log(data);
   playSound(game_questions[question_count].File_Path);
