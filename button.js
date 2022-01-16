@@ -20,8 +20,8 @@ const styles = StyleSheet.create({
   defaultButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
+    paddingVertical: 8,
+    paddingHorizontal: 22,
     borderRadius: 20,
     elevation: 3,
     //backgroundColor: {color},

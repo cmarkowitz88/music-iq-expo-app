@@ -11,11 +11,11 @@ export default function ScoreText(props) {
 const styles = StyleSheet.create({
     scoreText:{
         color:'purple',
-        fontSize:22,
+        fontSize:20,
         marginLeft:1,
-        paddingBottom:15,
+        paddingBottom:2,
         textAlign:'left',
         flexDirection:'row',
-        fontWeight:'bold'
+        fontWeight:'bold',
         }
 });

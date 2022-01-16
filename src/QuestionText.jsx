@@ -12,7 +12,7 @@ export default function QuestionText(props) {
 const styles = StyleSheet.create({
     questionText:{
         color:'white',
-        fontSize:22,
+        fontSize:20,
         marginLeft:6,
         paddingBottom:15
         }

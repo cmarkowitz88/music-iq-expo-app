@@ -1,11 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { Audio } from 'expo-av';
-import {StyleSheet, View, Button, Image, Text} from 'react-native';
+import {StyleSheet, View, Button, Image, Text, SafeAreaView} from 'react-native';
 import CustomButton from './button';
 import api from './src/GetQuestions2';
 import QuestionText from './src/QuestionText';
 import ScoreText from './src/ScoreText';
+import { get } from 'react-native/Libraries/Utilities/PixelRatio';
+import { VERTICAL } from 'react-native/Libraries/Components/ScrollView/ScrollViewContext';
 
 //export default function App() {
 const IndexPage = () => {
@@ -34,6 +36,7 @@ let [btn1_color, setBtn1Color] = useState('gray');
 let [btn2_color, setBtn2Color] = useState('gray');
 let [btn3_color, setBtn3Color] = useState('gray');
 let [btn4_color, setBtn4Color] = useState('gray');
+let [hint, setHint] = useState();
 
 let tmpCnt = 0;
 
@@ -65,8 +68,10 @@ const onPress = (val) => {
   setBtn_disabled_status(true);
   playback_object.unloadAsync();
   
+  
   if (selected_answer == correct_answer){
     //setBtn1Color('green')
+    playSoundFX(getSoundFXFile('correct'));
     highlightButtons('correct', btn_selected);
     //setScore(prevScore => prevScore + 1);
     calcScore(track_length, time_left,score_weight_multiplier)
@@ -75,6 +80,7 @@ const onPress = (val) => {
     console.log('Correct!')
   }
   else{
+    playSoundFX(getSoundFXFile('incorrect'));
     highlightButtons('incorrect', btn_selected);
     setStatusText("Incorrect")
     setIsCorrect(false)
@@ -113,6 +119,32 @@ const resetButtons = () => {
   setBtn4Color('gray');
 }
 
+const getSoundFXFile = (answer_status) => {
+
+  const applause = ['Applause_1.wav', 'Applause_2.wav', 'Applause_3.wav', 'Applause_4.wav'];
+  const boos = ['Boo_1.wav', 'Boo_2.wav', 'Boo_3.wav', 'Boo_4.wav'];
+
+  if (answer_status == 'correct'){
+      i = Math.floor(Math.random() * applause.length);
+      return applause[i];
+  }
+  else if (answer_status == 'incorrect'){
+      j = Math.floor(Math.random() * boos.length);
+      return boos[j];
+  }
+
+}
+
+async function playSoundFX(filePath){
+    const soundObjFX = new Audio.Sound();
+     
+    tmp = 'http://localhost:4566/music-iq.audio-files/' + filePath
+    const source = { uri: tmp};
+    const status = await soundObjFX.loadAsync(source);
+    
+    console.log(status);
+    await soundObjFX.playAsync();
+}
 
 async function playSound(filePath) {
     
@@ -130,7 +162,7 @@ async function playSound(filePath) {
 
   }
 
-
+//************** Initial Entry Point ****************/
 useEffect(() => {
   console.log("In useEffect");
   getData();
@@ -156,8 +188,10 @@ useEffect(() => {
     setCorrectAnswer(rndm_game_questions[question_count].Correct_Answer);
     setFilePath(rndm_game_questions[question_count].File_Path);
     setTrackLength(rndm_game_questions[question_count].Track_Length);
+    setHint(rndm_game_questions[question_count].Hint);
     setTimeLeft(rndm_game_questions[question_count].Track_Length);
     setScoreWeightMultiplier(rndm_game_questions[question_count].Score);
+    setRound(1);
     tmpCnt = rndm_game_questions[question_count].Track_Length;
 
     // Set the counter for question counter per round. 10 questions per round and then will show results view
@@ -226,6 +260,7 @@ const  nextQuestion = () => {
   setFilePath(game_questions[question_count].File_Path);
   setTrackLength(game_questions[question_count].Track_Length);
   setTimeLeft(game_questions[question_count].Track_Length);
+  setHint(game_questions[question_count].Hint);
   tmpCnt = game_questions[question_count].Track_Length;
 
   // Increment counter for current question for this round
@@ -258,6 +293,7 @@ async function goGetQuestions() {
 }
 
   return (
+    <SafeAreaView style={styles.safeview}>
     <View style={styles.container}>
       <Image style={styles.image} source={require('./assets/MusicIQ-Logo.jpg')} />
       <View><ScoreText text={score}></ScoreText></View>
@@ -266,37 +302,46 @@ async function goGetQuestions() {
       <View>
       <QuestionText questionText={question_text}></QuestionText>
       </View>
-      <View style={[{width: "90%", margin:10, textAlign: "center"}]}>
+      <View style={[{width: "90%", margin:5, textAlign: "center"}]}>
         <CustomButton  name='button1' text={answer1_text} color={btn1_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer1_text})} />
         <CustomButton  name='button2' text={answer2_text} color={btn2_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer2_text})}/>
         <CustomButton  name='button3' text={answer3_text} color={btn3_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer3_text})}/>
         <CustomButton  name='button4' text={answer4_text} color={btn4_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer4_text})}/>
-        <Button onPress={nextQuestion} title="Next -->"></Button>
+        <CustomButton  name='next'    text='Next' color='blue' onPress={nextQuestion} title="Next-->" />
         </View>
         <View><Text style={is_correct ? styles.statusTextCorrect : styles.statusTextIncorrect}>{status_text}</Text></View>
-      <StatusBar style="auto" />
+        <View><Text style={styles.hint}>{hint}</Text></View>
+  <StatusBar style="auto" />
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
     backgroundColor: 'black',
     alignContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  
+  safeview: {
+    flex:1,
+    backgroundColor: 'black',
   },
 
   image: {
     resizeMode: 'contain',
     width: 370,
-    height: 170,
+    height: 90,
   },
 
   questionText:{
     color:'white',
     fontSize:20,
-    marginLeft:6,
+    marginLeft:4,
   },
 
   statusTextCorrect:{
@@ -317,13 +362,18 @@ const styles = StyleSheet.create({
 
   timer:{
     color:'purple',
-    fontSize:22,
+    fontSize:20,
     marginLeft:1,
     paddingBottom:15,
     textAlign:'left',
     flexDirection:'row',
     fontWeight:'bold'
-    }
+    },
+
+   hint:{
+     color:'white'
+   } 
+
 });
 
 export default IndexPage
