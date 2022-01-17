@@ -37,6 +37,8 @@ let [btn2_color, setBtn2Color] = useState('gray');
 let [btn3_color, setBtn3Color] = useState('gray');
 let [btn4_color, setBtn4Color] = useState('gray');
 let [hint, setHint] = useState();
+let [showHintView, setShowHintView] = useState(false);
+let [showNextBtn, setShowNextBtnBln] = useState(false);
 
 let tmpCnt = 0;
 
@@ -87,6 +89,8 @@ const onPress = (val) => {
   }
   console.log(val)
   setSoundObject(null);
+  setShowNextBtnBln(true);
+  setShowHintView(true);
  
 }
 
@@ -243,12 +247,18 @@ function setTimer(){
 
 }
 
+const showHint = () => {
+  setShowHintView(true);
+}
+
 const  nextQuestion = () => {
   
   console.log("In game screen");
   console.log(question_count);
   setBtn_disabled_status(false);
-  setStatusText("")
+  setShowNextBtnBln(false);
+  setShowHintView(false);
+  setStatusText("");
   resetButtons();
  
   setQuestionText(game_questions[question_count].Question);
@@ -307,11 +317,17 @@ async function goGetQuestions() {
         <CustomButton  name='button2' text={answer2_text} color={btn2_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer2_text})}/>
         <CustomButton  name='button3' text={answer3_text} color={btn3_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer3_text})}/>
         <CustomButton  name='button4' text={answer4_text} color={btn4_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer4_text})}/>
-        <CustomButton  name='next'    text='Next' color='blue' onPress={nextQuestion} title="Next-->" />
+        <CustomButton  name='hint'    text='Show Me a Hint' onPress={showHint} title='Show Me a Hint' />
+        
         </View>
-        <View><Text style={is_correct ? styles.statusTextCorrect : styles.statusTextIncorrect}>{status_text}</Text></View>
-        <View><Text style={styles.hint}>{hint}</Text></View>
-  <StatusBar style="auto" />
+       
+        {showHintView ? (<View><Text style={styles.hint}>{hint}</Text></View>): null}
+        <View style={[{width: "90%", margin:5, textAlign: "center"}]}>
+          <Text style={is_correct ? styles.statusTextCorrect : styles.statusTextIncorrect}>{status_text}</Text>
+          {showNextBtn ? (<CustomButton  name='next'  style={styles.next_button}  text='Next -->' color='blue' onPress={nextQuestion} title="Next-->" />) : null}
+       
+       <StatusBar style="auto" />
+      </View>
     </View>
     </SafeAreaView>
   );
@@ -347,13 +363,18 @@ const styles = StyleSheet.create({
   statusTextCorrect:{
     color:'green',
     fontSize:28,
-    paddingTop:10
+    paddingTop:10,
+    textAlign: "center",
+    fontWeight:"bold",
+    paddingBottom:15,
   },
 
   statusTextIncorrect:{
     color: 'red',
     fontSize:28,
-    paddingTop:10
+    paddingTop:10,
+    textAlign: "center",
+    paddingBottom:15,
   },
 
   myButton:{
@@ -372,7 +393,11 @@ const styles = StyleSheet.create({
 
    hint:{
      color:'white'
-   } 
+   } ,
+
+   next_button:{
+     paddingTop:35,
+   }
 
 });
 
