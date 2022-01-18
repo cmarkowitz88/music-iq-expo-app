@@ -10,7 +10,7 @@ import { Text, View, StyleSheet, Pressable } from 'react-native';
   
   return (
     //<Pressable style={styles.button} onPress={ ()=> setOutputText('New Text')}>
-    <Pressable style={styles.defaultButton} onPress={onPress} disabled={disabled_status} backgroundColor={color}>
+    <Pressable style={styles.defaultButton} onPress={onPress} disabled={disabled_status} backgroundColor={color} isCorrect='true'>
       <Text style={styles.text}>{text}</Text>
     </Pressable>
   );
@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   defaultButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 22,
     borderRadius: 20,
     elevation: 3,
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     margin:10
   },
   text: {
-    fontSize: 16,
+    fontSize: 18,
     lineHeight: 21,
     fontWeight: 'bold',
     letterSpacing: 0.25,

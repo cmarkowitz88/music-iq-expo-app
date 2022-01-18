@@ -39,6 +39,7 @@ let [btn4_color, setBtn4Color] = useState('gray');
 let [hint, setHint] = useState();
 let [showHintView, setShowHintView] = useState(false);
 let [showNextBtn, setShowNextBtnBln] = useState(false);
+let [correct_answer_btn, setCorrectAnswerBtn] = useState();
 
 let tmpCnt = 0;
 
@@ -78,13 +79,14 @@ const onPress = (val) => {
     //setScore(prevScore => prevScore + 1);
     calcScore(track_length, time_left,score_weight_multiplier)
     setIsCorrect(true)
-    setStatusText("Correct")
+    setStatusText("CORRECT")
     console.log('Correct!')
   }
   else{
     playSoundFX(getSoundFXFile('incorrect'));
     highlightButtons('incorrect', btn_selected);
-    setStatusText("Incorrect")
+    highlightButtons('correct', correct_answer_btn)
+    setStatusText("INCORRECT")
     setIsCorrect(false)
   }
   console.log(val)
@@ -197,6 +199,9 @@ useEffect(() => {
     setScoreWeightMultiplier(rndm_game_questions[question_count].Score);
     setRound(1);
     tmpCnt = rndm_game_questions[question_count].Track_Length;
+    setCorrectAnswerButton(rndm_game_questions[question_count].Answer1, rndm_game_questions[question_count].Answer2,
+                           rndm_game_questions[question_count].Answer3, rndm_game_questions[question_count].Answer4,
+                           rndm_game_questions[question_count].Correct_Answer);
 
     // Set the counter for question counter per round. 10 questions per round and then will show results view
     setRoundQuestionCount(round_question_cnt + 1);
@@ -272,6 +277,9 @@ const  nextQuestion = () => {
   setTimeLeft(game_questions[question_count].Track_Length);
   setHint(game_questions[question_count].Hint);
   tmpCnt = game_questions[question_count].Track_Length;
+  setCorrectAnswerButton(game_questions[question_count].Answer1,game_questions[question_count].Answer2,
+                         game_questions[question_count].Answer3,game_questions[question_count].Answer4,
+                         game_questions[question_count].Correct_Answer);
 
   // Increment counter for current question for this round
   setRoundQuestionCount(round_question_cnt + 1);
@@ -282,6 +290,21 @@ const  nextQuestion = () => {
   setTimer();
   
 
+}
+
+const setCorrectAnswerButton = (ans1, ans2, ans3, ans4, c) => {
+  // As we are assigning the questions we want to know which button contains the correct answer
+  // so that if the use selects the incorrect answer we'll know the correct one so we can change
+  // the background to green to indicate it was the correct answer
+
+  if (ans1 == c)
+      setCorrectAnswerBtn(1);
+  else if (ans2 == c)
+      setCorrectAnswerBtn(2);
+  else if (ans3 == c)
+      setCorrectAnswerBtn(3);
+  else if (ans4 == c)
+      setCorrectAnswerBtn(4);
 }
 
 async function goGetQuestions() {
@@ -317,14 +340,14 @@ async function goGetQuestions() {
         <CustomButton  name='button2' text={answer2_text} color={btn2_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer2_text})}/>
         <CustomButton  name='button3' text={answer3_text} color={btn3_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer3_text})}/>
         <CustomButton  name='button4' text={answer4_text} color={btn4_color} disabled_status={btn_disabled_status} onPress={() => onPress({answer4_text})}/>
-        <CustomButton  name='hint'    text='Show Me a Hint' onPress={showHint} title='Show Me a Hint' />
+        <CustomButton  name='hint'    text='Give Me a Hint!' onPress={showHint} title='Show Me a Hint' />
         
         </View>
        
         {showHintView ? (<View><Text style={styles.hint}>{hint}</Text></View>): null}
         <View style={[{width: "90%", margin:5, textAlign: "center"}]}>
           <Text style={is_correct ? styles.statusTextCorrect : styles.statusTextIncorrect}>{status_text}</Text>
-          {showNextBtn ? (<CustomButton  name='next'  style={styles.next_button}  text='Next -->' color='blue' onPress={nextQuestion} title="Next-->" />) : null}
+          {showNextBtn ? (<CustomButton  name='next'  text='Next -->'  onPress={nextQuestion} title="Next-->" />) : null}
        
        <StatusBar style="auto" />
       </View>
@@ -371,9 +394,10 @@ const styles = StyleSheet.create({
 
   statusTextIncorrect:{
     color: 'red',
-    fontSize:28,
+    fontSize:35,
     paddingTop:10,
     textAlign: "center",
+    fontWeight:"bold",
     paddingBottom:15,
   },
 
@@ -392,11 +416,14 @@ const styles = StyleSheet.create({
     },
 
    hint:{
-     color:'white'
+     color:'white',
+     marginLeft:6,
+     fontSize:16,
    } ,
 
    next_button:{
      paddingTop:35,
+     fontSize:25,
    }
 
 });
