@@ -12,6 +12,7 @@ import { VERTICAL } from 'react-native/Libraries/Components/ScrollView/ScrollVie
 //export default function App() {
 const IndexPage = () => {
 
+let [level, setLevel] = useState();
 let [game_questions, setGameQuestions] = useState();
 let [question_text, setQuestionText] = useState("");
 let [correct_answer, setCorrectAnswer] = useState();
@@ -175,7 +176,8 @@ useEffect(() => {
   
   async function getData(){
     
-    const response = await fetch("http://127.0.0.1:3000/getQuestions");
+    setLevel(1);
+    const response = await fetch("http://127.0.0.1:3000/getQuestions?level=1");
     const data = await response.json();
     
     rndm_game_questions = randomize_questions(data);
