@@ -2,17 +2,16 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import { Audio } from 'expo-av';
 import {StyleSheet, View, Button, Image, Text, SafeAreaView} from 'react-native';
-import CustomButton from './button';
-import api from './src/GetQuestions2';
-import QuestionText from './src/QuestionText';
-import ScoreText from './src/ScoreText';
+import CustomButton from '../../button';
+import api from '../GetQuestions2';
+import QuestionText from '../QuestionText';
+import ScoreText from '../ScoreText';
 import { get } from 'react-native/Libraries/Utilities/PixelRatio';
 import { VERTICAL } from 'react-native/Libraries/Components/ScrollView/ScrollViewContext';
-import RootNavigator from './src/navigation/RootNavigator';
 
 //export default function App() {
-const IndexPage = () => {
-/*
+const GameScreen = () => {
+
 let [level, setLevel] = useState();
 let [game_questions, setGameQuestions] = useState();
 let [question_text, setQuestionText] = useState("");
@@ -170,7 +169,7 @@ async function playSound(filePath) {
 
   }
 
-
+//************** Initial Entry Point ****************/
 useEffect(() => {
   console.log("In useEffect");
   getData();
@@ -331,9 +330,9 @@ async function goGetQuestions() {
   return (
     <SafeAreaView style={styles.safeview}>
     <View style={styles.container}>
-      <Image style={styles.image} source={require('./assets/MusicIQ-Logo.jpg')} />
+      <Image style={styles.image} source={require('../../assets/MusicIQ-Logo_2.jpg')} />
       <View><ScoreText text={score}></ScoreText></View>
-     
+      {/*<View><TimerText> </TimerText></View>*/}
       <View><Text style={styles.timer}>Time Remaining: {time_left} </Text></View>
       <View>
       <QuestionText questionText={question_text}></QuestionText>
@@ -428,8 +427,7 @@ const styles = StyleSheet.create({
      paddingTop:35,
      fontSize:25,
    }
-*/
-return <RootNavigator />;
-};
 
-export default IndexPage;
+});
+
+export default GameScreen;
