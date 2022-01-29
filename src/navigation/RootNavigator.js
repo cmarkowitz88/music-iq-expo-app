@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import WelcomeScreen from '../screens/WelcomeScreen';
 import GameScreen from '../screens/GameScreen';
+import RoundReview from '../screens/RoundReview';
 
 
 const Stack = createNativeStackNavigator();
@@ -16,7 +17,7 @@ const RootNavigator = () => {
             <Stack.Navigator screenOptions={{headerShown: false}}>
               <Stack.Screen name="Home" component={WelcomeScreen} />
               <Stack.Screen name="Game" component={GameScreen} />
-
+              <Stack.Screen name="RoundReview" component={RoundReview} />
             </Stack.Navigator>
         </NavigationContainer>
 

@@ -6,11 +6,9 @@ import CustomButton from '../../button';
 import api from '../GetQuestions2';
 import QuestionText from '../QuestionText';
 import ScoreText from '../ScoreText';
-import { get } from 'react-native/Libraries/Utilities/PixelRatio';
-import { VERTICAL } from 'react-native/Libraries/Components/ScrollView/ScrollViewContext';
 
-//export default function App() {
-const GameScreen = () => {
+
+const GameScreen = ({navigation}) => {
 
 let [level, setLevel] = useState();
 let [game_questions, setGameQuestions] = useState();
@@ -41,8 +39,9 @@ let [hint, setHint] = useState();
 let [showHintView, setShowHintView] = useState(false);
 let [showNextBtn, setShowNextBtnBln] = useState(false);
 let [correct_answer_btn, setCorrectAnswerBtn] = useState();
-
 let tmpCnt = 0;
+
+const QUESTIONS_PER_ROUND = 10;
 
 const onPress = (val) => {
   let ans1 = val.answer1_text;
@@ -71,7 +70,9 @@ const onPress = (val) => {
   clearInterval(oneSecInterval);
   setBtn_disabled_status(true);
   playback_object.unloadAsync();
-  
+  let c = round_question_cnt + 1;
+  setRoundQuestionCount(c);
+  setQuestionCount(question_count + 1);
   
   if (selected_answer == correct_answer){
     //setBtn1Color('green')
@@ -89,6 +90,11 @@ const onPress = (val) => {
     highlightButtons('correct', correct_answer_btn)
     setStatusText("INCORRECT")
     setIsCorrect(false)
+  }
+  
+  if (c == 1){
+    navigation.navigate('RoundReview')
+    setRoundQuestionCount(1);
   }
   console.log(val)
   setSoundObject(null);
@@ -205,9 +211,6 @@ useEffect(() => {
                            rndm_game_questions[question_count].Answer3, rndm_game_questions[question_count].Answer4,
                            rndm_game_questions[question_count].Correct_Answer);
 
-    // Set the counter for question counter per round. 10 questions per round and then will show results view
-    setRoundQuestionCount(round_question_cnt + 1);
-    
     //console.log(data);
     playSound(rndm_game_questions[question_count].File_Path);
     setQuestionCount(question_count + 1);
@@ -284,11 +287,11 @@ const  nextQuestion = () => {
                          game_questions[question_count].Correct_Answer);
 
   // Increment counter for current question for this round
-  setRoundQuestionCount(round_question_cnt + 1);
+  //setRoundQuestionCount(round_question_cnt + 1);
     
   //console.log(data);
   playSound(game_questions[question_count].File_Path);
-  setQuestionCount(question_count + 1);
+  //setQuestionCount(question_count + 1);
   setTimer();
   
 
