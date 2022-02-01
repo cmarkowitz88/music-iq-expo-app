@@ -1,50 +1,70 @@
 import React from "react";
-import {ImageBackground, StyleSheet,SafeAreaView, View, Button, Text, Image} from "react-native";
+import {
+  ImageBackground,
+  StyleSheet,
+  SafeAreaView,
+  FlatList,
+  View,
+  Button,
+  Text,
+  Image,
+} from "react-native";
 import CustomButton from "../../button";
 
-const RoundReview = (navigation) => {
+const RoundReview = ({ route, navigation }) => {
+  const { data } = route.params;
+  const Item = ({ answer_status }) => (
+    <View>
+      <Text style={styles.text}>{answer_status}</Text>
+    </View>
+  );
 
-    return(
-        <SafeAreaView style={styles.container}>
-        <View style={styles.container}>
-            <Text>Round Review</Text>
-       
-        </View>
-        </SafeAreaView>
+  const renderItem = ({ item }) => (
+    <Item answer_status={item.answer_status} />
+  );
 
-        
-    )
-}
+  console.log(data);
+  console.log("h");
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View>
+        <Text style={styles.text}>Round Review</Text>
+        {data && (
+          <FlatList
+            data={data}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+          />
+        )}
+
+        <CustomButton text="Back" onPress={() => navigation.navigate("Game")} />
+      </View>
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
-    container:{
-        flex: 1,
-        backgroundColor:"black",
-        flexDirection: 'column',
-        backgroundColor: 'black',
-        alignContent: 'center',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-    },
-    background: {
-        flex: 1,
-        width:null,
-        height:null,
-        resizeMode: "contain",
-       
-    },
-    button:{
-        color:"white", 
-    },
-    text:{
-        color:"white",
-    },
-    image: {
-        resizeMode: 'contain',
-        width: 370,
-        height: 90,
-      },
+  container: {
+    flex: 1,
+    backgroundColor: "black",
+    flexDirection: "column",
+    color: "white",
+    alignContent: "center",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
 
-})
+  button: {
+    color: "white",
+  },
+  text: {
+    color: "white",
+  },
+
+  answer_status: {
+    color: "white",
+  },
+});
 
 export default RoundReview;

@@ -1,18 +1,25 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
-import { Audio } from 'expo-av';
-import {StyleSheet, View, Button, Image, Text, SafeAreaView} from 'react-native';
-import CustomButton from './button';
-import api from './src/GetQuestions2';
-import QuestionText from './src/QuestionText';
-import ScoreText from './src/ScoreText';
-import { get } from 'react-native/Libraries/Utilities/PixelRatio';
-import { VERTICAL } from 'react-native/Libraries/Components/ScrollView/ScrollViewContext';
-import RootNavigator from './src/navigation/RootNavigator';
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
+import { Audio } from "expo-av";
+import {
+  StyleSheet,
+  View,
+  Button,
+  Image,
+  Text,
+  SafeAreaView,
+} from "react-native";
+import CustomButton from "./button";
+import api from "./src/GetQuestions2";
+import QuestionText from "./src/QuestionText";
+import ScoreText from "./src/ScoreText";
+import { get } from "react-native/Libraries/Utilities/PixelRatio";
+import { VERTICAL } from "react-native/Libraries/Components/ScrollView/ScrollViewContext";
+import RootNavigator from "./src/navigation/RootNavigator";
 
 //export default function App() {
 const IndexPage = () => {
-/*
+  /*
 let [level, setLevel] = useState();
 let [game_questions, setGameQuestions] = useState();
 let [question_text, setQuestionText] = useState("");
@@ -429,7 +436,7 @@ const styles = StyleSheet.create({
      fontSize:25,
    }
 */
-return <RootNavigator />;
+  return <RootNavigator />;
 };
 
 export default IndexPage;

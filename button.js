@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   defaultButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 22,
     borderRadius: 20,
     elevation: 3,
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     margin:10
   },
   text: {
-    fontSize: 18,
+    fontSize: 16,
     lineHeight: 21,
     fontWeight: 'bold',
     letterSpacing: 0.25,
