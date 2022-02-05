@@ -8,19 +8,39 @@ import {
   Button,
   Text,
   Image,
+  ScrollView,
 } from "react-native";
 import CustomButton from "../../button";
 
 const RoundReview = ({ route, navigation }) => {
   const { data } = route.params;
-  const Item = ({ answer_status }) => (
-    <View>
-      <Text style={styles.text}>{answer_status}</Text>
+  const header_wording = 'Round Review';
+  const header_answer = "Your Answer: ";
+  const header_time = "Your Time: ";
+  const time_increments = " seconds";
+  
+  const Item = ({ num, question, answer_status, answer, time_to_answer }) => (
+    <View style={styles.listItem}>
+      <Text style={styles.question_text}>
+        {num}. {question}
+      </Text>
+      <Text style={styles.text}>
+        {header_answer}{answer} - {answer_status}
+      </Text>
+      <Text style={styles.last_item_text}>
+        {header_time}{time_to_answer}{time_increments}
+      </Text>
     </View>
   );
 
   const renderItem = ({ item }) => (
-    <Item answer_status={item.answer_status} />
+    <Item
+      num={item.id}
+      question={item.question}
+      answer_status={item.answer_status}
+      answer={item.answer}
+      time_to_answer={item.time_to_answer}
+    />
   );
 
   console.log(data);
@@ -29,15 +49,18 @@ const RoundReview = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View>
-        <Text style={styles.text}>Round Review</Text>
-        {data && (
-          <FlatList
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-          />
-        )}
-
+      
+        <Text style={styles.header_text}>{header_wording}</Text>
+        <View>
+          {data && (
+            <FlatList
+              data={data}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id}
+            />
+          )}
+        </View>
+       
         <CustomButton text="Back" onPress={() => navigation.navigate("Game")} />
       </View>
     </SafeAreaView>
@@ -50,20 +73,43 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
     flexDirection: "column",
     color: "white",
-    alignContent: "center",
-    alignItems: "center",
-    justifyContent: "flex-start",
+    fontSize: 15,
+  },
+  listItem:{
+    borderWidth:1,
+    borderColor:"green",
+    backgroundColor:'green',
+    padding:10,
+  },
+
+  header_text: {
+    fontSize: 28,
+    color: "white",
+    paddingBottom: 25,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 
   button: {
     color: "white",
   },
+  question_text: {
+    color: "white",
+    fontSize: 18,
+    textAlign: "left",
+    fontWeight: "bold",
+    paddingBottom: 5,
+  },
   text: {
     color: "white",
+    fontSize: 18,
+    textAlign: "left",
   },
-
-  answer_status: {
+  last_item_text: {
     color: "white",
+    fontSize: 18,
+    textAlign: "left",
+    paddingBottom:10,
   },
 });
 
