@@ -118,8 +118,10 @@ const GameScreen = ({ navigation }) => {
     setRndReviewAry(tmp);
 
     if (c == QUESTIONS_PER_ROUND) {
-      navigation.navigate("RoundReview",{data:rnd_review_ary});
+      setRndReviewAry([]);
       setRoundQuestionCount(1);
+      navigation.navigate("RoundReview",{data:rnd_review_ary});
+      
     }
     console.log(val);
     setSoundObject(null);
