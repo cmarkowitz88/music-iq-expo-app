@@ -46,11 +46,12 @@ const GameScreen = ({ navigation }) => {
   let [showNextBtn, setShowNextBtnBln] = useState(false);
   let [correct_answer_btn, setCorrectAnswerBtn] = useState();
   let [users_time, setUsersTime] = useState(0);
+  let [rnd_review_ary, setRndReviewAry] = useState([]);
 
   // Temp variables
   let tmpCnt = 0;
   let tmpStatus = "";
-  let rnd_review_ary = [];
+  //let rnd_review_ary = [];
 
   const QUESTIONS_PER_ROUND = 10;
 
@@ -112,9 +113,11 @@ const GameScreen = ({ navigation }) => {
       answer_status: tmpStatus,
       time_to_answer: tmp_users_time,
     };
-    rnd_review_ary.push(roundReviewData);
+    tmp = rnd_review_ary;
+    tmp.push(roundReviewData);
+    setRndReviewAry(tmp);
 
-    if (c == 1) {
+    if (c == QUESTIONS_PER_ROUND) {
       navigation.navigate("RoundReview",{data:rnd_review_ary});
       setRoundQuestionCount(1);
     }

@@ -14,21 +14,24 @@ import CustomButton from "../../button";
 
 const RoundReview = ({ route, navigation }) => {
   const { data } = route.params;
-  const header_wording = 'Round Review';
+  const header_wording = "Round Review";
   const header_answer = "Your Answer: ";
   const header_time = "Your Time: ";
   const time_increments = " seconds";
-  
+
   const Item = ({ num, question, answer_status, answer, time_to_answer }) => (
     <View style={styles.listItem}>
       <Text style={styles.question_text}>
         {num}. {question}
       </Text>
       <Text style={styles.text}>
-        {header_answer}{answer} - {answer_status}
+        {header_answer}
+        {answer} - {answer_status}
       </Text>
       <Text style={styles.last_item_text}>
-        {header_time}{time_to_answer}{time_increments}
+        {header_time}
+        {time_to_answer}
+        {time_increments}
       </Text>
     </View>
   );
@@ -48,19 +51,19 @@ const RoundReview = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View>
-      
+      <View style={{ flex: 1, width: '100%' }}>
         <Text style={styles.header_text}>{header_wording}</Text>
-        <View>
+        <View style={{ flex: 1, width: '100%' }}>
           {data && (
             <FlatList
               data={data}
               renderItem={renderItem}
               keyExtractor={(item) => item.id}
+              scrollEnabled = "true"
             />
           )}
         </View>
-       
+
         <CustomButton text="Back" onPress={() => navigation.navigate("Game")} />
       </View>
     </SafeAreaView>
@@ -69,17 +72,18 @@ const RoundReview = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "black",
     flexDirection: "column",
     color: "white",
     fontSize: 15,
+    flex: 1,
+    height:"100%"
   },
-  listItem:{
-    borderWidth:1,
-    borderColor:"green",
-    backgroundColor:'green',
-    padding:10,
+  listItem: {
+    borderWidth: 1,
+    borderColor: "green",
+    backgroundColor: "green",
+    padding: 10,
   },
 
   header_text: {
@@ -109,7 +113,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     textAlign: "left",
-    paddingBottom:10,
+    paddingBottom: 10,
   },
 });
 
