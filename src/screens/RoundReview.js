@@ -9,15 +9,28 @@ import {
   Text,
   Image,
   ScrollView,
+  Divider,
 } from "react-native";
 import CustomButton from "../../button";
+
+const separator = () => (
+  <View
+      style={{
+        backgroundColor: 'white',
+        height: 0.5,
+      }}
+    />
+);
 
 const RoundReview = ({ route, navigation }) => {
   const { data } = route.params;
   const header_wording = "Round Review";
   const header_answer = "Your Answer: ";
   const header_time = "Your Time: ";
-  const time_increments = " seconds";
+  const time_increment_1 = " second";
+  const time_increment_2 = " seconds"
+
+  
 
   const Item = ({ num, question, answer_status, answer, time_to_answer }) => (
     <View style={styles.listItem}>
@@ -31,7 +44,7 @@ const RoundReview = ({ route, navigation }) => {
       <Text style={styles.last_item_text}>
         {header_time}
         {time_to_answer}
-        {time_increments}
+        {time_to_answer ==1 ? time_increment_1 : time_increment_2}
       </Text>
     </View>
   );
@@ -60,6 +73,7 @@ const RoundReview = ({ route, navigation }) => {
               renderItem={renderItem}
               keyExtractor={(item) => item.id}
               scrollEnabled = "true"
+              ItemSeparatorComponent={separator}
             />
           )}
         </View>
@@ -81,8 +95,7 @@ const styles = StyleSheet.create({
   },
   listItem: {
     borderWidth: 1,
-    borderColor: "green",
-    backgroundColor: "green",
+    backgroundColor: "black",
     padding: 10,
   },
 
