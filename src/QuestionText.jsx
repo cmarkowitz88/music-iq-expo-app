@@ -14,5 +14,6 @@ const styles = StyleSheet.create({
         color:'white',
         fontSize:20,
         marginLeft:6,
+        paddingBottom:15
         }
 });

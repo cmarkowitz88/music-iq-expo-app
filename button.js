@@ -1,30 +1,30 @@
 import React, {useState} from 'react';
 import { Text, View, StyleSheet, Pressable } from 'react-native';
 
-export default function CustomButton(props) {
-    
-  const [ outputText, setOutputText] = useState('Open up App.js')
+//export default function CustomButton(props) {
+  //const CustomButton = ({text, onPress}) => {
+    const CustomButton = ({onPress, text, disabled_status,color}) => {
 
-  const btnPress = () =>{ alert(props.name) }
+  //const btnPress = () =>{ alert(props.text) }
   
   
   return (
     //<Pressable style={styles.button} onPress={ ()=> setOutputText('New Text')}>
-    <Pressable style={styles.button} onPress={btnPress}>
-      <Text style={styles.text}>{props.text}</Text>
+    <Pressable style={styles.defaultButton} onPress={onPress} disabled={disabled_status} backgroundColor={color} isCorrect='true'>
+      <Text style={styles.text}>{text}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
+  defaultButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
+    paddingVertical: 8,
+    paddingHorizontal: 22,
     borderRadius: 20,
     elevation: 3,
-    backgroundColor: 'gray',
+    //backgroundColor: {color},
     margin:10
   },
   text: {
@@ -35,3 +35,5 @@ const styles = StyleSheet.create({
     color: 'white',
   },
 });
+
+export default CustomButton
