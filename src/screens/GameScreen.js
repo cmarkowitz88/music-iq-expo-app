@@ -47,6 +47,7 @@ const GameScreen = ({ navigation }) => {
   let [correct_answer_btn, setCorrectAnswerBtn] = useState();
   let [users_time, setUsersTime] = useState(0);
   let [rnd_review_ary, setRndReviewAry] = useState([]);
+  let [out_of_time, setOutOfTime] = useState(false);
 
   // Temp variables
   let tmpCnt = 0;
@@ -60,7 +61,9 @@ const GameScreen = ({ navigation }) => {
     let ans2 = val.answer2_text;
     let ans3 = val.answer3_text;
     let ans4 = val.answer4_text;
+    let selected_answer = "";
     let btn_selected = 0;
+    let blnOutOfTime = false;
 
     if (ans1 != undefined) {
       selected_answer = ans1;
@@ -75,13 +78,16 @@ const GameScreen = ({ navigation }) => {
       selected_answer = ans4;
       btn_selected = 4;
     }
+    else{
+      blnOutOfTime = true;
+    }
 
     let tmp_users_time = track_length - time_left;
     setUsersTime(tmp_users_time);
 
     clearInterval(oneSecInterval);
     setBtn_disabled_status(true);
-    playback_object.unloadAsync();
+    if(playback_object) playback_object.unloadAsync();
     let c = round_question_cnt + 1;
     setRoundQuestionCount(c);
     setQuestionCount(question_count + 1);
@@ -120,8 +126,7 @@ const GameScreen = ({ navigation }) => {
     if (c == QUESTIONS_PER_ROUND) {
       setRndReviewAry([]);
       setRoundQuestionCount(1);
-      navigation.navigate("RoundReview",{data:rnd_review_ary});
-      
+      navigation.navigate("RoundReview", { data: rnd_review_ary });
     }
     console.log(val);
     setSoundObject(null);
@@ -142,7 +147,7 @@ const GameScreen = ({ navigation }) => {
       else if (in_btn_selected == 2) setBtn2Color("green");
       else if (in_btn_selected == 3) setBtn3Color("green");
       else if (in_btn_selected == 4) setBtn4Color("green");
-    } else if (status == "incorrect") {
+    } else  {
       if (in_btn_selected == 1) setBtn1Color("red");
       else if (in_btn_selected == 2) setBtn2Color("red");
       else if (in_btn_selected == 3) setBtn3Color("red");
@@ -275,10 +280,11 @@ const GameScreen = ({ navigation }) => {
       tmpCnt = tmpCnt - 1;
 
       setTimeLeft((prevtimeLeft) => prevtimeLeft - 1);
-      //console.log({tmpCnt});
 
       if (tmpCnt == 0) {
+        setOutOfTime(true);
         clearInterval(oneSecInterval);
+        onPress("out-of-time");
       }
     }, 1000);
   }
