@@ -16,6 +16,7 @@ import ScoreText from "../ScoreText";
 
 const GameScreen = ({ navigation }) => {
   // All state variables
+  let [timer_started, setTimerStarted] = useState(false);
   let [level, setLevel] = useState();
   let [game_questions, setGameQuestions] = useState();
   let [question_text, setQuestionText] = useState("");
@@ -31,7 +32,7 @@ const GameScreen = ({ navigation }) => {
   let [round_question_cnt, setRoundQuestionCount] = useState(0);
   let [question_count, setQuestionCount] = useState(0);
   let [track_length, setTrackLength] = useState(0);
-  let [time_left, setTimeLeft] = useState(0);
+  let [timeLeft, setTimeLeft] = useState(30);
   let [status_text, setStatusText] = useState("");
   let [is_correct, setIsCorrect] = useState(false);
   let [btn_disabled_status, setBtn_disabled_status] = useState(false);
@@ -48,6 +49,10 @@ const GameScreen = ({ navigation }) => {
   let [users_time, setUsersTime] = useState(0);
   let [rnd_review_ary, setRndReviewAry] = useState([]);
   let [out_of_time, setOutOfTime] = useState(false);
+
+
+  const [seconds, setSeconds] = useState();
+  const [isActive, setIsActive] = useState(true);
 
   // Temp variables
   let tmpCnt = 0;
@@ -82,10 +87,10 @@ const GameScreen = ({ navigation }) => {
       blnOutOfTime = true;
     }
 
-    let tmp_users_time = track_length - time_left;
+    let tmp_users_time = track_length - seconds;
     setUsersTime(tmp_users_time);
 
-    clearInterval(oneSecInterval);
+    //clearInterval(oneSecInterval);
     setBtn_disabled_status(true);
     if(playback_object) playback_object.unloadAsync();
     let c = round_question_cnt + 1;
@@ -98,7 +103,7 @@ const GameScreen = ({ navigation }) => {
       playSoundFX(getSoundFXFile("correct"));
       highlightButtons("correct", btn_selected);
       //setScore(prevScore => prevScore + 1);
-      calcScore(track_length, time_left, score_weight_multiplier);
+      calcScore(track_length, seconds, score_weight_multiplier);
       setIsCorrect(true);
       setStatusText("CORRECT");
       console.log("Correct!");
@@ -174,7 +179,7 @@ const GameScreen = ({ navigation }) => {
     if (answer_status == "correct") {
       i = Math.floor(Math.random() * applause.length);
       return applause[i];
-    } else if (answer_status == "incorrect") {
+    } else  {
       j = Math.floor(Math.random() * boos.length);
       return boos[j];
     }
@@ -204,6 +209,8 @@ const GameScreen = ({ navigation }) => {
       await soundObj.playAsync();
     }
   }
+
+  
 
   //************** Initial Entry Point for GameScreen component  ****************/
   useEffect(() => {
@@ -235,9 +242,9 @@ const GameScreen = ({ navigation }) => {
       setTrackLength(rndm_game_questions[question_count].Track_Length);
       setHint(rndm_game_questions[question_count].Hint);
       setTimeLeft(rndm_game_questions[question_count].Track_Length);
+      setSeconds(rndm_game_questions[question_count].Track_Length);
       setScoreWeightMultiplier(rndm_game_questions[question_count].Score);
       setRound(1);
-      tmpCnt = rndm_game_questions[question_count].Track_Length;
       setCorrectAnswerButton(
         rndm_game_questions[question_count].Answer1,
         rndm_game_questions[question_count].Answer2,
@@ -249,7 +256,8 @@ const GameScreen = ({ navigation }) => {
       //console.log(data);
       playSound(rndm_game_questions[question_count].File_Path);
       setQuestionCount(question_count + 1);
-      setTimer();
+      //setTimer();
+      setTimerStarted(true);
     }
 
     const randomize_questions = (in_array) => {
@@ -275,6 +283,38 @@ const GameScreen = ({ navigation }) => {
     };
   }, []);
 
+  // useEffect(() => {
+  //   let oneSecInterval = null;
+  //   if(isActive){
+  //     oneSecInterval = setInterval(() => {
+  //       //setTimeLeft((prevtimeLeft) => prevtimeLeft - 1);
+  //       setTimeLeft(timeLeft => timeLeft - 1);
+  
+  //       // if (time_left == 0) {
+  //       //   setOutOfTime(true);
+  //       //   clearInterval(oneSecInterval);
+  //       //   onPress("out-of-time");
+  //       // }
+  //     }, 1000);
+  //   }
+  // },[timeLeft]);
+
+
+  useEffect(() => {
+    let interval = null;
+    if (seconds>0) {
+      interval = setInterval(() => {
+        setSeconds(seconds => seconds - 1);
+      }, 1000);
+    } else if (seconds == 0) {
+      clearInterval(interval);
+      setOutOfTime(true);
+      onPress("out-of-time");
+    }
+    return () => clearInterval(interval);
+  }, [seconds]);
+
+  
   function setTimer() {
     oneSecInterval = setInterval(() => {
       tmpCnt = tmpCnt - 1;
@@ -310,9 +350,9 @@ const GameScreen = ({ navigation }) => {
     setCorrectAnswer(game_questions[question_count].Correct_Answer);
     setFilePath(game_questions[question_count].File_Path);
     setTrackLength(game_questions[question_count].Track_Length);
-    setTimeLeft(game_questions[question_count].Track_Length);
+    setSeconds(game_questions[question_count].Track_Length);
     setHint(game_questions[question_count].Hint);
-    tmpCnt = game_questions[question_count].Track_Length;
+   
     setCorrectAnswerButton(
       game_questions[question_count].Answer1,
       game_questions[question_count].Answer2,
@@ -327,7 +367,7 @@ const GameScreen = ({ navigation }) => {
     //console.log(data);
     playSound(game_questions[question_count].File_Path);
     //setQuestionCount(question_count + 1);
-    setTimer();
+    //setTimer();
   };
 
   const setCorrectAnswerButton = (ans1, ans2, ans3, ans4, c) => {
@@ -371,7 +411,7 @@ const GameScreen = ({ navigation }) => {
         </View>
         {/*<View><TimerText> </TimerText></View>*/}
         <View>
-          <Text style={styles.timer}>Time Remaining: {time_left} </Text>
+          <Text style={styles.timer}>Time Remaining: {seconds ? seconds:""} </Text>
         </View>
         <View>
           <QuestionText questionText={question_text}></QuestionText>
