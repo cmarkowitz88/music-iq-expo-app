@@ -69,6 +69,7 @@ const GameScreen = ({ navigation }) => {
     let selected_answer = "";
     let btn_selected = 0;
     let blnOutOfTime = false;
+    setTimerStarted(false);
 
     if (ans1 != undefined) {
       selected_answer = ans1;
@@ -97,6 +98,16 @@ const GameScreen = ({ navigation }) => {
     setRoundQuestionCount(c);
     setQuestionCount(question_count + 1);
 
+    if(blnOutOfTime){
+      setStatusText("OUT OF TIME");
+    }
+    else if (selected_answer == correct_answer){
+      setStatusText("CORRECT");
+    }
+    else{
+      setStatusText("INCORRECT");
+    }
+    
     if (selected_answer == correct_answer) {
       //setBtn1Color('green')
       tmpStatus = "Correct";
@@ -105,14 +116,12 @@ const GameScreen = ({ navigation }) => {
       //setScore(prevScore => prevScore + 1);
       calcScore(track_length, seconds, score_weight_multiplier);
       setIsCorrect(true);
-      setStatusText("CORRECT");
       console.log("Correct!");
     } else {
       tmpStatus = "Incorrect";
       playSoundFX(getSoundFXFile("incorrect"));
       highlightButtons("incorrect", btn_selected);
       highlightButtons("correct", correct_answer_btn);
-      setStatusText("INCORRECT");
       setIsCorrect(false);
     }
 
@@ -243,6 +252,7 @@ const GameScreen = ({ navigation }) => {
       setHint(rndm_game_questions[question_count].Hint);
       setTimeLeft(rndm_game_questions[question_count].Track_Length);
       setSeconds(rndm_game_questions[question_count].Track_Length);
+      setTimerStarted(true);
       setScoreWeightMultiplier(rndm_game_questions[question_count].Score);
       setRound(1);
       setCorrectAnswerButton(
@@ -257,7 +267,7 @@ const GameScreen = ({ navigation }) => {
       playSound(rndm_game_questions[question_count].File_Path);
       setQuestionCount(question_count + 1);
       //setTimer();
-      setTimerStarted(true);
+     
     }
 
     const randomize_questions = (in_array) => {
@@ -302,17 +312,19 @@ const GameScreen = ({ navigation }) => {
 
   useEffect(() => {
     let interval = null;
-    if (seconds>0) {
+    if (seconds>0 && timer_started) {
       interval = setInterval(() => {
         setSeconds(seconds => seconds - 1);
       }, 1000);
     } else if (seconds == 0) {
+      setSeconds(0);
       clearInterval(interval);
       setOutOfTime(true);
       onPress("out-of-time");
     }
+    else if(!timer_started);
     return () => clearInterval(interval);
-  }, [seconds]);
+  }, [seconds, timer_started]);
 
   
   function setTimer() {
@@ -341,6 +353,7 @@ const GameScreen = ({ navigation }) => {
     setShowHintView(false);
     setStatusText("");
     resetButtons();
+    setTimerStarted(true);
 
     setQuestionText(game_questions[question_count].Question);
     setAnswer1Text(game_questions[question_count].Answer1);
@@ -411,7 +424,7 @@ const GameScreen = ({ navigation }) => {
         </View>
         {/*<View><TimerText> </TimerText></View>*/}
         <View>
-          <Text style={styles.timer}>Time Remaining: {seconds ? seconds:""} </Text>
+          <Text style={styles.timer}>Time Remaining: {seconds} </Text>
         </View>
         <View>
           <QuestionText questionText={question_text}></QuestionText>
