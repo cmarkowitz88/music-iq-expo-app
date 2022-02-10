@@ -50,14 +50,12 @@ const GameScreen = ({ navigation }) => {
   let [rnd_review_ary, setRndReviewAry] = useState([]);
   let [out_of_time, setOutOfTime] = useState(false);
 
-
   const [seconds, setSeconds] = useState();
   const [isActive, setIsActive] = useState(true);
 
   // Temp variables
   let tmpCnt = 0;
   let tmpStatus = "";
-  //let rnd_review_ary = [];
 
   const QUESTIONS_PER_ROUND = 10;
 
@@ -109,11 +107,9 @@ const GameScreen = ({ navigation }) => {
     }
     
     if (selected_answer == correct_answer) {
-      //setBtn1Color('green')
       tmpStatus = "Correct";
       playSoundFX(getSoundFXFile("correct"));
       highlightButtons("correct", btn_selected);
-      //setScore(prevScore => prevScore + 1);
       calcScore(track_length, seconds, score_weight_multiplier);
       setIsCorrect(true);
       console.log("Correct!");
