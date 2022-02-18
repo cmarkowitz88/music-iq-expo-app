@@ -34,6 +34,10 @@ const GameScreen = ({ navigation }) => {
   let [answer4_text, setAnswer4Text] = useState();
   let [score_weight_multiplier, setScoreWeightMultiplier] = useState();
   let [file_path, setFilePath] = useState();
+  let [file_path1, setFilePath1] = useState();
+  let [file_path2, setFilePath2] = useState();
+  let [file_path3, setFilePath3] = useState();
+  let [file_path4, setFilePath4] = useState();
   let [score, setScore] = useState(0);
   let [round, setRound] = useState(0);
   let [round_question_cnt, setRoundQuestionCount] = useState(0);
@@ -225,20 +229,16 @@ const GameScreen = ({ navigation }) => {
     getData();
 
     async function getData() {
+      setLevel(1);
       let data = {};
 
-      
       if (useMockData) {
-        return new Promise((resolve, reject) =>{
-          data = require("json!../../../MockData.json");
-          resolve(true);
-        });
-       
-        
-      }
-
-      setLevel(1);
-      if (!useMockData) {
+        //data = require("json!../../../MockData.json");
+        const response = await fetch(
+          "/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData.json"
+        );
+        data = await response.json();
+      } else if (!useMockData) {
         const response = await fetch(
           "http://127.0.0.1:3000/getQuestions?level=1"
         );
@@ -260,7 +260,11 @@ const GameScreen = ({ navigation }) => {
       setAnswer3Text(rndm_game_questions[question_count].Answer3);
       setAnswer4Text(rndm_game_questions[question_count].Answer4);
       setCorrectAnswer(rndm_game_questions[question_count].Correct_Answer);
-      setFilePath(rndm_game_questions[question_count].File_Path);
+      setFilePath(rndm_game_questions[question_count].File_Path) 
+      if (rndm_game_questions[question_count].Answer1_File_Path){
+        setFilePath1(rndm_game_questions[question_count].Answer1_File_Path)
+      }
+      
       setTrackLength(rndm_game_questions[question_count].Track_Length);
       setHint(rndm_game_questions[question_count].Hint);
       setTimeLeft(rndm_game_questions[question_count].Track_Length);
@@ -278,7 +282,7 @@ const GameScreen = ({ navigation }) => {
 
       //console.log(data);
       playSound(rndm_game_questions[question_count].File_Path);
-      setQuestionCount(question_count + 1);
+      //setQuestionCount(question_count + 1);
       //setTimer();
     }
 
@@ -355,42 +359,51 @@ const GameScreen = ({ navigation }) => {
   };
 
   const nextQuestion = () => {
-    console.log("In game screen");
-    console.log(question_count);
-    setBtn_disabled_status(false);
-    setShowNextBtnBln(false);
-    setShowHintView(false);
-    setStatusText("");
-    resetButtons();
-    setTimerStarted(true);
+    if (question_count < game_questions.length) {
+      console.log("In game screen");
+      console.log(question_count);
+      setBtn_disabled_status(false);
+      setShowNextBtnBln(false);
+      setShowHintView(false);
+      setStatusText("");
+      resetButtons();
+      setTimerStarted(true);
 
-    setQuestionType(game_questions[question_count].Type);
-    setQuestionText(game_questions[question_count].Question);
-    setAnswer1Text(game_questions[question_count].Answer1);
-    setAnswer2Text(game_questions[question_count].Answer2);
-    setAnswer3Text(game_questions[question_count].Answer3);
-    setAnswer4Text(game_questions[question_count].Answer4);
-    setCorrectAnswer(game_questions[question_count].Correct_Answer);
-    setFilePath(game_questions[question_count].File_Path);
-    setTrackLength(game_questions[question_count].Track_Length);
-    setSeconds(game_questions[question_count].Track_Length);
-    setHint(game_questions[question_count].Hint);
+      setQuestionType(game_questions[question_count].Type);
+      setQuestionText(game_questions[question_count].Question);
+      setAnswer1Text(game_questions[question_count].Answer1);
+      setAnswer2Text(game_questions[question_count].Answer2);
+      setAnswer3Text(game_questions[question_count].Answer3);
+      setAnswer4Text(game_questions[question_count].Answer4);
+      setCorrectAnswer(game_questions[question_count].Correct_Answer);
+      setFilePath(game_questions[question_count].File_Path);
+      if (game_questions[question_count].Answer1_File_Path){
+        setFilePath1(game_questions[question_count].Answer1_File_Path)
+      }
+      setTrackLength(game_questions[question_count].Track_Length);
+      setSeconds(game_questions[question_count].Track_Length);
+      setHint(game_questions[question_count].Hint);
 
-    setCorrectAnswerButton(
-      game_questions[question_count].Answer1,
-      game_questions[question_count].Answer2,
-      game_questions[question_count].Answer3,
-      game_questions[question_count].Answer4,
-      game_questions[question_count].Correct_Answer
-    );
+      setCorrectAnswerButton(
+        game_questions[question_count].Answer1,
+        game_questions[question_count].Answer2,
+        game_questions[question_count].Answer3,
+        game_questions[question_count].Answer4,
+        game_questions[question_count].Correct_Answer
+      );
 
-    // Increment counter for current question for this round
-    //setRoundQuestionCount(round_question_cnt + 1);
+      // Increment counter for current question for this round
+      //setRoundQuestionCount(round_question_cnt + 1);
 
-    //console.log(data);
-    playSound(game_questions[question_count].File_Path);
-    //setQuestionCount(question_count + 1);
-    //setTimer();
+      //console.log(data);
+      playSound(game_questions[question_count].File_Path);
+      //setQuestionCount(question_count + 1);
+      //setTimer();
+    }
+    else{
+      console.log("No More Questions.");
+      setStatusText("Level Completed. Nice Job.");
+    }
   };
 
   const setCorrectAnswerButton = (ans1, ans2, ans3, ans4, c) => {
@@ -441,7 +454,7 @@ const GameScreen = ({ navigation }) => {
           <QuestionText questionText={question_text}></QuestionText>
         </View>
 
-        {question_type == "music-knowledge" && (
+        {question_type && question_type == "music-memory" && (
           <View
             style={[
               { flexDirection: "row", alignItems: "center", marginLeft: 10 },
@@ -452,7 +465,7 @@ const GameScreen = ({ navigation }) => {
                 { flex: 1, flexDirection: "row", justifyContent: "left" },
               ]}
             >
-              <TouchableOpacity onPress={() => playSound(file_path)}>
+              <TouchableOpacity onPress={() => playSound(file_path1)}>
                 <AntDesign name="caretright" size={40} color="white" />
               </TouchableOpacity>
             </View>
@@ -477,7 +490,7 @@ const GameScreen = ({ navigation }) => {
           </View>
         )}
 
-        {question_type && question_type != "music-knowledge" && (
+        {question_type && question_type == "music-knowledge" && (
           <View
             style={[
               {
