@@ -8,17 +8,24 @@ import {
   Image,
   Text,
   SafeAreaView,
+  TouchableOpacity,
 } from "react-native";
 import CustomButton from "../../button";
 import api from "../GetQuestions2";
 import QuestionText from "../QuestionText";
 import ScoreText from "../ScoreText";
+import { AntDesign } from "@expo/vector-icons";
+import getEnvVars from "../../environment";
+
+const { useMockData } = getEnvVars();
+console.log("Using Mock Data: " + useMockData);
 
 const GameScreen = ({ navigation }) => {
   // All state variables
   let [timer_started, setTimerStarted] = useState(false);
   let [level, setLevel] = useState();
   let [game_questions, setGameQuestions] = useState();
+  let [question_type, setQuestionType] = useState();
   let [question_text, setQuestionText] = useState("");
   let [correct_answer, setCorrectAnswer] = useState();
   let [answer1_text, setAnswer1Text] = useState();
@@ -59,7 +66,7 @@ const GameScreen = ({ navigation }) => {
 
   const QUESTIONS_PER_ROUND = 10;
 
-  const onPress = (val) => {
+  const guessAnswer = (val) => {
     let ans1 = val.answer1_text;
     let ans2 = val.answer2_text;
     let ans3 = val.answer3_text;
@@ -81,8 +88,7 @@ const GameScreen = ({ navigation }) => {
     } else if (ans4 != undefined) {
       selected_answer = ans4;
       btn_selected = 4;
-    }
-    else{
+    } else {
       blnOutOfTime = true;
     }
 
@@ -91,21 +97,19 @@ const GameScreen = ({ navigation }) => {
 
     //clearInterval(oneSecInterval);
     setBtn_disabled_status(true);
-    if(playback_object) playback_object.unloadAsync();
+    if (playback_object) playback_object.unloadAsync();
     let c = round_question_cnt + 1;
     setRoundQuestionCount(c);
     setQuestionCount(question_count + 1);
 
-    if(blnOutOfTime){
+    if (blnOutOfTime) {
       setStatusText("OUT OF TIME");
-    }
-    else if (selected_answer == correct_answer){
+    } else if (selected_answer == correct_answer) {
       setStatusText("CORRECT");
-    }
-    else{
+    } else {
       setStatusText("INCORRECT");
     }
-    
+
     if (selected_answer == correct_answer) {
       tmpStatus = "Correct";
       playSoundFX(getSoundFXFile("correct"));
@@ -129,7 +133,7 @@ const GameScreen = ({ navigation }) => {
       answer_status: tmpStatus,
       time_to_answer: tmp_users_time,
     };
-    tmp = rnd_review_ary;
+    let tmp = rnd_review_ary;
     tmp.push(roundReviewData);
     setRndReviewAry(tmp);
 
@@ -157,7 +161,7 @@ const GameScreen = ({ navigation }) => {
       else if (in_btn_selected == 2) setBtn2Color("green");
       else if (in_btn_selected == 3) setBtn3Color("green");
       else if (in_btn_selected == 4) setBtn4Color("green");
-    } else  {
+    } else {
       if (in_btn_selected == 1) setBtn1Color("red");
       else if (in_btn_selected == 2) setBtn2Color("red");
       else if (in_btn_selected == 3) setBtn3Color("red");
@@ -182,10 +186,10 @@ const GameScreen = ({ navigation }) => {
     const boos = ["Boo_1.wav", "Boo_2.wav", "Boo_3.wav", "Boo_4.wav"];
 
     if (answer_status == "correct") {
-      i = Math.floor(Math.random() * applause.length);
+      let i = Math.floor(Math.random() * applause.length);
       return applause[i];
-    } else  {
-      j = Math.floor(Math.random() * boos.length);
+    } else {
+      let j = Math.floor(Math.random() * boos.length);
       return boos[j];
     }
   };
@@ -215,19 +219,31 @@ const GameScreen = ({ navigation }) => {
     }
   }
 
-  
-
   //************** Initial Entry Point for GameScreen component  ****************/
   useEffect(() => {
     console.log("In useEffect");
     getData();
 
     async function getData() {
+      let data = {};
+
+      
+      if (useMockData) {
+        return new Promise((resolve, reject) =>{
+          data = require("json!../../../MockData.json");
+          resolve(true);
+        });
+       
+        
+      }
+
       setLevel(1);
-      const response = await fetch(
-        "http://127.0.0.1:3000/getQuestions?level=1"
-      );
-      const data = await response.json();
+      if (!useMockData) {
+        const response = await fetch(
+          "http://127.0.0.1:3000/getQuestions?level=1"
+        );
+        data = await response.json();
+      }
 
       rndm_game_questions = randomize_questions(data);
 
@@ -237,6 +253,7 @@ const GameScreen = ({ navigation }) => {
 
       // First time app is loaded we need immediate access to data so we'll directly use data object
       // For future requests we'll use game_questions array
+      setQuestionType(rndm_game_questions[question_count].Type);
       setQuestionText(rndm_game_questions[question_count].Question);
       setAnswer1Text(rndm_game_questions[question_count].Answer1);
       setAnswer2Text(rndm_game_questions[question_count].Answer2);
@@ -263,7 +280,6 @@ const GameScreen = ({ navigation }) => {
       playSound(rndm_game_questions[question_count].File_Path);
       setQuestionCount(question_count + 1);
       //setTimer();
-     
     }
 
     const randomize_questions = (in_array) => {
@@ -295,7 +311,7 @@ const GameScreen = ({ navigation }) => {
   //     oneSecInterval = setInterval(() => {
   //       //setTimeLeft((prevtimeLeft) => prevtimeLeft - 1);
   //       setTimeLeft(timeLeft => timeLeft - 1);
-  
+
   //       // if (time_left == 0) {
   //       //   setOutOfTime(true);
   //       //   clearInterval(oneSecInterval);
@@ -305,24 +321,21 @@ const GameScreen = ({ navigation }) => {
   //   }
   // },[timeLeft]);
 
-
   useEffect(() => {
     let interval = null;
-    if (seconds>0 && timer_started) {
+    if (seconds > 0 && timer_started) {
       interval = setInterval(() => {
-        setSeconds(seconds => seconds - 1);
+        setSeconds((seconds) => seconds - 1);
       }, 1000);
     } else if (seconds == 0) {
       setSeconds(0);
       clearInterval(interval);
       setOutOfTime(true);
-      onPress("out-of-time");
-    }
-    else if(!timer_started);
+      guessAnswer("out-of-time");
+    } else if (!timer_started);
     return () => clearInterval(interval);
   }, [seconds, timer_started]);
 
-  
   function setTimer() {
     oneSecInterval = setInterval(() => {
       tmpCnt = tmpCnt - 1;
@@ -332,7 +345,7 @@ const GameScreen = ({ navigation }) => {
       if (tmpCnt == 0) {
         setOutOfTime(true);
         clearInterval(oneSecInterval);
-        onPress("out-of-time");
+        guessAnswer("out-of-time");
       }
     }, 1000);
   }
@@ -351,6 +364,7 @@ const GameScreen = ({ navigation }) => {
     resetButtons();
     setTimerStarted(true);
 
+    setQuestionType(game_questions[question_count].Type);
     setQuestionText(game_questions[question_count].Question);
     setAnswer1Text(game_questions[question_count].Answer1);
     setAnswer2Text(game_questions[question_count].Answer2);
@@ -361,7 +375,7 @@ const GameScreen = ({ navigation }) => {
     setTrackLength(game_questions[question_count].Track_Length);
     setSeconds(game_questions[question_count].Track_Length);
     setHint(game_questions[question_count].Hint);
-   
+
     setCorrectAnswerButton(
       game_questions[question_count].Answer1,
       game_questions[question_count].Answer2,
@@ -418,50 +432,98 @@ const GameScreen = ({ navigation }) => {
         <View>
           <ScoreText text={score}></ScoreText>
         </View>
-        {/*<View><TimerText> </TimerText></View>*/}
-        <View>
-          <Text style={styles.timer}>Time Remaining: {seconds} </Text>
-        </View>
+        {question_type == "music-knowledge" && (
+          <View>
+            <Text style={styles.timer}>Time Remaining: {seconds} </Text>
+          </View>
+        )}
         <View>
           <QuestionText questionText={question_text}></QuestionText>
         </View>
-        <View style={[{ width: "90%", margin: 5, textAlign: "center" }]}>
-          <CustomButton
-            name="button1"
-            text={answer1_text}
-            color={btn1_color}
-            disabled_status={btn_disabled_status}
-            onPress={() => onPress({ answer1_text })}
-          />
-          <CustomButton
-            name="button2"
-            text={answer2_text}
-            color={btn2_color}
-            disabled_status={btn_disabled_status}
-            onPress={() => onPress({ answer2_text })}
-          />
-          <CustomButton
-            name="button3"
-            text={answer3_text}
-            color={btn3_color}
-            disabled_status={btn_disabled_status}
-            onPress={() => onPress({ answer3_text })}
-          />
-          <CustomButton
-            name="button4"
-            text={answer4_text}
-            color={btn4_color}
-            disabled_status={btn_disabled_status}
-            onPress={() => onPress({ answer4_text })}
-          />
-          <CustomButton
-            name="hint"
-            text="Give Me a Hint!"
-            onPress={showHint}
-            title="Show Me a Hint"
-          />
-        </View>
 
+        {question_type == "music-knowledge" && (
+          <View
+            style={[
+              { flexDirection: "row", alignItems: "center", marginLeft: 10 },
+            ]}
+          >
+            <View
+              style={[
+                { flex: 1, flexDirection: "row", justifyContent: "left" },
+              ]}
+            >
+              <TouchableOpacity onPress={() => playSound(file_path)}>
+                <AntDesign name="caretright" size={40} color="white" />
+              </TouchableOpacity>
+            </View>
+            <View
+              style={[
+                {
+                  flex: 6,
+                  justifyContent: "left",
+                  flexDirection: "row",
+                  backgroundColor: "black",
+                },
+              ]}
+            >
+              <CustomButton
+                name="button3"
+                text={answer3_text}
+                color={btn3_color}
+                disabled_status={btn_disabled_status}
+                onPress={() => guessAnswer({ answer3_text })}
+              />
+            </View>
+          </View>
+        )}
+
+        {question_type && question_type != "music-knowledge" && (
+          <View
+            style={[
+              {
+                width: "100%",
+                margin: 5,
+                textAlign: "center",
+                alignItems: "center",
+              },
+            ]}
+          >
+            <CustomButton
+              name="button1"
+              text={answer1_text}
+              color={btn1_color}
+              disabled_status={btn_disabled_status}
+              onPress={() => guessAnswer({ answer1_text })}
+            />
+            <CustomButton
+              name="button2"
+              text={answer2_text}
+              color={btn2_color}
+              disabled_status={btn_disabled_status}
+              onPress={() => guessAnswer({ answer2_text })}
+            />
+            <CustomButton
+              name="button3"
+              text={answer3_text}
+              color={btn3_color}
+              disabled_status={btn_disabled_status}
+              onPress={() => guessAnswer({ answer3_text })}
+            />
+            <CustomButton
+              name="button4"
+              text={answer4_text}
+              color={btn4_color}
+              disabled_status={btn_disabled_status}
+              onPress={() => guessAnswer({ answer4_text })}
+            />
+            <CustomButton
+              name="hint"
+              text="Give Me a Hint!"
+              onPress={showHint}
+              title="Show Me a Hint"
+            />
+          </View>
+        )}
         {showHintView ? (
           <View>
             <Text style={styles.hint}>{hint}</Text>
