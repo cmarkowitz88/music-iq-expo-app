@@ -9,12 +9,14 @@ import {
   Text,
   SafeAreaView,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import CustomButton from "../../button";
+import CustomPlayButton from "../../play-button";
 import api from "../GetQuestions2";
 import QuestionText from "../QuestionText";
 import ScoreText from "../ScoreText";
-import { AntDesign } from "@expo/vector-icons";
+
 import getEnvVars from "../../environment";
 
 const { useMockData } = getEnvVars();
@@ -150,6 +152,7 @@ const GameScreen = ({ navigation }) => {
     setSoundObject(null);
     setShowNextBtnBln(true);
     setShowHintView(true);
+    setOutOfTime(false);
   };
 
   const calcScore = (in_track_length, user_time, score_weight_multiplier) => {
@@ -198,6 +201,13 @@ const GameScreen = ({ navigation }) => {
     }
   };
 
+  const playNextMemoryAnswer = (filepath) =>{
+    playback_object.unloadAsync();
+    setSoundObject(null);
+    playSound(filepath, 'memory' )
+
+  }
+
   async function playSoundFX(filePath) {
     const soundObjFX = new Audio.Sound();
 
@@ -209,8 +219,8 @@ const GameScreen = ({ navigation }) => {
     await soundObjFX.playAsync();
   }
 
-  async function playSound(filePath) {
-    if (sound_object === null) {
+  async function playSound(filePath,question_type) {
+    if (sound_object === null || question_type == 'memory' ) {
       const soundObj = new Audio.Sound();
       setPlayBackObject(soundObj);
       //const source = require('./assets/audio/2.wav')
@@ -260,11 +270,14 @@ const GameScreen = ({ navigation }) => {
       setAnswer3Text(rndm_game_questions[question_count].Answer3);
       setAnswer4Text(rndm_game_questions[question_count].Answer4);
       setCorrectAnswer(rndm_game_questions[question_count].Correct_Answer);
-      setFilePath(rndm_game_questions[question_count].File_Path) 
-      if (rndm_game_questions[question_count].Answer1_File_Path){
-        setFilePath1(rndm_game_questions[question_count].Answer1_File_Path)
+      setFilePath(rndm_game_questions[question_count].File_Path);
+      if (rndm_game_questions[question_count].Type == 'music-memory') {
+        setFilePath1(rndm_game_questions[question_count].Answer1_File_Path);
+        setFilePath2(rndm_game_questions[question_count].Answer2_File_Path);
+        setFilePath3(rndm_game_questions[question_count].Answer3_File_Path);
+        setFilePath4(rndm_game_questions[question_count].Answer4_File_Path);
       }
-      
+
       setTrackLength(rndm_game_questions[question_count].Track_Length);
       setHint(rndm_game_questions[question_count].Hint);
       setTimeLeft(rndm_game_questions[question_count].Track_Length);
@@ -335,7 +348,11 @@ const GameScreen = ({ navigation }) => {
       setSeconds(0);
       clearInterval(interval);
       setOutOfTime(true);
-      guessAnswer("out-of-time");
+      if (playback_object) {
+        playback_object.unloadAsync();
+        setSoundObject(null);
+      }
+      if (question_type == "music-knowledge") guessAnswer("out-of-time");
     } else if (!timer_started);
     return () => clearInterval(interval);
   }, [seconds, timer_started]);
@@ -377,8 +394,11 @@ const GameScreen = ({ navigation }) => {
       setAnswer4Text(game_questions[question_count].Answer4);
       setCorrectAnswer(game_questions[question_count].Correct_Answer);
       setFilePath(game_questions[question_count].File_Path);
-      if (game_questions[question_count].Answer1_File_Path){
-        setFilePath1(game_questions[question_count].Answer1_File_Path)
+      if (game_questions[question_count].Type == 'music-memory') {
+        setFilePath1(game_questions[question_count].Answer1_File_Path);
+        setFilePath2(game_questions[question_count].Answer2_File_Path);
+        setFilePath3(game_questions[question_count].Answer3_File_Path);
+        setFilePath4(game_questions[question_count].Answer4_File_Path);
       }
       setTrackLength(game_questions[question_count].Track_Length);
       setSeconds(game_questions[question_count].Track_Length);
@@ -399,8 +419,7 @@ const GameScreen = ({ navigation }) => {
       playSound(game_questions[question_count].File_Path);
       //setQuestionCount(question_count + 1);
       //setTimer();
-    }
-    else{
+    } else {
       console.log("No More Questions.");
       setStatusText("Level Completed. Nice Job.");
     }
@@ -445,19 +464,21 @@ const GameScreen = ({ navigation }) => {
         <View>
           <ScoreText text={score}></ScoreText>
         </View>
-        {question_type == "music-knowledge" && (
-          <View>
-            <Text style={styles.timer}>Time Remaining: {seconds} </Text>
-          </View>
-        )}
+
+        <View>
+          <Text style={styles.timer}>Time Remaining: {seconds} </Text>
+        </View>
+
         <View>
           <QuestionText questionText={question_text}></QuestionText>
         </View>
 
-        {question_type && question_type == "music-memory" && (
+        {question_type && out_of_time && question_type == "music-memory" && 
+        (
+          <>
           <View
             style={[
-              { flexDirection: "row", alignItems: "center", marginLeft: 10 },
+              { flexDirection: "row", alignItems: "center", marginLeft: 10},
             ]}
           >
             <View
@@ -465,9 +486,7 @@ const GameScreen = ({ navigation }) => {
                 { flex: 1, flexDirection: "row", justifyContent: "left" },
               ]}
             >
-              <TouchableOpacity onPress={() => playSound(file_path1)}>
-                <AntDesign name="caretright" size={40} color="white" />
-              </TouchableOpacity>
+              <CustomPlayButton onPress={() => playNextMemoryAnswer(file_path1)} />
             </View>
             <View
               style={[
@@ -480,14 +499,51 @@ const GameScreen = ({ navigation }) => {
               ]}
             >
               <CustomButton
-                name="button3"
-                text={answer3_text}
+                name="button1"
+                text={answer1_text}
                 color={btn3_color}
                 disabled_status={btn_disabled_status}
-                onPress={() => guessAnswer({ answer3_text })}
+                onPress={() => guessAnswer({ answer1_text })}
               />
             </View>
+            
+            
           </View>
+          <View
+            style={[
+              { flexDirection: "row", alignItems: "center", marginLeft: 10 },
+            ]}
+          >
+            <View
+              style={[
+                { flex: 1, flexDirection: "row", justifyContent: "left" },
+              ]}
+            >
+              <CustomPlayButton onPress={() => playNextMemoryAnswer(file_path2)} />
+            </View>
+            <View
+              style={[
+                {
+                  flex: 6,
+                  justifyContent: "left",
+                  flexDirection: "row",
+                  backgroundColor: "black",
+                },
+              ]}
+            >
+              <CustomButton
+                name="button2"
+                text={answer2_text}
+                color={btn2_color}
+                disabled_status={btn_disabled_status}
+                onPress={() => guessAnswer({ answer2_text })}
+              />
+            </View>
+            
+            
+          </View>
+          
+          </>
         )}
 
         {question_type && question_type == "music-knowledge" && (
@@ -536,6 +592,7 @@ const GameScreen = ({ navigation }) => {
               title="Show Me a Hint"
             />
           </View>
+          
         )}
         {showHintView ? (
           <View>
