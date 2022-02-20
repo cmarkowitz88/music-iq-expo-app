@@ -152,7 +152,7 @@ const GameScreen = ({ navigation }) => {
     setSoundObject(null);
     setShowNextBtnBln(true);
     setShowHintView(true);
-    setOutOfTime(false);
+    //setOutOfTime(false);
   };
 
   const calcScore = (in_track_length, user_time, score_weight_multiplier) => {
@@ -385,6 +385,7 @@ const GameScreen = ({ navigation }) => {
       setStatusText("");
       resetButtons();
       setTimerStarted(true);
+      setOutOfTime(false);
 
       setQuestionType(game_questions[question_count].Type);
       setQuestionText(game_questions[question_count].Question);
@@ -501,14 +502,13 @@ const GameScreen = ({ navigation }) => {
               <CustomButton
                 name="button1"
                 text={answer1_text}
-                color={btn3_color}
+                color={btn1_color}
                 disabled_status={btn_disabled_status}
                 onPress={() => guessAnswer({ answer1_text })}
               />
             </View>
-            
-            
           </View>
+          
           <View
             style={[
               { flexDirection: "row", alignItems: "center", marginLeft: 10 },
@@ -539,8 +539,70 @@ const GameScreen = ({ navigation }) => {
                 onPress={() => guessAnswer({ answer2_text })}
               />
             </View>
-            
-            
+          </View>
+
+          <View
+            style={[
+              { flexDirection: "row", alignItems: "center", marginLeft: 10 },
+            ]}
+          >
+            <View
+              style={[
+                { flex: 1, flexDirection: "row", justifyContent: "left" },
+              ]}
+            >
+              <CustomPlayButton onPress={() => playNextMemoryAnswer(file_path3)} />
+            </View>
+            <View
+              style={[
+                {
+                  flex: 6,
+                  justifyContent: "left",
+                  flexDirection: "row",
+                  backgroundColor: "black",
+                },
+              ]}
+            >
+              <CustomButton
+                name="button3"
+                text={answer3_text}
+                color={btn3_color}
+                disabled_status={btn_disabled_status}
+                onPress={() => guessAnswer({ answer3_text })}
+              />
+            </View>
+          </View>
+
+          <View
+            style={[
+              { flexDirection: "row", alignItems: "center", marginLeft: 10 },
+            ]}
+          >
+            <View
+              style={[
+                { flex: 1, flexDirection: "row", justifyContent: "left" },
+              ]}
+            >
+              <CustomPlayButton onPress={() => playNextMemoryAnswer(file_path4)} />
+            </View>
+            <View
+              style={[
+                {
+                  flex: 6,
+                  justifyContent: "left",
+                  flexDirection: "row",
+                  backgroundColor: "black",
+                },
+              ]}
+            >
+              <CustomButton
+                name="button4"
+                text={answer4_text}
+                color={btn4_color}
+                disabled_status={btn_disabled_status}
+                onPress={() => guessAnswer({ answer4_text })}
+              />
+            </View>
           </View>
           
           </>
