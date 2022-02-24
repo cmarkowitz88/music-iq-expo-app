@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { Text, View, StyleSheet, Pressable } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 
-const CustomPlayButton = ({ onPress }) => {
+const CustomPlayButton = ({ color, onPress }) => {
   return (
     <Pressable onPress={onPress} isCorrect="true"
     style={({ pressed }) => [
         { opacity: pressed ? 0.5 : 1.0 }
       ]}>
-      <AntDesign name="caretright" size={35} color="white" />
+      <AntDesign name="caretright" size={35} color={color} />
     </Pressable>
   );
 };

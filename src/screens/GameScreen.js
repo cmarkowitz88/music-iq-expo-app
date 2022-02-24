@@ -18,6 +18,7 @@ import QuestionText from "../QuestionText";
 import ScoreText from "../ScoreText";
 
 import getEnvVars from "../../environment";
+import { out } from "react-native/Libraries/Animated/Easing";
 
 const { useMockData } = getEnvVars();
 console.log("Using Mock Data: " + useMockData);
@@ -62,6 +63,7 @@ const GameScreen = ({ navigation }) => {
   let [users_time, setUsersTime] = useState(0);
   let [rnd_review_ary, setRndReviewAry] = useState([]);
   let [out_of_time, setOutOfTime] = useState(false);
+  let [showAnimatedGif, setShowAnimatedGif] = useState(true);
 
   const [seconds, setSeconds] = useState();
   const [isActive, setIsActive] = useState(true);
@@ -81,6 +83,7 @@ const GameScreen = ({ navigation }) => {
     let btn_selected = 0;
     let blnOutOfTime = false;
     setTimerStarted(false);
+    setShowAnimatedGif(false);
 
     if (ans1 != undefined) {
       selected_answer = ans1;
@@ -204,7 +207,8 @@ const GameScreen = ({ navigation }) => {
   const playNextMemoryAnswer = (filepath) =>{
     playback_object.unloadAsync();
     setSoundObject(null);
-    playSound(filepath, 'memory' )
+    playSound(filepath, 'memory' );
+    setShowAnimatedGif(true);
 
   }
 
@@ -345,6 +349,7 @@ const GameScreen = ({ navigation }) => {
         setSeconds((seconds) => seconds - 1);
       }, 1000);
     } else if (seconds == 0) {
+      setShowAnimatedGif(false);
       setSeconds(0);
       clearInterval(interval);
       setOutOfTime(true);
@@ -379,6 +384,7 @@ const GameScreen = ({ navigation }) => {
     if (question_count < game_questions.length) {
       console.log("In game screen");
       console.log(question_count);
+      setShowAnimatedGif(true);
       setBtn_disabled_status(false);
       setShowNextBtnBln(false);
       setShowHintView(false);
@@ -455,6 +461,8 @@ const GameScreen = ({ navigation }) => {
       });
   }
 
+  
+
   return (
     <SafeAreaView style={styles.safeview}>
       <View style={styles.container}>
@@ -467,12 +475,17 @@ const GameScreen = ({ navigation }) => {
         </View>
 
         <View>
-          <Text style={styles.timer}>Time Remaining: {seconds} </Text>
+          <Text style={styles.timer}>Time Remaining: {seconds < 10 ? "0":""}{seconds} </Text>
+        </View>
+
+        <View style={{paddingBottom:15}}>
+          <Image style={{height:70,width:300}} source={showAnimatedGif ? require("../../assets/5uwq.gif"): require("../../assets/5uwq_Still.png")} />
         </View>
 
         <View>
           <QuestionText questionText={question_text}></QuestionText>
         </View>
+       
 
         {question_type && out_of_time && question_type == "music-memory" && 
         (
@@ -487,7 +500,7 @@ const GameScreen = ({ navigation }) => {
                 { flex: 1, flexDirection: "row", justifyContent: "left" },
               ]}
             >
-              <CustomPlayButton onPress={() => playNextMemoryAnswer(file_path1)} />
+              <CustomPlayButton color="red" onPress={() => playNextMemoryAnswer(file_path1)} />
             </View>
             <View
               style={[
@@ -519,7 +532,7 @@ const GameScreen = ({ navigation }) => {
                 { flex: 1, flexDirection: "row", justifyContent: "left" },
               ]}
             >
-              <CustomPlayButton onPress={() => playNextMemoryAnswer(file_path2)} />
+              <CustomPlayButton color="green" onPress={() => playNextMemoryAnswer(file_path2)} />
             </View>
             <View
               style={[
@@ -551,7 +564,7 @@ const GameScreen = ({ navigation }) => {
                 { flex: 1, flexDirection: "row", justifyContent: "left" },
               ]}
             >
-              <CustomPlayButton onPress={() => playNextMemoryAnswer(file_path3)} />
+              <CustomPlayButton color="yellow" onPress={() => playNextMemoryAnswer(file_path3)} />
             </View>
             <View
               style={[
@@ -583,7 +596,7 @@ const GameScreen = ({ navigation }) => {
                 { flex: 1, flexDirection: "row", justifyContent: "left" },
               ]}
             >
-              <CustomPlayButton onPress={() => playNextMemoryAnswer(file_path4)} />
+              <CustomPlayButton color="blue" onPress={() => playNextMemoryAnswer(file_path4)} />
             </View>
             <View
               style={[
@@ -647,15 +660,26 @@ const GameScreen = ({ navigation }) => {
               disabled_status={btn_disabled_status}
               onPress={() => guessAnswer({ answer4_text })}
             />
-            <CustomButton
+          </View>
+          
+        )}
+      
+       {question_type == 'music-knowledge' && (
+        <CustomButton
               name="hint"
               text="Give Me a Hint!"
               onPress={showHint}
               title="Show Me a Hint"
-            />
-          </View>
-          
-        )}
+            />)}
+        
+        {question_type == 'music-memory' && out_of_time &&( 
+           <CustomButton
+           name="hint"
+           text="Give Me a Hint!"
+           onPress={showHint}
+           title="Show Me a Hint"
+         />)}
+      
         {showHintView ? (
           <View>
             <Text style={styles.hint}>{hint}</Text>

@@ -1,7 +1,7 @@
 [
     {
         "Answer4": "Select Answer 4",
-        "Answer4_File_Path": "FreewillDrums.wav",
+        "Answer4_File_Path": "LivingAfterMidnightDrums.wav",
         "Answer2": "Select Answer 2",
         "Answer2_File_Path": "EverybodyWantsToRuleDrums.wav",
         "Answer3": "Select Answer 3",
@@ -16,13 +16,13 @@
         "Type": "music-memory",
         "Correct_Answer": "Select Answer 2",
         "Track_Length": "16",
-        "Question": "Listen carefully to this track, then listen to each of the potential answers and select the answer that's identical to what you first heard.",
+        "Question": "(1) Listen carefully to this track (2) then click the play button next to each of the potential answers (3) then select the answer that's identical to what you first heard.",
         "Level": "1",
         "ID": "mm900000"
     },
     {
         "Answer4": "Select Answer 4",
-        "Answer4_File_Path": "FreewillDrums.wav",
+        "Answer4_File_Path": "LivingAfterMidnightDrums.wav",
         "Answer2": "Select Answer 2",
         "Answer2_File_Path": "EverybodyWantsToRuleDrums.wav",
         "Answer3": "Select Answer 3",
