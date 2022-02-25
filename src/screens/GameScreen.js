@@ -19,6 +19,7 @@ import ScoreText from "../ScoreText";
 
 import getEnvVars from "../../environment";
 import { out } from "react-native/Libraries/Animated/Easing";
+import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
 
 const { useMockData } = getEnvVars();
 console.log("Using Mock Data: " + useMockData);
@@ -46,6 +47,10 @@ const GameScreen = ({ navigation }) => {
   let [round_question_cnt, setRoundQuestionCount] = useState(0);
   let [question_count, setQuestionCount] = useState(0);
   let [track_length, setTrackLength] = useState(0);
+  let [answer1_track_length, setAnswer1TrackLength] = useState(0);
+  let [answer2_track_length, setAnswer2TrackLength] = useState(0);
+  let [answer3_track_length, setAnswer3TrackLength] = useState(0);
+  let [answer4_track_length, setAnswer4TrackLength] = useState(0);
   let [timeLeft, setTimeLeft] = useState(30);
   let [status_text, setStatusText] = useState("");
   let [is_correct, setIsCorrect] = useState(false);
@@ -64,9 +69,11 @@ const GameScreen = ({ navigation }) => {
   let [rnd_review_ary, setRndReviewAry] = useState([]);
   let [out_of_time, setOutOfTime] = useState(false);
   let [showAnimatedGif, setShowAnimatedGif] = useState(true);
-
-  const [seconds, setSeconds] = useState();
-  const [isActive, setIsActive] = useState(true);
+  let [playing_memory_track, setPlayingMemoryTrack] = useState(false);
+  let [seconds, setSeconds] = useState();
+  let [isActive, setIsActive] = useState(true);
+  let [memory_seconds, setMemorySeconds] = useState();
+  let [memory_answer_selected_button, setMemoryAnswerSelectedButton] = useState(0);
 
   // Temp variables
   let tmpCnt = 0;
@@ -84,6 +91,7 @@ const GameScreen = ({ navigation }) => {
     let blnOutOfTime = false;
     setTimerStarted(false);
     setShowAnimatedGif(false);
+    setPlayingMemoryTrack(false);
 
     if (ans1 != undefined) {
       selected_answer = ans1;
@@ -204,13 +212,15 @@ const GameScreen = ({ navigation }) => {
     }
   };
 
-  const playNextMemoryAnswer = (filepath) =>{
+  const playNextMemoryAnswer = (filepath, trackLength,answer_number) => {
+    setPlayingMemoryTrack(true);
     playback_object.unloadAsync();
     setSoundObject(null);
-    playSound(filepath, 'memory' );
+    playSound(filepath, "memory");
     setShowAnimatedGif(true);
-
-  }
+    setMemorySeconds(trackLength);
+    setMemoryAnswerSelectedButton(answer_number);
+  };
 
   async function playSoundFX(filePath) {
     const soundObjFX = new Audio.Sound();
@@ -223,8 +233,8 @@ const GameScreen = ({ navigation }) => {
     await soundObjFX.playAsync();
   }
 
-  async function playSound(filePath,question_type) {
-    if (sound_object === null || question_type == 'memory' ) {
+  async function playSound(filePath, question_type) {
+    if (sound_object === null || question_type == "memory") {
       const soundObj = new Audio.Sound();
       setPlayBackObject(soundObj);
       //const source = require('./assets/audio/2.wav')
@@ -275,7 +285,7 @@ const GameScreen = ({ navigation }) => {
       setAnswer4Text(rndm_game_questions[question_count].Answer4);
       setCorrectAnswer(rndm_game_questions[question_count].Correct_Answer);
       setFilePath(rndm_game_questions[question_count].File_Path);
-      if (rndm_game_questions[question_count].Type == 'music-memory') {
+      if (rndm_game_questions[question_count].Type == "music-memory") {
         setFilePath1(rndm_game_questions[question_count].Answer1_File_Path);
         setFilePath2(rndm_game_questions[question_count].Answer2_File_Path);
         setFilePath3(rndm_game_questions[question_count].Answer3_File_Path);
@@ -283,6 +293,10 @@ const GameScreen = ({ navigation }) => {
       }
 
       setTrackLength(rndm_game_questions[question_count].Track_Length);
+      setAnswer1TrackLength(rndm_game_questions[question_count].Answer1_Track_Length);
+      setAnswer2TrackLength(rndm_game_questions[question_count].Answer2_Track_Length);
+      setAnswer3TrackLength(rndm_game_questions[question_count].Answer3_Track_Length);
+      setAnswer4TrackLength(rndm_game_questions[question_count].Answer4_Track_Length);
       setHint(rndm_game_questions[question_count].Hint);
       setTimeLeft(rndm_game_questions[question_count].Track_Length);
       setSeconds(rndm_game_questions[question_count].Track_Length);
@@ -353,6 +367,7 @@ const GameScreen = ({ navigation }) => {
       setSeconds(0);
       clearInterval(interval);
       setOutOfTime(true);
+      setTimerStarted(false);
       if (playback_object) {
         playback_object.unloadAsync();
         setSoundObject(null);
@@ -361,6 +376,19 @@ const GameScreen = ({ navigation }) => {
     } else if (!timer_started);
     return () => clearInterval(interval);
   }, [seconds, timer_started]);
+
+  useEffect(() => {
+    let interval = null;
+    if (question_type == "music-memory" && playing_memory_track) {
+       console.log("Playing Memory Track");
+       if(memory_seconds > 0){
+        interval = setInterval(() => {
+        setMemorySeconds((memory_seconds) => memory_seconds - 1);
+        }, 1000);
+     }
+    }
+    return () => clearInterval(interval);
+  },[memory_seconds]);
 
   function setTimer() {
     oneSecInterval = setInterval(() => {
@@ -401,13 +429,17 @@ const GameScreen = ({ navigation }) => {
       setAnswer4Text(game_questions[question_count].Answer4);
       setCorrectAnswer(game_questions[question_count].Correct_Answer);
       setFilePath(game_questions[question_count].File_Path);
-      if (game_questions[question_count].Type == 'music-memory') {
+      if (game_questions[question_count].Type == "music-memory") {
         setFilePath1(game_questions[question_count].Answer1_File_Path);
         setFilePath2(game_questions[question_count].Answer2_File_Path);
         setFilePath3(game_questions[question_count].Answer3_File_Path);
         setFilePath4(game_questions[question_count].Answer4_File_Path);
       }
       setTrackLength(game_questions[question_count].Track_Length);
+      setAnswer1TrackLength(rndm_game_questions[question_count].Answer1_Track_Length);
+      setAnswer2TrackLength(rndm_game_questions[question_count].Answer2_Track_Length);
+      setAnswer3TrackLength(rndm_game_questions[question_count].Answer3_Track_Length);
+      setAnswer4TrackLength(rndm_game_questions[question_count].Answer4_Track_Length);
       setSeconds(game_questions[question_count].Track_Length);
       setHint(game_questions[question_count].Hint);
 
@@ -461,8 +493,6 @@ const GameScreen = ({ navigation }) => {
       });
   }
 
-  
-
   return (
     <SafeAreaView style={styles.safeview}>
       <View style={styles.container}>
@@ -475,149 +505,169 @@ const GameScreen = ({ navigation }) => {
         </View>
 
         <View>
-          <Text style={styles.timer}>Time Remaining: {seconds < 10 ? "0":""}{seconds} </Text>
+          <Text style={styles.timer}>
+            Time Remaining: {seconds < 10 ? "0" : ""}
+            {seconds}{" "}
+          </Text>
         </View>
 
-        <View style={{paddingBottom:15}}>
-          <Image style={{height:70,width:300}} source={showAnimatedGif ? require("../../assets/5uwq.gif"): require("../../assets/5uwq_Still.png")} />
+        <View style={{ paddingBottom: 15 }}>
+          <Image
+            style={{ height: 70, width: 300 }}
+            source={
+              showAnimatedGif
+                ? require("../../assets/5uwq.gif")
+                : require("../../assets/5uwq_Still.png")
+            }
+          />
         </View>
 
         <View>
           <QuestionText questionText={question_text}></QuestionText>
         </View>
-       
 
-        {question_type && out_of_time && question_type == "music-memory" && 
-        (
+        {question_type && out_of_time && question_type == "music-memory" && (
           <>
-          <View
-            style={[
-              { flexDirection: "row", alignItems: "center", marginLeft: 10},
-            ]}
-          >
             <View
               style={[
-                { flex: 1, flexDirection: "row", justifyContent: "left" },
+                { flexDirection: "row", alignItems: "center", marginLeft: 10 },
               ]}
             >
-              <CustomPlayButton color="red" onPress={() => playNextMemoryAnswer(file_path1)} />
+              <View
+                style={[
+                  { flex: 1, flexDirection: "row", justifyContent: "left" },
+                ]}
+              >
+                <CustomPlayButton
+                  color="red"
+                  onPress={() => playNextMemoryAnswer(file_path1, answer1_track_length,1)}
+                />
+              </View>
+              <Text style={styles.memory_seconds}>{memory_answer_selected_button == '1' ? memory_seconds : " "}</Text>
+              <View
+                style={[
+                  {
+                    flex: 6,
+                    justifyContent: "left",
+                    flexDirection: "row",
+                    backgroundColor: "black",
+                  },
+                ]}
+              >
+                <CustomButton
+                  name="button1"
+                  text={answer1_text}
+                  color={btn1_color}
+                  disabled_status={btn_disabled_status}
+                  onPress={() => guessAnswer({ answer1_text })}
+                />
+              </View>
             </View>
-            <View
-              style={[
-                {
-                  flex: 6,
-                  justifyContent: "left",
-                  flexDirection: "row",
-                  backgroundColor: "black",
-                },
-              ]}
-            >
-              <CustomButton
-                name="button1"
-                text={answer1_text}
-                color={btn1_color}
-                disabled_status={btn_disabled_status}
-                onPress={() => guessAnswer({ answer1_text })}
-              />
-            </View>
-          </View>
-          
-          <View
-            style={[
-              { flexDirection: "row", alignItems: "center", marginLeft: 10 },
-            ]}
-          >
-            <View
-              style={[
-                { flex: 1, flexDirection: "row", justifyContent: "left" },
-              ]}
-            >
-              <CustomPlayButton color="green" onPress={() => playNextMemoryAnswer(file_path2)} />
-            </View>
-            <View
-              style={[
-                {
-                  flex: 6,
-                  justifyContent: "left",
-                  flexDirection: "row",
-                  backgroundColor: "black",
-                },
-              ]}
-            >
-              <CustomButton
-                name="button2"
-                text={answer2_text}
-                color={btn2_color}
-                disabled_status={btn_disabled_status}
-                onPress={() => guessAnswer({ answer2_text })}
-              />
-            </View>
-          </View>
 
-          <View
-            style={[
-              { flexDirection: "row", alignItems: "center", marginLeft: 10 },
-            ]}
-          >
             <View
               style={[
-                { flex: 1, flexDirection: "row", justifyContent: "left" },
+                { flexDirection: "row", alignItems: "center", marginLeft: 10 },
               ]}
             >
-              <CustomPlayButton color="yellow" onPress={() => playNextMemoryAnswer(file_path3)} />
+              <View
+                style={[
+                  { flex: 1, flexDirection: "row", justifyContent: "left" },
+                ]}
+              >
+                <CustomPlayButton
+                  color="green"
+                  onPress={() => playNextMemoryAnswer(file_path2, answer2_track_length,2)}
+                />
+              </View>
+              <View
+                style={[
+                  {
+                    flex: 6,
+                    justifyContent: "left",
+                    flexDirection: "row",
+                    backgroundColor: "black",
+                  },
+                ]}
+              >
+                <CustomButton
+                  name="button2"
+                  text={answer2_text}
+                  color={btn2_color}
+                  disabled_status={btn_disabled_status}
+                  onPress={() => guessAnswer({ answer2_text })}
+                />
+              </View>
             </View>
-            <View
-              style={[
-                {
-                  flex: 6,
-                  justifyContent: "left",
-                  flexDirection: "row",
-                  backgroundColor: "black",
-                },
-              ]}
-            >
-              <CustomButton
-                name="button3"
-                text={answer3_text}
-                color={btn3_color}
-                disabled_status={btn_disabled_status}
-                onPress={() => guessAnswer({ answer3_text })}
-              />
-            </View>
-          </View>
 
-          <View
-            style={[
-              { flexDirection: "row", alignItems: "center", marginLeft: 10 },
-            ]}
-          >
             <View
               style={[
-                { flex: 1, flexDirection: "row", justifyContent: "left" },
+                { flexDirection: "row", alignItems: "center", marginLeft: 10 },
               ]}
             >
-              <CustomPlayButton color="blue" onPress={() => playNextMemoryAnswer(file_path4)} />
+              <View
+                style={[
+                  { flex: 1, flexDirection: "row", justifyContent: "left" },
+                ]}
+              >
+                <CustomPlayButton
+                  color="yellow"
+                  onPress={() => playNextMemoryAnswer(file_path3, answer3_track_length,3)}
+                />
+              </View>
+              <View
+                style={[
+                  {
+                    flex: 6,
+                    justifyContent: "left",
+                    flexDirection: "row",
+                    backgroundColor: "black",
+                  },
+                ]}
+              >
+                <CustomButton
+                  name="button3"
+                  text={answer3_text}
+                  color={btn3_color}
+                  disabled_status={btn_disabled_status}
+                  onPress={() => guessAnswer({ answer3_text })}
+                />
+              </View>
             </View>
+
             <View
               style={[
-                {
-                  flex: 6,
-                  justifyContent: "left",
-                  flexDirection: "row",
-                  backgroundColor: "black",
-                },
+                { flexDirection: "row", alignItems: "center", marginLeft: 10 },
               ]}
             >
-              <CustomButton
-                name="button4"
-                text={answer4_text}
-                color={btn4_color}
-                disabled_status={btn_disabled_status}
-                onPress={() => guessAnswer({ answer4_text })}
-              />
+              <View
+                style={[
+                  { flex: 1, flexDirection: "row", justifyContent: "left" },
+                ]}
+              >
+                <CustomPlayButton
+                  color="blue"
+                  onPress={() => playNextMemoryAnswer(file_path4,answer4_track_length,4)}
+                />
+              </View>
+              <View
+                style={[
+                  {
+                    flex: 6,
+                    justifyContent: "left",
+                    flexDirection: "row",
+                    backgroundColor: "black",
+                  },
+                ]}
+              >
+                <CustomButton
+                  name="button4"
+                  text={answer4_text}
+                  color={btn4_color}
+                  disabled_status={btn_disabled_status}
+                  onPress={() => guessAnswer({ answer4_text })}
+                />
+              </View>
             </View>
-          </View>
-          
           </>
         )}
 
@@ -661,25 +711,26 @@ const GameScreen = ({ navigation }) => {
               onPress={() => guessAnswer({ answer4_text })}
             />
           </View>
-          
         )}
-      
-       {question_type == 'music-knowledge' && (
-        <CustomButton
-              name="hint"
-              text="Give Me a Hint!"
-              onPress={showHint}
-              title="Show Me a Hint"
-            />)}
-        
-        {question_type == 'music-memory' && out_of_time &&( 
-           <CustomButton
-           name="hint"
-           text="Give Me a Hint!"
-           onPress={showHint}
-           title="Show Me a Hint"
-         />)}
-      
+
+        {question_type == "music-knowledge" && (
+          <CustomButton
+            name="hint"
+            text="Give Me a Hint!"
+            onPress={showHint}
+            title="Show Me a Hint"
+          />
+        )}
+
+        {question_type == "music-memory" && out_of_time && (
+          <CustomButton
+            name="hint"
+            text="Give Me a Hint!"
+            onPress={showHint}
+            title="Show Me a Hint"
+          />
+        )}
+
         {showHintView ? (
           <View>
             <Text style={styles.hint}>{hint}</Text>
@@ -777,6 +828,10 @@ const styles = StyleSheet.create({
   next_button: {
     paddingTop: 35,
     fontSize: 25,
+  },
+
+  memory_seconds: {
+    color:"white",
   },
 });
 
