@@ -8,7 +8,7 @@ const CustomPlayButton = ({ color, onPress }) => {
     style={({ pressed }) => [
         { opacity: pressed ? 0.5 : 1.0 }
       ]}>
-      <AntDesign name="caretright" size={35} color={color} />
+      <AntDesign name="caretright" size={32} color={color} />
     </Pressable>
   );
 };

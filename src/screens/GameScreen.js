@@ -73,6 +73,7 @@ const GameScreen = ({ navigation }) => {
   let [seconds, setSeconds] = useState();
   let [isActive, setIsActive] = useState(true);
   let [memory_seconds, setMemorySeconds] = useState();
+  let [memory_track_length, setMemoryTrackLength] = useState();
   let [memory_answer_selected_button, setMemoryAnswerSelectedButton] = useState(0);
 
   // Temp variables
@@ -218,7 +219,8 @@ const GameScreen = ({ navigation }) => {
     setSoundObject(null);
     playSound(filepath, "memory");
     setShowAnimatedGif(true);
-    setMemorySeconds(trackLength);
+    setMemorySeconds(0);
+    setMemoryTrackLength(trackLength)
     setMemoryAnswerSelectedButton(answer_number);
   };
 
@@ -361,6 +363,8 @@ const GameScreen = ({ navigation }) => {
     if (seconds > 0 && timer_started) {
       interval = setInterval(() => {
         setSeconds((seconds) => seconds - 1);
+        //setMemorySeconds(0);
+        console.log(memory_seconds);
       }, 1000);
     } else if (seconds == 0) {
       setShowAnimatedGif(false);
@@ -381,9 +385,10 @@ const GameScreen = ({ navigation }) => {
     let interval = null;
     if (question_type == "music-memory" && playing_memory_track) {
        console.log("Playing Memory Track");
-       if(memory_seconds > 0){
+       if(memory_seconds  < memory_track_length){
         interval = setInterval(() => {
-        setMemorySeconds((memory_seconds) => memory_seconds - 1);
+        setMemorySeconds((memory_seconds) => memory_seconds + 1);
+        console.log(memory_seconds);
         }, 1000);
      }
     }
@@ -506,7 +511,7 @@ const GameScreen = ({ navigation }) => {
 
         <View>
           <Text style={styles.timer}>
-            Time Remaining: {seconds < 10 ? "0" : ""}
+            Time Remaining: 0:{seconds < 10 ? "0" : ""}
             {seconds}{" "}
           </Text>
         </View>
@@ -543,7 +548,11 @@ const GameScreen = ({ navigation }) => {
                   onPress={() => playNextMemoryAnswer(file_path1, answer1_track_length,1)}
                 />
               </View>
-              <Text style={styles.memory_seconds}>{memory_answer_selected_button == '1' ? memory_seconds : " "}</Text>
+              <Text style={styles.memory_seconds}>
+                {!memory_seconds || memory_answer_selected_button !=1 ? '0:00 ' : ''}
+                {memory_answer_selected_button ==1 && memory_seconds && memory_seconds <= 9 ? '0:0'+memory_seconds+' ' : ''} 
+                {memory_answer_selected_button ==1 && memory_seconds && memory_seconds > 9 ? '0:'+memory_seconds+' ' : ''}
+                / 0:{answer1_track_length}</Text>
               <View
                 style={[
                   {
@@ -579,6 +588,11 @@ const GameScreen = ({ navigation }) => {
                   onPress={() => playNextMemoryAnswer(file_path2, answer2_track_length,2)}
                 />
               </View>
+              <Text style={styles.memory_seconds}>
+                {!memory_seconds || memory_answer_selected_button !=2 ? '0:00 ' : ''}
+                {memory_answer_selected_button ==2 && memory_seconds && memory_seconds <= 9 ? '0:0'+memory_seconds+' ' : ''} 
+                {memory_answer_selected_button ==2 && memory_seconds && memory_seconds > 9 ? '0:'+memory_seconds+' ' : ''}
+                / 0:{answer2_track_length}</Text>
               <View
                 style={[
                   {
@@ -614,6 +628,11 @@ const GameScreen = ({ navigation }) => {
                   onPress={() => playNextMemoryAnswer(file_path3, answer3_track_length,3)}
                 />
               </View>
+              <Text style={styles.memory_seconds}>
+                {!memory_seconds || memory_answer_selected_button !=3 ? '0:00 ' : ''}
+                {memory_answer_selected_button ==3 && memory_seconds && memory_seconds <= 9 ? '0:0'+memory_seconds+' ' : ''} 
+                {memory_answer_selected_button ==3 && memory_seconds && memory_seconds > 9 ? '0:'+memory_seconds+' ' : ''}
+                / 0:{answer3_track_length}</Text>
               <View
                 style={[
                   {
@@ -649,6 +668,11 @@ const GameScreen = ({ navigation }) => {
                   onPress={() => playNextMemoryAnswer(file_path4,answer4_track_length,4)}
                 />
               </View>
+              <Text style={styles.memory_seconds}>
+                {!memory_seconds || memory_answer_selected_button !=4 ? '0:00 ' : ''}
+                {memory_answer_selected_button ==4 && memory_seconds && memory_seconds <= 9 ? '0:0'+memory_seconds+' ' : ''} 
+                {memory_answer_selected_button ==4 && memory_seconds && memory_seconds > 9 ? '0:'+memory_seconds+' ' : ''}
+                / 0:{answer4_track_length}</Text>
               <View
                 style={[
                   {
@@ -817,6 +841,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
     flexDirection: "row",
     fontWeight: "bold",
+    fontVariant:['tabular-nums'],
   },
 
   hint: {
@@ -832,6 +857,9 @@ const styles = StyleSheet.create({
 
   memory_seconds: {
     color:"white",
+    fontSize:15,
+    fontVariant:['tabular-nums'],
+    fontWeight:"bold",
   },
 });
 
