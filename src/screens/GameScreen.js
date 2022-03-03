@@ -446,6 +446,7 @@ const GameScreen = ({ navigation }) => {
       setAnswer3TrackLength(rndm_game_questions[question_count].Answer3_Track_Length);
       setAnswer4TrackLength(rndm_game_questions[question_count].Answer4_Track_Length);
       setSeconds(game_questions[question_count].Track_Length);
+      setMemorySeconds(null);
       setHint(game_questions[question_count].Hint);
 
       setCorrectAnswerButton(
@@ -535,7 +536,7 @@ const GameScreen = ({ navigation }) => {
           <>
             <View
               style={[
-                { flexDirection: "row", alignItems: "center", marginLeft: 10 },
+                { flexDirection: "row", alignItems: "center", marginLeft: 5 },
               ]}
             >
               <View
@@ -575,7 +576,7 @@ const GameScreen = ({ navigation }) => {
 
             <View
               style={[
-                { flexDirection: "row", alignItems: "center", marginLeft: 10 },
+                { flexDirection: "row", alignItems: "center", marginLeft: 5 },
               ]}
             >
               <View
@@ -615,7 +616,7 @@ const GameScreen = ({ navigation }) => {
 
             <View
               style={[
-                { flexDirection: "row", alignItems: "center", marginLeft: 10 },
+                { flexDirection: "row", alignItems: "center", marginLeft: 5 },
               ]}
             >
               <View
@@ -655,7 +656,7 @@ const GameScreen = ({ navigation }) => {
 
             <View
               style={[
-                { flexDirection: "row", alignItems: "center", marginLeft: 10 },
+                { flexDirection: "row", alignItems: "center", marginLeft: 5 },
               ]}
             >
               <View
@@ -857,9 +858,10 @@ const styles = StyleSheet.create({
 
   memory_seconds: {
     color:"white",
-    fontSize:15,
+    fontSize:16,
     fontVariant:['tabular-nums'],
     fontWeight:"bold",
+    paddingRight:5,
   },
 });
 
