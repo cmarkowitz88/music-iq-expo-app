@@ -227,7 +227,7 @@ const GameScreen = ({ navigation }) => {
   async function playSoundFX(filePath) {
     const soundObjFX = new Audio.Sound();
 
-    tmp = "http://localhost:4566/music-iq.audio-files/" + filePath;
+    tmp = "http://localhost:4566/m-musiciq-audio-files/" + filePath;
     const source = { uri: tmp };
     const status = await soundObjFX.loadAsync(source);
 
@@ -240,7 +240,7 @@ const GameScreen = ({ navigation }) => {
       const soundObj = new Audio.Sound();
       setPlayBackObject(soundObj);
       //const source = require('./assets/audio/2.wav')
-      tmp = "http://localhost:4566/music-iq.audio-files/" + filePath;
+      tmp = "http://localhost:4566/m-musiciq-audio-files/" + filePath;
       const source = { uri: tmp };
       const status = await soundObj.loadAsync(source);
       setSoundObject(status);

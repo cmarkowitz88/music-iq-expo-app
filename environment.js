@@ -5,7 +5,7 @@ const localhost = Platform.OS === "ios" ? "localhost:8080" : "10.0.2.2:8080";
 
 const ENV = {
  dev:{
-    useMockData: true,
+    useMockData: false,
  },
  staging:{
     useMockData: false,
