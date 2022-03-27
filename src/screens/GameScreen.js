@@ -21,8 +21,20 @@ import getEnvVars from "../../environment";
 import { out } from "react-native/Libraries/Animated/Easing";
 import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
 
-const { useMockData } = getEnvVars();
+let useMockData = '';
+let apiUriGetQuestions = '';
+let apiUriGetAudioApiUri = '';
+
+const envObj = getEnvVars();
+console.log(envObj);
+
+
+
+//const { useMockData } = getEnvVars();
+//const { localGetQuestionsApi} = getEnvVars();
 console.log("Using Mock Data: " + useMockData);
+
+
 
 const GameScreen = ({ navigation }) => {
   // All state variables
@@ -81,6 +93,17 @@ const GameScreen = ({ navigation }) => {
   let tmpStatus = "";
 
   const QUESTIONS_PER_ROUND = 10;
+
+  const setUpVars = (inObj) => {
+    if(inObj.useLocalApis){
+      apiUriGetQuestions = inObj.localGetQuestionsApi;
+      apiUriGetAudioApiUri = inObj.localGetAudioApi;
+    }
+    else{
+      apiUriGetQuestions = inObj.devGetQuestionsApi;
+      apiUriGetAudioApiUri = inObj.devGetAudioApi;
+    }
+  }
 
   const guessAnswer = (val) => {
     let ans1 = val.answer1_text;
@@ -227,7 +250,8 @@ const GameScreen = ({ navigation }) => {
   async function playSoundFX(filePath) {
     const soundObjFX = new Audio.Sound();
 
-    tmp = "http://localhost:4566/m-musiciq-audio-files/" + filePath;
+    tmp = apiUriGetAudioApiUri + filePath;
+    //tmp = "http://localhost:4566/m-musiciq-audio-files/" + filePath;
     const source = { uri: tmp };
     const status = await soundObjFX.loadAsync(source);
 
@@ -240,7 +264,8 @@ const GameScreen = ({ navigation }) => {
       const soundObj = new Audio.Sound();
       setPlayBackObject(soundObj);
       //const source = require('./assets/audio/2.wav')
-      tmp = "http://localhost:4566/m-musiciq-audio-files/" + filePath;
+      tmp = apiUriGetAudioApiUri + filePath;
+      //tmp = "http://localhost:4566/m-musiciq-audio-files/" + filePath;
       const source = { uri: tmp };
       const status = await soundObj.loadAsync(source);
       setSoundObject(status);
@@ -252,6 +277,7 @@ const GameScreen = ({ navigation }) => {
   //************** Initial Entry Point for GameScreen component  ****************/
   useEffect(() => {
     console.log("In useEffect");
+    setUpVars(envObj);
     getData();
 
     async function getData() {
@@ -266,7 +292,8 @@ const GameScreen = ({ navigation }) => {
         data = await response.json();
       } else if (!useMockData) {
         const response = await fetch(
-          "http://127.0.0.1:3000/getQuestions?level=1"
+          //"http://127.0.0.1:3000/getQuestions?level=1"
+          apiUriGetQuestions
         );
         data = await response.json();
       }
