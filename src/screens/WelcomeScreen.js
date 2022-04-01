@@ -11,6 +11,7 @@ function WelcomeScreen({navigation}){
            source={require('../../assets/iStock-488101821.jpg')}>
                 <Image style={styles.image} source={require('../../assets/MusicIQ-Logo_2.jpg')} />
                 <CustomButton  text="Play Game" onPress={() => navigation.navigate('Game')}/>
+                <CustomButton  text="Create New User" onPress={() => navigation.navigate('LogIn')}/>
                
         </ImageBackground>
        
