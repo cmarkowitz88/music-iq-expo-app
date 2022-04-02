@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Icon,
 } from "react-native";
 import {
   CognitoUserPool,
@@ -18,15 +19,17 @@ import {
   CognitoUser,
   AuthenticationDetails,
 } from "amazon-cognito-identity-js";
+import { AntDesign } from "@expo/vector-icons";
 
 const LogInScreen = ({ navigation }) => {
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
+  const [secure, setSecure] = useState(true);
 
   const logInUser = () => {
     let authenticationData = {
-      Username: "cmarkowitz88@comcast.net",
-      Password: "2376ParkerMarker!@",
+      Username: userEmail,
+      Password: userPassword,
     };
 
     let authenticationDetails = new AuthenticationDetails(authenticationData);
@@ -36,9 +39,26 @@ const LogInScreen = ({ navigation }) => {
       ClientId: "383pg349j8s1m42kavf0ta7i4r",
     };
     let userPool = new CognitoUserPool(poolData);
+    let userData = {
+      Username: userEmail,
+      Pool: userPool,
+    };
+
+    var cognitoUser = new CognitoUser(userData);
+    cognitoUser.authenticateUser(authenticationDetails, {
+      onSuccess: function (result) {
+        let accessToken = result.getAccessToken().getJwtToken();
+        let idToken = result.getIdToken().getJwtToken();
+      },
+      onFailure: function (err) {
+        alert(err.message || JSON.stringify(err));
+      },
+    });
   };
 
-  const handleSubmitPress = () => {};
+  const handleSubmitPress = () => {
+    logInUser();
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -57,16 +77,18 @@ const LogInScreen = ({ navigation }) => {
           placeholder="Ernter Your Email Address"
         />
 
-        <Text 
-        style={styles.body_text}>Enter your password:</Text>
-        <TextInput style={styles.inputStyle} 
-        autoCapitalize="none"
-        style={styles.inputStyle}
-        onChangeText={(newPassword) => setUserPassword(newPassword)}
-        defaultValue={userPassword}
-        placeholder="Ernter Your Password"
-        secureTextEntry={true}
-        />
+        <Text style={styles.body_text}>Enter your password:</Text>
+        <View>
+          <TextInput
+            style={styles.inputStyle}
+            autoCapitalize="none"
+            style={styles.inputStyle}
+            onChangeText={(newPassword) => setUserPassword(newPassword)}
+            defaultValue={userPassword}
+            placeholder="Ernter Your Password"
+            secureTextEntry={secure}
+          />
+        </View>
       </View>
       <Text style={styles.body_text}>{userEmail}</Text>
       <Text style={styles.body_text}>{userPassword}</Text>
@@ -79,6 +101,17 @@ const LogInScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  SectionStyle: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 0.5,
+    borderColor: "#000",
+    height: 40,
+    borderRadius: 5,
+    margin: 10,
+  },
   container: {
     backgroundColor: "black",
     flexDirection: "column",
@@ -98,6 +131,7 @@ const styles = StyleSheet.create({
     padding: 5,
     fontSize: 22,
     width: "90%",
+    flexDirection: "row",
   },
   header_text: {
     color: "white",
