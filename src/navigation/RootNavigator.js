@@ -8,6 +8,9 @@ import WelcomeScreen from '../screens/WelcomeScreen';
 import GameScreen from '../screens/GameScreen';
 import RoundReview from '../screens/RoundReview';
 import LoginScreen from '../screens/LoginScreen';
+import LoginTest from '../screens/LoginTestScreen';
+import NewUser from '../screens/NewUser';
+import NewUserConfirmEmail from '../screens/NewUserEmailConfirm';
 
 
 const Stack = createNativeStackNavigator();
@@ -16,10 +19,12 @@ const RootNavigator = () => {
     return (
         <NavigationContainer>
             <Stack.Navigator screenOptions={{headerShown: false}}>
-              <Stack.Screen name="Home"         component={WelcomeScreen} />
-              <Stack.Screen name="Game"         component={GameScreen} />
-              <Stack.Screen name="RoundReview"  component={RoundReview} />
-              <Stack.Screen name="LogIn"        component={LoginScreen} />
+              <Stack.Screen name="Home"                     component={WelcomeScreen} />
+              <Stack.Screen name="Game"                     component={GameScreen} />
+              <Stack.Screen name="RoundReview"              component={RoundReview} />
+              <Stack.Screen name="LogIn"                    component={LoginTest} />
+              <Stack.Screen name="NewUser"                  component={NewUser} />
+              <Stack.Screen name="NewUserConfirmEmail"      component={NewUserConfirmEmail} />
             </Stack.Navigator>
         </NavigationContainer>
 

@@ -19,12 +19,15 @@ import {
   CognitoUser,
   AuthenticationDetails,
 } from "amazon-cognito-identity-js";
-import { AntDesign } from "@expo/vector-icons";
+import { Fontisto } from "@expo/vector-icons";
+
 
 const LogInScreen = ({ navigation }) => {
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
   const [secure, setSecure] = useState(true);
+  const [loginMessage, setLoginMessage] = useState("");
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const logInUser = () => {
     let authenticationData = {
@@ -49,69 +52,92 @@ const LogInScreen = ({ navigation }) => {
       onSuccess: function (result) {
         let accessToken = result.getAccessToken().getJwtToken();
         let idToken = result.getIdToken().getJwtToken();
+        setLoginMessage("Successful.");
+        setLoggedIn(true);
       },
       onFailure: function (err) {
-        alert(err.message || JSON.stringify(err));
+        console.log(err.message);
+        setLoginMessage(err.message);
       },
     });
   };
 
   const handleSubmitPress = () => {
     logInUser();
-  };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <Image
-        style={styles.image}
-        source={require("../../assets/MusicIQ-Logo_2.jpg")}
-      />
-      <View style={{ flex: 1, width: "100%" }}>
-        <Text style={styles.header_text}> Please Log In</Text>
-        <Text style={styles.body_text}>Enter your username:</Text>
-        <TextInput
-          autoCapitalize="none"
-          style={styles.inputStyle}
-          onChangeText={(newText) => setUserEmail(newText)}
-          defaultValue={userEmail}
-          placeholder="Ernter Your Email Address"
+    return (
+      <SafeAreaView style={styles.container}>
+        <Image
+          style={styles.image}
+          source={require("../../assets/MusicIQ-Logo_2.jpg")}
         />
-
-        <Text style={styles.body_text}>Enter your password:</Text>
-        <View>
+  
+        <View style={{ flex: 1, width: "100%" }}>
+          <Text style={styles.header_text}>Login</Text>
+  
+          <View>
+            <Text
+              style={{
+                color: "red",
+                fontSize: 25,
+                margin: 12,
+              }}
+            >
+              {loginMessage}
+            </Text>
+          </View>
+          
+          <Text style={styles.body_text}>Enter your username:</Text>
+          <View style={styles.SectionStyle}> 
+          <Fontisto style={{margin:5}}name="email" size={32} color='white'/>
           <TextInput
-            style={styles.inputStyle}
             autoCapitalize="none"
             style={styles.inputStyle}
-            onChangeText={(newPassword) => setUserPassword(newPassword)}
-            defaultValue={userPassword}
-            placeholder="Ernter Your Password"
-            secureTextEntry={secure}
+            onChangeText={(newText) => setUserEmail(newText)}
+            defaultValue={userEmail}
+            placeholder="Ernter Your Email Address"
           />
+          </View>
+          <Text style={styles.body_text}>Enter your password:</Text>
+          <View>
+            <TextInput
+              style={styles.inputStyle}
+              autoCapitalize="none"
+              style={styles.inputStyle}
+              onChangeText={(newPassword) => setUserPassword(newPassword)}
+              defaultValue={userPassword}
+              placeholder="Ernter Your Password"
+              secureTextEntry={secure}
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "flex-end",
+            }}
+          >
+            <TouchableOpacity
+              style={styles.buttonStyle}
+              onPress={handleSubmitPress}
+            >
+              <Text style={styles.buttonTextStyle}>LOGIN</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-      <Text style={styles.body_text}>{userEmail}</Text>
-      <Text style={styles.body_text}>{userPassword}</Text>
+  
+        <View>
+          <Text style={{ color: "#fff", fontSize: 20, paddingBottom:25}}>
+            Don't have an account? Sign up here.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  };
+  
+  };
 
-      <TouchableOpacity style={styles.buttonStyle} onPress={handleSubmitPress}>
-        <Text style={styles.buttonTextStyle}>LOGIN</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
-  );
-};
-
+  
 const styles = StyleSheet.create({
-  SectionStyle: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderWidth: 0.5,
-    borderColor: "#000",
-    height: 40,
-    borderRadius: 5,
-    margin: 10,
-  },
   container: {
     backgroundColor: "black",
     flexDirection: "column",
@@ -122,27 +148,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
   },
+  SectionStyle: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    
+   
+   
+},
   inputStyle: {
-    backgroundColor: "#45dba5",
+    backgroundColor: "#fff",
     height: 40,
     margin: 12,
+    marginLeft:12,
     borderWidth: 1,
     borderColor: "gray",
-    padding: 5,
-    fontSize: 22,
+    padding: 10,
+    fontSize: 20,
     width: "90%",
     flexDirection: "row",
+    borderRadius: 20,
   },
   header_text: {
     color: "white",
-    fontSize: 25,
-    paddingTop: 30,
+    fontSize: 40,
+    paddingTop: 20,
     margin: 12,
+    fontWeight:"bold"
   },
   body_text: {
     color: "white",
-    paddingTop: 25,
-    fontSize: 18,
+    paddingTop: 10,
+    fontSize: 20,
     margin: 12,
     paddingBottom: 0,
   },
@@ -153,17 +190,17 @@ const styles = StyleSheet.create({
     borderColor: "#7DE24E",
     height: 40,
     alignItems: "center",
-    borderRadius: 10,
+    borderRadius: 20,
     marginLeft: 35,
     marginRight: 35,
-    marginTop: 20,
+    marginTop: 40,
     marginBottom: 25,
-    width: 125,
+    width: 165,
   },
   buttonTextStyle: {
     color: "#FFFFFF",
     paddingVertical: 10,
-    fontSize: 16,
+    fontSize: 20,
   },
 });
 
