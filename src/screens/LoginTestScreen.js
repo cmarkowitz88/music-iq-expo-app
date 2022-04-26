@@ -18,6 +18,7 @@ import {
 } from "amazon-cognito-identity-js";
 
 import * as SecureStore from "expo-secure-store";
+import { setLocalStorage2, getValueFor, logInUser } from "./Utils";
 
 const LogInTest = ({navigation}) => {
   const [userEmail, setUserEmail] = useState("");
@@ -25,6 +26,12 @@ const LogInTest = ({navigation}) => {
   const [secure, setSecure] = useState(true);
   const [loginMessage, setLoginMessage] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
+
+  const setLocalStorage =  async (key, value) => {
+    await SecureStore.setItemAsync("idToken", idToken).catch((error) =>
+              console.log("Could not save user info ", error)
+            ).then(console.log("saved value"));
+  }
 
   const handleNewUser = () => {
     navigation.navigate("NewUser");
@@ -56,11 +63,14 @@ const LogInTest = ({navigation}) => {
       onSuccess: function (result) {
         let accessToken = result.getAccessToken().getJwtToken();
         let idToken = result.getIdToken().getJwtToken();
-        SecureStore.setItemAsync("idToken", idToken).catch((error) =>
-              console.log("Could not save user info ", error)
-            );
+        setLocalStorage2("idToken", idToken).then(() => {navigation.navigate("Game")
+        console.log("Wrote to storage");});
+        // SecureStore.setItemAsync("idToken", idToken).catch((error) =>
+        //       console.log("Could not save user info ", error)
+        //     );
         setLoginMessage("Successful.");
         setLoggedIn(true);
+        
       },
       onFailure: function (err) {
         console.log(err.message);

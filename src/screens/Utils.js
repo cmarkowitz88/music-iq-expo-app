@@ -23,32 +23,17 @@ export const setLocalStorage = (key, value) => {
   }
 };
 
-//export  const getLocalStorage = (key) => {
-//console.log("In get LocalStorage");
-//tmp = await getValueFor(key);
-//return tmp;
+export async function setLocalStorage2(key, value) {
+  await SecureStore.setItemAsync(key, value).then(() => {
+    console.log("wrote to storage");
+  });
+}
 
-// export function getValueFor(key) {
-    
-//     try {
-//         result = await SecureStore.getItemAsync(key);
-//         if (result) {
-//             console.log("🔐 Here's your value 🔐 \n" + result);
-//             resolve(result);
-//         } else {
-//             console.log("No values stored under that key.");
-//             resolve("Not found");
-//     }
-//     } catch {
-//         e;
-//         console.log(e);
-//         reject("Error getting key");
-//   } finally {
-//     console.log("Done reading local storage value.");
-//   }
-
-// }
-
+export async function getLocalStorage(key) {
+  result = await SecureStore.getItemAsync(key)
+  // let result = await SecureStore.getItemAsync(key);
+   return result;
+}
 export function logInUser(userName, userPassword) {
   var promise = new Promise((resolve, reject) => {
     let rtn = "success";
@@ -90,7 +75,7 @@ export function logInUser(userName, userPassword) {
             //setLoginMessage(err.message);
             rtn = "failure";
             reject("failed");
-          }
+          },
         });
       });
     }

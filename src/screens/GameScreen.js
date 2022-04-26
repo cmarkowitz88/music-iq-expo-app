@@ -16,25 +16,24 @@ import CustomPlayButton from "../../play-button";
 import api from "../GetQuestions2";
 import QuestionText from "../QuestionText";
 import ScoreText from "../ScoreText";
+import { setLocalStorage2, getLocalStorage, logInUser } from "./Utils";
 
 import getEnvVars from "../../environment";
 import { out } from "react-native/Libraries/Animated/Easing";
 import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
+import * as SecureStore from "expo-secure-store";
 
-let useMockData = '';
-let apiUriGetQuestions = '';
-let apiUriGetAudioApiUri = '';
+let useMockData = "";
+let apiUriGetQuestions = "";
+let apiUriGetAudioApiUri = "";
+let idToken = "";
 
 const envObj = getEnvVars();
 console.log(envObj);
 
-
-
 //const { useMockData } = getEnvVars();
 //const { localGetQuestionsApi} = getEnvVars();
 console.log("Using Mock Data: " + useMockData);
-
-
 
 const GameScreen = ({ navigation }) => {
   // All state variables
@@ -86,7 +85,8 @@ const GameScreen = ({ navigation }) => {
   let [isActive, setIsActive] = useState(true);
   let [memory_seconds, setMemorySeconds] = useState();
   let [memory_track_length, setMemoryTrackLength] = useState();
-  let [memory_answer_selected_button, setMemoryAnswerSelectedButton] = useState(0);
+  let [memory_answer_selected_button, setMemoryAnswerSelectedButton] =
+    useState(0);
 
   // Temp variables
   let tmpCnt = 0;
@@ -95,15 +95,21 @@ const GameScreen = ({ navigation }) => {
   const QUESTIONS_PER_ROUND = 10;
 
   const setUpVars = (inObj) => {
-    if(inObj.useLocalApis){
+    if (inObj.useLocalApis) {
       apiUriGetQuestions = inObj.localGetQuestionsApi;
       apiUriGetAudioApiUri = inObj.localGetAudioApi;
-    }
-    else{
+    } else {
       apiUriGetQuestions = inObj.devGetQuestionsApi;
       apiUriGetAudioApiUri = inObj.devGetAudioApi;
+
+      // getLocalStorage("idToken").then((token) => {
+      //   idToken = token;
+      //   console.log(token);
+      //   console.log(idToken);
+      // });
+     
     }
-  }
+  };
 
   const guessAnswer = (val) => {
     let ans1 = val.answer1_text;
@@ -236,14 +242,14 @@ const GameScreen = ({ navigation }) => {
     }
   };
 
-  const playNextMemoryAnswer = (filepath, trackLength,answer_number) => {
+  const playNextMemoryAnswer = (filepath, trackLength, answer_number) => {
     setPlayingMemoryTrack(true);
     playback_object.unloadAsync();
     setSoundObject(null);
     playSound(filepath, "memory");
     setShowAnimatedGif(true);
     setMemorySeconds(0);
-    setMemoryTrackLength(trackLength)
+    setMemoryTrackLength(trackLength);
     setMemoryAnswerSelectedButton(answer_number);
   };
 
@@ -278,7 +284,11 @@ const GameScreen = ({ navigation }) => {
   useEffect(() => {
     console.log("In useEffect");
     setUpVars(envObj);
-    getData();
+    getLocalStorage("idToken").then((token) => {
+      idToken = token;
+      getData();
+    });
+    
 
     async function getData() {
       setLevel(1);
@@ -291,10 +301,21 @@ const GameScreen = ({ navigation }) => {
         );
         data = await response.json();
       } else if (!useMockData) {
+        debugger;
+        let obj = {
+            withCredentials: true,
+            credentials: 'include',
+            headers:{'Authorization':'Bearer ' + {idToken} },
+        };
+        console.log(obj);
         const response = await fetch(
           //"http://127.0.0.1:3000/getQuestions?level=1"
-          apiUriGetQuestions
-        );
+          apiUriGetQuestions, { 
+            withCredentials: true,
+            credentials: 'include',
+            headers:{'Authorization':`Bearer ${idToken}`,},
+          });
+        debugger;
         data = await response.json();
       }
 
@@ -322,10 +343,18 @@ const GameScreen = ({ navigation }) => {
       }
 
       setTrackLength(rndm_game_questions[question_count].Track_Length);
-      setAnswer1TrackLength(rndm_game_questions[question_count].Answer1_Track_Length);
-      setAnswer2TrackLength(rndm_game_questions[question_count].Answer2_Track_Length);
-      setAnswer3TrackLength(rndm_game_questions[question_count].Answer3_Track_Length);
-      setAnswer4TrackLength(rndm_game_questions[question_count].Answer4_Track_Length);
+      setAnswer1TrackLength(
+        rndm_game_questions[question_count].Answer1_Track_Length
+      );
+      setAnswer2TrackLength(
+        rndm_game_questions[question_count].Answer2_Track_Length
+      );
+      setAnswer3TrackLength(
+        rndm_game_questions[question_count].Answer3_Track_Length
+      );
+      setAnswer4TrackLength(
+        rndm_game_questions[question_count].Answer4_Track_Length
+      );
       setHint(rndm_game_questions[question_count].Hint);
       setTimeLeft(rndm_game_questions[question_count].Track_Length);
       setSeconds(rndm_game_questions[question_count].Track_Length);
@@ -411,16 +440,16 @@ const GameScreen = ({ navigation }) => {
   useEffect(() => {
     let interval = null;
     if (question_type == "music-memory" && playing_memory_track) {
-       console.log("Playing Memory Track");
-       if(memory_seconds  < memory_track_length){
+      console.log("Playing Memory Track");
+      if (memory_seconds < memory_track_length) {
         interval = setInterval(() => {
-        setMemorySeconds((memory_seconds) => memory_seconds + 1);
-        console.log(memory_seconds);
+          setMemorySeconds((memory_seconds) => memory_seconds + 1);
+          console.log(memory_seconds);
         }, 1000);
-     }
+      }
     }
     return () => clearInterval(interval);
-  },[memory_seconds]);
+  }, [memory_seconds]);
 
   function setTimer() {
     oneSecInterval = setInterval(() => {
@@ -468,10 +497,18 @@ const GameScreen = ({ navigation }) => {
         setFilePath4(game_questions[question_count].Answer4_File_Path);
       }
       setTrackLength(game_questions[question_count].Track_Length);
-      setAnswer1TrackLength(rndm_game_questions[question_count].Answer1_Track_Length);
-      setAnswer2TrackLength(rndm_game_questions[question_count].Answer2_Track_Length);
-      setAnswer3TrackLength(rndm_game_questions[question_count].Answer3_Track_Length);
-      setAnswer4TrackLength(rndm_game_questions[question_count].Answer4_Track_Length);
+      setAnswer1TrackLength(
+        rndm_game_questions[question_count].Answer1_Track_Length
+      );
+      setAnswer2TrackLength(
+        rndm_game_questions[question_count].Answer2_Track_Length
+      );
+      setAnswer3TrackLength(
+        rndm_game_questions[question_count].Answer3_Track_Length
+      );
+      setAnswer4TrackLength(
+        rndm_game_questions[question_count].Answer4_Track_Length
+      );
       setSeconds(game_questions[question_count].Track_Length);
       setMemorySeconds(null);
       setHint(game_questions[question_count].Hint);
@@ -573,14 +610,27 @@ const GameScreen = ({ navigation }) => {
               >
                 <CustomPlayButton
                   color="red"
-                  onPress={() => playNextMemoryAnswer(file_path1, answer1_track_length,1)}
+                  onPress={() =>
+                    playNextMemoryAnswer(file_path1, answer1_track_length, 1)
+                  }
                 />
               </View>
               <Text style={styles.memory_seconds}>
-                {!memory_seconds || memory_answer_selected_button !=1 ? '0:00 ' : ''}
-                {memory_answer_selected_button ==1 && memory_seconds && memory_seconds <= 9 ? '0:0'+memory_seconds+' ' : ''} 
-                {memory_answer_selected_button ==1 && memory_seconds && memory_seconds > 9 ? '0:'+memory_seconds+' ' : ''}
-                / 0:{answer1_track_length}</Text>
+                {!memory_seconds || memory_answer_selected_button != 1
+                  ? "0:00 "
+                  : ""}
+                {memory_answer_selected_button == 1 &&
+                memory_seconds &&
+                memory_seconds <= 9
+                  ? "0:0" + memory_seconds + " "
+                  : ""}
+                {memory_answer_selected_button == 1 &&
+                memory_seconds &&
+                memory_seconds > 9
+                  ? "0:" + memory_seconds + " "
+                  : ""}
+                / 0:{answer1_track_length}
+              </Text>
               <View
                 style={[
                   {
@@ -613,14 +663,27 @@ const GameScreen = ({ navigation }) => {
               >
                 <CustomPlayButton
                   color="green"
-                  onPress={() => playNextMemoryAnswer(file_path2, answer2_track_length,2)}
+                  onPress={() =>
+                    playNextMemoryAnswer(file_path2, answer2_track_length, 2)
+                  }
                 />
               </View>
               <Text style={styles.memory_seconds}>
-                {!memory_seconds || memory_answer_selected_button !=2 ? '0:00 ' : ''}
-                {memory_answer_selected_button ==2 && memory_seconds && memory_seconds <= 9 ? '0:0'+memory_seconds+' ' : ''} 
-                {memory_answer_selected_button ==2 && memory_seconds && memory_seconds > 9 ? '0:'+memory_seconds+' ' : ''}
-                / 0:{answer2_track_length}</Text>
+                {!memory_seconds || memory_answer_selected_button != 2
+                  ? "0:00 "
+                  : ""}
+                {memory_answer_selected_button == 2 &&
+                memory_seconds &&
+                memory_seconds <= 9
+                  ? "0:0" + memory_seconds + " "
+                  : ""}
+                {memory_answer_selected_button == 2 &&
+                memory_seconds &&
+                memory_seconds > 9
+                  ? "0:" + memory_seconds + " "
+                  : ""}
+                / 0:{answer2_track_length}
+              </Text>
               <View
                 style={[
                   {
@@ -653,14 +716,27 @@ const GameScreen = ({ navigation }) => {
               >
                 <CustomPlayButton
                   color="yellow"
-                  onPress={() => playNextMemoryAnswer(file_path3, answer3_track_length,3)}
+                  onPress={() =>
+                    playNextMemoryAnswer(file_path3, answer3_track_length, 3)
+                  }
                 />
               </View>
               <Text style={styles.memory_seconds}>
-                {!memory_seconds || memory_answer_selected_button !=3 ? '0:00 ' : ''}
-                {memory_answer_selected_button ==3 && memory_seconds && memory_seconds <= 9 ? '0:0'+memory_seconds+' ' : ''} 
-                {memory_answer_selected_button ==3 && memory_seconds && memory_seconds > 9 ? '0:'+memory_seconds+' ' : ''}
-                / 0:{answer3_track_length}</Text>
+                {!memory_seconds || memory_answer_selected_button != 3
+                  ? "0:00 "
+                  : ""}
+                {memory_answer_selected_button == 3 &&
+                memory_seconds &&
+                memory_seconds <= 9
+                  ? "0:0" + memory_seconds + " "
+                  : ""}
+                {memory_answer_selected_button == 3 &&
+                memory_seconds &&
+                memory_seconds > 9
+                  ? "0:" + memory_seconds + " "
+                  : ""}
+                / 0:{answer3_track_length}
+              </Text>
               <View
                 style={[
                   {
@@ -693,14 +769,27 @@ const GameScreen = ({ navigation }) => {
               >
                 <CustomPlayButton
                   color="blue"
-                  onPress={() => playNextMemoryAnswer(file_path4,answer4_track_length,4)}
+                  onPress={() =>
+                    playNextMemoryAnswer(file_path4, answer4_track_length, 4)
+                  }
                 />
               </View>
               <Text style={styles.memory_seconds}>
-                {!memory_seconds || memory_answer_selected_button !=4 ? '0:00 ' : ''}
-                {memory_answer_selected_button ==4 && memory_seconds && memory_seconds <= 9 ? '0:0'+memory_seconds+' ' : ''} 
-                {memory_answer_selected_button ==4 && memory_seconds && memory_seconds > 9 ? '0:'+memory_seconds+' ' : ''}
-                / 0:{answer4_track_length}</Text>
+                {!memory_seconds || memory_answer_selected_button != 4
+                  ? "0:00 "
+                  : ""}
+                {memory_answer_selected_button == 4 &&
+                memory_seconds &&
+                memory_seconds <= 9
+                  ? "0:0" + memory_seconds + " "
+                  : ""}
+                {memory_answer_selected_button == 4 &&
+                memory_seconds &&
+                memory_seconds > 9
+                  ? "0:" + memory_seconds + " "
+                  : ""}
+                / 0:{answer4_track_length}
+              </Text>
               <View
                 style={[
                   {
@@ -869,7 +958,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
     flexDirection: "row",
     fontWeight: "bold",
-    fontVariant:['tabular-nums'],
+    fontVariant: ["tabular-nums"],
   },
 
   hint: {
@@ -884,11 +973,11 @@ const styles = StyleSheet.create({
   },
 
   memory_seconds: {
-    color:"white",
-    fontSize:16,
-    fontVariant:['tabular-nums'],
-    fontWeight:"bold",
-    paddingRight:5,
+    color: "white",
+    fontSize: 16,
+    fontVariant: ["tabular-nums"],
+    fontWeight: "bold",
+    paddingRight: 5,
   },
 });
 

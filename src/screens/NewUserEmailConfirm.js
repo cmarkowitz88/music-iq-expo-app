@@ -18,7 +18,7 @@ import {
   AuthenticationDetails,
 } from "amazon-cognito-identity-js";
 
-import { setLocalStorage, getValueFor, logInUser } from "./Utils";
+import { setLocalStorage2, getValueFor, logInUser } from "./Utils";
 import * as SecureStore from "expo-secure-store";
 
 const NewUserConfirmEmail = ({ route, navigation }) => {
