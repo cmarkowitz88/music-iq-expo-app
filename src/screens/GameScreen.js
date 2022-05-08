@@ -282,7 +282,6 @@ const GameScreen = ({ navigation }) => {
       //tmp = encodeURI(apiUriGetAudioApiUri + filePath);
       //filePath = 'https://s3.amazonaws.com/craig.markowitz.stuff/1000020.wav?';
       //tmp = "http://localhost:4566/m-musiciq-audio-files/" + filePath;
-      //filePath = 'https://s3.us-east-1.amazonaws.com/craig.markowitz.stuff/1000020.wav?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIFvcJtzjn%2BO1Addj4Q%2Fc3x7o%2BFlbs%2F8efqT52TvWZRJQAiBL5ZNezq%2BroGIJ20VF4wGVhVaNpqhaOL1OguefRZeGmCqeAgjE%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDA0NDAyNDE1NDQyMyIM3p%2FephE4ea2Ex4qkKvIBercePatN9aBh5FvRaxve6B904%2BlJ834V%2B9RHdAbzHqw2FOsq%2F2JsflzdDVXaNyzpejQfiGF3kP91QZbazU2weUk85Q9S0bOzdLCXmP16EW9mJ5TldqFR2dQofJvGrXZczOMhpnI4vb2D%2FfwFeOFNay%2FQGFtZ2YFd%2BhYWDC5RjKbdKwkmcJ7nA3437uYBf0XrRXdeSi7m0zdIVNbSAb%2ByXGD6Tgt%2FgUZsPd7LbY3i94UeGRqOusBDcUnk2JrV8IFk8Nw%2BkqPRt3LMuomdqqyGjpiTob2sela34F0ZU2%2BODkoZt04ByoIpYDdtYq%2BXC7q9ItIwxfHakwY64AEW7%2F4fdPkou4DxTjGxL%2FXy6dh0AUkg0Og9vdRPgeA7dKZ89VjZ8QyoPB2Q5QrFtW6mMy1Dr0mIK%2BKW1XXtu0oMNaqs9NaminKfHg4ZmHCdNFtF3DuincBpuYSHToYh3T9pr0WLCYxdCh%2FqirWD4jK0yT4A%2FXypPrgq2wcn8HUWW1x3JswPSf2J3GHoADQQdK0e5YSV%2BbCasRhqpP9c63ehiGn521KgRz%2BY2ILhjW628fc%2FpeRP7zER64Xmaj5PDGehrlmJmV2CNgDBAKFeR2z4rReP503Px35vVG3RteLiSw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220507T195401Z&X-Amz-SignedHeaders=host&X-Amz-Expires=43200&X-Amz-Credential=ASIAQUQALJE3VM6LHGP3%2F20220507%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=837bdb849f96e1193169907671ea07aaeae998487ab7f9d6723672a290974708'
      
       const source = { uri: filePath };
       const status = await soundObj.loadAsync(source);
@@ -465,8 +464,8 @@ const GameScreen = ({ navigation }) => {
         // });
 
         var s3 = new AWS.S3({
-          accessKeyId:'AKIAQUQALJE3UIXZUDVS',
-          secretAccessKey:'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'
+          accessKeyId:'',
+          secretAccessKey:''
         });
 
         var params = {
