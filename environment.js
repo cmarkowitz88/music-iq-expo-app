@@ -10,7 +10,7 @@ const ENV = {
     localGetQuestionsApi:'http://127.0.0.1:3000/getQuestions?level=1',
     localGetAudioApi: 'http://localhost:4566/m-musiciq-audio-files/',
     devGetQuestionsApi: 'https://exmi415of4.execute-api.us-east-1.amazonaws.com/Stage/getQuestions?level=1',
-    devGetAudioApi: 'http://localhost:4566/m-musiciq-audio-files/',
+    devGetAudioApi: 'https://m-musiciq-audio-files.s3.amazonaws.com/',
  },
  staging:{
     useMockData: false,

@@ -22,11 +22,19 @@ import getEnvVars from "../../environment";
 import { out } from "react-native/Libraries/Animated/Easing";
 import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
 import * as SecureStore from "expo-secure-store";
+import {
+  CognitoUserPool,
+  CognitoUserAttribute,
+  CognitoUser,
+  AuthenticationDetails,
+} from "amazon-cognito-identity-js";
+
+import AWS from "aws-sdk";
 
 let useMockData = "";
 let apiUriGetQuestions = "";
 let apiUriGetAudioApiUri = "";
-let idToken = "";
+let tmpIdToken = "";
 
 const envObj = getEnvVars();
 console.log(envObj);
@@ -87,6 +95,7 @@ const GameScreen = ({ navigation }) => {
   let [memory_track_length, setMemoryTrackLength] = useState();
   let [memory_answer_selected_button, setMemoryAnswerSelectedButton] =
     useState(0);
+  let [idToken, setIdToken] = useState();
 
   // Temp variables
   let tmpCnt = 0;
@@ -95,6 +104,7 @@ const GameScreen = ({ navigation }) => {
   const QUESTIONS_PER_ROUND = 10;
 
   const setUpVars = (inObj) => {
+    useMockData = inObj.useMockData;
     if (inObj.useLocalApis) {
       apiUriGetQuestions = inObj.localGetQuestionsApi;
       apiUriGetAudioApiUri = inObj.localGetAudioApi;
@@ -107,7 +117,6 @@ const GameScreen = ({ navigation }) => {
       //   console.log(token);
       //   console.log(idToken);
       // });
-     
     }
   };
 
@@ -270,9 +279,12 @@ const GameScreen = ({ navigation }) => {
       const soundObj = new Audio.Sound();
       setPlayBackObject(soundObj);
       //const source = require('./assets/audio/2.wav')
-      tmp = apiUriGetAudioApiUri + filePath;
+      //tmp = encodeURI(apiUriGetAudioApiUri + filePath);
+      //filePath = 'https://s3.amazonaws.com/craig.markowitz.stuff/1000020.wav?';
       //tmp = "http://localhost:4566/m-musiciq-audio-files/" + filePath;
-      const source = { uri: tmp };
+      //filePath = 'https://s3.us-east-1.amazonaws.com/craig.markowitz.stuff/1000020.wav?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIFvcJtzjn%2BO1Addj4Q%2Fc3x7o%2BFlbs%2F8efqT52TvWZRJQAiBL5ZNezq%2BroGIJ20VF4wGVhVaNpqhaOL1OguefRZeGmCqeAgjE%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDA0NDAyNDE1NDQyMyIM3p%2FephE4ea2Ex4qkKvIBercePatN9aBh5FvRaxve6B904%2BlJ834V%2B9RHdAbzHqw2FOsq%2F2JsflzdDVXaNyzpejQfiGF3kP91QZbazU2weUk85Q9S0bOzdLCXmP16EW9mJ5TldqFR2dQofJvGrXZczOMhpnI4vb2D%2FfwFeOFNay%2FQGFtZ2YFd%2BhYWDC5RjKbdKwkmcJ7nA3437uYBf0XrRXdeSi7m0zdIVNbSAb%2ByXGD6Tgt%2FgUZsPd7LbY3i94UeGRqOusBDcUnk2JrV8IFk8Nw%2BkqPRt3LMuomdqqyGjpiTob2sela34F0ZU2%2BODkoZt04ByoIpYDdtYq%2BXC7q9ItIwxfHakwY64AEW7%2F4fdPkou4DxTjGxL%2FXy6dh0AUkg0Og9vdRPgeA7dKZ89VjZ8QyoPB2Q5QrFtW6mMy1Dr0mIK%2BKW1XXtu0oMNaqs9NaminKfHg4ZmHCdNFtF3DuincBpuYSHToYh3T9pr0WLCYxdCh%2FqirWD4jK0yT4A%2FXypPrgq2wcn8HUWW1x3JswPSf2J3GHoADQQdK0e5YSV%2BbCasRhqpP9c63ehiGn521KgRz%2BY2ILhjW628fc%2FpeRP7zER64Xmaj5PDGehrlmJmV2CNgDBAKFeR2z4rReP503Px35vVG3RteLiSw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220507T195401Z&X-Amz-SignedHeaders=host&X-Amz-Expires=43200&X-Amz-Credential=ASIAQUQALJE3VM6LHGP3%2F20220507%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=837bdb849f96e1193169907671ea07aaeae998487ab7f9d6723672a290974708'
+     
+      const source = { uri: filePath };
       const status = await soundObj.loadAsync(source);
       setSoundObject(status);
       console.log(status);
@@ -285,10 +297,10 @@ const GameScreen = ({ navigation }) => {
     console.log("In useEffect");
     setUpVars(envObj);
     getLocalStorage("idToken").then((token) => {
-      idToken = token;
+      tmpIdToken = token;
+      setIdToken(token);
       getData();
     });
-    
 
     async function getData() {
       setLevel(1);
@@ -301,21 +313,22 @@ const GameScreen = ({ navigation }) => {
         );
         data = await response.json();
       } else if (!useMockData) {
-        debugger;
         let obj = {
-            withCredentials: true,
-            credentials: 'include',
-            headers:{'Authorization':'Bearer ' + {idToken} },
+          withCredentials: true,
+          credentials: "include",
+          headers: { Authorization: "Bearer " + { tmpIdToken } },
         };
         console.log(obj);
         const response = await fetch(
           //"http://127.0.0.1:3000/getQuestions?level=1"
-          apiUriGetQuestions, { 
+          apiUriGetQuestions,
+          {
             withCredentials: true,
-            credentials: 'include',
-            headers:{'Authorization':`Bearer ${idToken}`,},
-          });
-        debugger;
+            credentials: "include",
+            headers: { Authorization: `Bearer ${tmpIdToken}` },
+          }
+        );
+
         data = await response.json();
       }
 
@@ -370,9 +383,18 @@ const GameScreen = ({ navigation }) => {
       );
 
       //console.log(data);
-      playSound(rndm_game_questions[question_count].File_Path);
-      //setQuestionCount(question_count + 1);
-      //setTimer();
+      if (!envObj.useLocalApis) {
+        generatePreSignedURL(rndm_game_questions[question_count].File_Path)
+          .then((url) => {
+            playSound(url);
+          })
+          .catch((err) => {
+            console.log("Error " + err);
+          });
+      }
+      else {
+        playSound(rndm_game_questions[question_count].File_Path);
+      }
     }
 
     const randomize_questions = (in_array) => {
@@ -397,6 +419,81 @@ const GameScreen = ({ navigation }) => {
       return question_array;
     };
   }, []);
+
+  let generatePreSignedURL = (filePath) => {
+    var promise = new Promise((resolve, reject) => {
+      let token = idToken ? idToken : tmpIdToken;
+      AWS.config.region = "us-east-1";
+      AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",
+        Logins: {
+          "cognito-idp.us-east-1.amazonaws.com/us-east-1_smGpwOWnD": token,
+        },
+      });
+
+      // AWS.config.credentials.refresh((error) => {
+      //   if (error) {
+      //     console.error(error);
+      //   } else {
+      //     console.log('Successfully logged!');
+      //   }
+      // });
+
+      AWS.config.credentials.get(function () {
+        var accessKeyId = AWS.config.credentials.accessKeyId;
+        var secretAccessKey = AWS.config.credentials.secretAccessKey;
+        var sessionToken = AWS.config.credentials.sessionToken;
+        console.log(accessKeyId + " " + secretAccessKey);
+        AWS.config.update({
+          accessKeyId: accessKeyId,
+          secretAccessKey: secretAccessKey,
+        });
+
+        // var params = {
+        // };
+        // var sts = new AWS.STS();
+        // sts.getCallerIdentity(params, function(err, data) {
+        //   if (err) console.log(err, err.stack); // an error occurred
+        //   else     console.log(data);           // successful response
+        //   /*
+        //   data = {
+        //    Account: "123456789012",
+        //    Arn: "arn:aws:iam::123456789012:user/Alice",
+        //    UserId: "AKIAI44QH8DHBEXAMPLE"
+        //   }
+        //   */
+        // });
+
+        var s3 = new AWS.S3({
+          accessKeyId:'AKIAQUQALJE3UIXZUDVS',
+          secretAccessKey:'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'
+        });
+
+        var params = {
+          Bucket:'m-musiciq-audio-files',
+          Key:filePath
+        };
+
+        // s3.getObject(params, function(err, data){
+        //   if (err) console.log(err, err.stack);
+        //   else {
+        //     console.log(data);
+        //     resolve(data);
+        //   }
+        // })
+        filePath = '1000020.mp3'
+        var presignedUrl = s3.getSignedUrl("getObject", {
+          Bucket: "m-musiciq-audio-files",
+          Key: filePath,
+          Expires: 60000,
+        });
+        resolve(presignedUrl);
+        //resolve('https://m-musiciq-audio-files.s3.us-east-1.amazonaws.com/1000020.mp3?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIFvcJtzjn%2BO1Addj4Q%2Fc3x7o%2BFlbs%2F8efqT52TvWZRJQAiBL5ZNezq%2BroGIJ20VF4wGVhVaNpqhaOL1OguefRZeGmCqeAgjE%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDA0NDAyNDE1NDQyMyIM3p%2FephE4ea2Ex4qkKvIBercePatN9aBh5FvRaxve6B904%2BlJ834V%2B9RHdAbzHqw2FOsq%2F2JsflzdDVXaNyzpejQfiGF3kP91QZbazU2weUk85Q9S0bOzdLCXmP16EW9mJ5TldqFR2dQofJvGrXZczOMhpnI4vb2D%2FfwFeOFNay%2FQGFtZ2YFd%2BhYWDC5RjKbdKwkmcJ7nA3437uYBf0XrRXdeSi7m0zdIVNbSAb%2ByXGD6Tgt%2FgUZsPd7LbY3i94UeGRqOusBDcUnk2JrV8IFk8Nw%2BkqPRt3LMuomdqqyGjpiTob2sela34F0ZU2%2BODkoZt04ByoIpYDdtYq%2BXC7q9ItIwxfHakwY64AEW7%2F4fdPkou4DxTjGxL%2FXy6dh0AUkg0Og9vdRPgeA7dKZ89VjZ8QyoPB2Q5QrFtW6mMy1Dr0mIK%2BKW1XXtu0oMNaqs9NaminKfHg4ZmHCdNFtF3DuincBpuYSHToYh3T9pr0WLCYxdCh%2FqirWD4jK0yT4A%2FXypPrgq2wcn8HUWW1x3JswPSf2J3GHoADQQdK0e5YSV%2BbCasRhqpP9c63ehiGn521KgRz%2BY2ILhjW628fc%2FpeRP7zER64Xmaj5PDGehrlmJmV2CNgDBAKFeR2z4rReP503Px35vVG3RteLiSw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220508T014457Z&X-Amz-SignedHeaders=host&X-Amz-Expires=14400&X-Amz-Credential=ASIAQUQALJE3VM6LHGP3%2F20220508%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=85c3ecb2275bd046a7ee2933d018a61063100da2b4083f665232ee68583fbbdc')
+        //resolve('https://s3.amazonaws.com/craig.markowitz.stuff/1000020.wav');
+      });
+    });
+    return promise;
+  };
 
   // useEffect(() => {
   //   let oneSecInterval = null;
