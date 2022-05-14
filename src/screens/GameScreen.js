@@ -128,6 +128,8 @@ const GameScreen = ({ navigation }) => {
     let selected_answer = "";
     let btn_selected = 0;
     let blnOutOfTime = false;
+    let soundFxFile = "";
+
     setTimerStarted(false);
     setShowAnimatedGif(false);
     setPlayingMemoryTrack(false);
@@ -168,17 +170,33 @@ const GameScreen = ({ navigation }) => {
 
     if (selected_answer == correct_answer) {
       tmpStatus = "Correct";
-      playSoundFX(getSoundFXFile("correct"));
+      soundFxFile = getSoundFXFile("correct");
+      
+      //playSoundFX();
       highlightButtons("correct", btn_selected);
       calcScore(track_length, seconds, score_weight_multiplier);
       setIsCorrect(true);
       console.log("Correct!");
     } else {
       tmpStatus = "Incorrect";
-      playSoundFX(getSoundFXFile("incorrect"));
+      //playSoundFX(getSoundFXFile("incorrect"));
+      soundFxFile = getSoundFXFile("incorrect");
       highlightButtons("incorrect", btn_selected);
       highlightButtons("correct", correct_answer_btn);
       setIsCorrect(false);
+    }
+
+    if (!envObj.useLocalApis) {
+      generatePreSignedURL(soundFxFile)
+        .then((url) => {
+          playSoundFX(url);
+        })
+        .catch((err) => {
+          console.log("Error " + err);
+        });
+    } else {
+        url = "http://localhost:4566/m-musiciq-audio-files/" + soundFxFile;
+        playSoundFX(url);
     }
 
     // Assign the question/answer properties to object and push into array so we can show on RoundReview screen
@@ -235,12 +253,12 @@ const GameScreen = ({ navigation }) => {
 
   const getSoundFXFile = (answer_status) => {
     const applause = [
-      "Applause_1.wav",
-      "Applause_2.wav",
-      "Applause_3.wav",
-      "Applause_4.wav",
+      "Applause_1.mp3",
+      "Applause_2.mp3",
+      "Applause_3.mp3",
+      "Applause_4.mp3",
     ];
-    const boos = ["Boo_1.wav", "Boo_2.wav", "Boo_3.wav", "Boo_4.wav"];
+    const boos = ["Boo_1.mp3", "Boo_2.mp3", "Boo_3.mp3", "Boo_4.mp3"];
 
     if (answer_status == "correct") {
       let i = Math.floor(Math.random() * applause.length);
@@ -265,9 +283,10 @@ const GameScreen = ({ navigation }) => {
   async function playSoundFX(filePath) {
     const soundObjFX = new Audio.Sound();
 
-    tmp = apiUriGetAudioApiUri + filePath;
-    //tmp = "http://localhost:4566/m-musiciq-audio-files/" + filePath;
-    const source = { uri: tmp };
+    //tmp = apiUriGetAudioApiUri + filePath;
+    //tmp = "http://localhost:4566/m-musiciq-audio-files/SoundFX/" + filePath;
+    //const source = require('./assets')
+    const source = { uri: filePath };
     const status = await soundObjFX.loadAsync(source);
 
     console.log(status);
@@ -282,7 +301,7 @@ const GameScreen = ({ navigation }) => {
       //tmp = encodeURI(apiUriGetAudioApiUri + filePath);
       //filePath = 'https://s3.amazonaws.com/craig.markowitz.stuff/1000020.wav?';
       //tmp = "http://localhost:4566/m-musiciq-audio-files/" + filePath;
-     
+
       const source = { uri: filePath };
       const status = await soundObj.loadAsync(source);
       setSoundObject(status);
@@ -390,9 +409,9 @@ const GameScreen = ({ navigation }) => {
           .catch((err) => {
             console.log("Error " + err);
           });
-      }
-      else {
-        playSound(rndm_game_questions[question_count].File_Path);
+      } else {
+        url = apiUriGetAudioApiUri + rndm_game_questions[question_count].File_Path;
+        playSound(url);
       }
     }
 
@@ -425,18 +444,20 @@ const GameScreen = ({ navigation }) => {
       AWS.config.region = "us-east-1";
       AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",
+        region: "us-east-1",
         Logins: {
           "cognito-idp.us-east-1.amazonaws.com/us-east-1_smGpwOWnD": token,
         },
       });
+      console.log(AWS.config.credentials);
 
-      // AWS.config.credentials.refresh((error) => {
-      //   if (error) {
-      //     console.error(error);
-      //   } else {
-      //     console.log('Successfully logged!');
-      //   }
-      // });
+      AWS.config.credentials.refresh((error) => {
+        if (error) {
+          console.error(error);
+        } else {
+          console.log("Successfully logged!");
+        }
+      });
 
       AWS.config.credentials.get(function () {
         var accessKeyId = AWS.config.credentials.accessKeyId;
@@ -446,41 +467,19 @@ const GameScreen = ({ navigation }) => {
         AWS.config.update({
           accessKeyId: accessKeyId,
           secretAccessKey: secretAccessKey,
+          sessionToken: sessionToken,
+          region: "us-east-1",
         });
 
-        // var params = {
-        // };
-        // var sts = new AWS.STS();
-        // sts.getCallerIdentity(params, function(err, data) {
-        //   if (err) console.log(err, err.stack); // an error occurred
-        //   else     console.log(data);           // successful response
-        //   /*
-        //   data = {
-        //    Account: "123456789012",
-        //    Arn: "arn:aws:iam::123456789012:user/Alice",
-        //    UserId: "AKIAI44QH8DHBEXAMPLE"
-        //   }
-        //   */
+        console.log(AWS.config.credentials);
+        // var s3 = new AWS.S3({
+        //   accessKeyId:accessKeyId,
+        //   secretAccessKey:secretAccessKey
         // });
 
-        var s3 = new AWS.S3({
-          accessKeyId:'',
-          secretAccessKey:''
-        });
+        var s3 = new AWS.S3();
 
-        var params = {
-          Bucket:'m-musiciq-audio-files',
-          Key:filePath
-        };
-
-        // s3.getObject(params, function(err, data){
-        //   if (err) console.log(err, err.stack);
-        //   else {
-        //     console.log(data);
-        //     resolve(data);
-        //   }
-        // })
-        filePath = '1000020.mp3'
+        //filePath = "1000020.mp3";
         var presignedUrl = s3.getSignedUrl("getObject", {
           Bucket: "m-musiciq-audio-files",
           Key: filePath,
@@ -621,7 +620,19 @@ const GameScreen = ({ navigation }) => {
       //setRoundQuestionCount(round_question_cnt + 1);
 
       //console.log(data);
-      playSound(game_questions[question_count].File_Path);
+      //playSound(game_questions[question_count].File_Path);
+      if (!envObj.useLocalApis) {
+        generatePreSignedURL(game_questions[question_count].File_Path)
+          .then((url) => {
+            playSound(url);
+          })
+          .catch((err) => {
+            console.log("Error " + err);
+          });
+      } else {
+        url = apiUriGetAudioApiUri + rndm_game_questions[question_count].File_Path;
+        playSound(url);
+      }
       //setQuestionCount(question_count + 1);
       //setTimer();
     } else {
