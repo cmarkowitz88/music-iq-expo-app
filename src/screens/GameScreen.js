@@ -8,6 +8,7 @@ import {
   Image,
   Text,
   SafeAreaView,
+  ScrollView,
   TouchableOpacity,
   Pressable,
 } from "react-native";
@@ -96,6 +97,7 @@ const GameScreen = ({ navigation }) => {
   let [memory_answer_selected_button, setMemoryAnswerSelectedButton] =
     useState(0);
   let [idToken, setIdToken] = useState();
+  let [gotUserCreds, setGotUserCreds] = useState(false);
 
   // Temp variables
   let tmpCnt = 0;
@@ -171,7 +173,7 @@ const GameScreen = ({ navigation }) => {
     if (selected_answer == correct_answer) {
       tmpStatus = "Correct";
       soundFxFile = getSoundFXFile("correct");
-      
+
       //playSoundFX();
       highlightButtons("correct", btn_selected);
       calcScore(track_length, seconds, score_weight_multiplier);
@@ -195,8 +197,8 @@ const GameScreen = ({ navigation }) => {
           console.log("Error " + err);
         });
     } else {
-        url = "http://localhost:4566/m-musiciq-audio-files/" + soundFxFile;
-        playSoundFX(url);
+      url = "http://localhost:4566/m-musiciq-audio-files/" + soundFxFile;
+      playSoundFX(url);
     }
 
     // Assign the question/answer properties to object and push into array so we can show on RoundReview screen
@@ -273,7 +275,20 @@ const GameScreen = ({ navigation }) => {
     setPlayingMemoryTrack(true);
     playback_object.unloadAsync();
     setSoundObject(null);
-    playSound(filepath, "memory");
+    //playSound(filepath, "memory");
+    if (!envObj.useLocalApis) {
+      generatePreSignedURL(filepath)
+        .then((url) => {
+          playSound(url, "memory");
+        })
+        .catch((err) => {
+          console.log("Error " + err);
+        });
+    } else {
+      url =
+        apiUriGetAudioApiUri + filepath;
+      playSound(url, "memory");
+    }
     setShowAnimatedGif(true);
     setMemorySeconds(0);
     setMemoryTrackLength(trackLength);
@@ -410,7 +425,8 @@ const GameScreen = ({ navigation }) => {
             console.log("Error " + err);
           });
       } else {
-        url = apiUriGetAudioApiUri + rndm_game_questions[question_count].File_Path;
+        url =
+          apiUriGetAudioApiUri + rndm_game_questions[question_count].File_Path;
         playSound(url);
       }
     }
@@ -440,55 +456,72 @@ const GameScreen = ({ navigation }) => {
 
   let generatePreSignedURL = (filePath) => {
     var promise = new Promise((resolve, reject) => {
-      let token = idToken ? idToken : tmpIdToken;
-      AWS.config.region = "us-east-1";
-      AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-        IdentityPoolId: "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",
-        region: "us-east-1",
-        Logins: {
-          "cognito-idp.us-east-1.amazonaws.com/us-east-1_smGpwOWnD": token,
-        },
-      });
-      console.log(AWS.config.credentials);
-
-      AWS.config.credentials.refresh((error) => {
-        if (error) {
-          console.error(error);
-        } else {
-          console.log("Successfully logged!");
-        }
-      });
-
-      AWS.config.credentials.get(function () {
-        var accessKeyId = AWS.config.credentials.accessKeyId;
-        var secretAccessKey = AWS.config.credentials.secretAccessKey;
-        var sessionToken = AWS.config.credentials.sessionToken;
-        console.log(accessKeyId + " " + secretAccessKey);
-        AWS.config.update({
-          accessKeyId: accessKeyId,
-          secretAccessKey: secretAccessKey,
-          sessionToken: sessionToken,
+      
+      if (!gotUserCreds || AWS.config.credentials.expired) {
+        let token = idToken ? idToken : tmpIdToken;
+        AWS.config.region = "us-east-1";
+        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+          IdentityPoolId: "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",
           region: "us-east-1",
+          Logins: {
+            "cognito-idp.us-east-1.amazonaws.com/us-east-1_smGpwOWnD": token,
+          },
         });
-
         console.log(AWS.config.credentials);
-        // var s3 = new AWS.S3({
-        //   accessKeyId:accessKeyId,
-        //   secretAccessKey:secretAccessKey
-        // });
 
-        var s3 = new AWS.S3();
+        AWS.config.credentials.refresh((error) => {
+          if (error) {
+            console.error(error);
+          } else {
+            console.log("Successfully logged!");
+          }
+        });
+        console.log("Token Status =  " + console.log(AWS.config.credentials.expired));
 
-        //filePath = "1000020.mp3";
-        var presignedUrl = s3.getSignedUrl("getObject", {
-          Bucket: "m-musiciq-audio-files",
-          Key: filePath,
-          Expires: 60000,
+        AWS.config.credentials.get(function () {
+          var accessKeyId = AWS.config.credentials.accessKeyId;
+          var secretAccessKey = AWS.config.credentials.secretAccessKey;
+          var sessionToken = AWS.config.credentials.sessionToken;
+          setGotUserCreds(true);
+          console.log(accessKeyId + " " + secretAccessKey);
+          AWS.config.update({
+            accessKeyId: accessKeyId,
+            secretAccessKey: secretAccessKey,
+            sessionToken: sessionToken,
+            region: "us-east-1",
+          });
+
+          console.log("Creds = " + AWS.config.credentials);
+          //filePath = "1000020.mp3";
+          var s3 = new AWS.S3();
+          var presignedUrl = s3.getSignedUrl("getObject", {
+            Bucket: "m-musiciq-audio-files",
+            Key: filePath,
+            Expires: 60000,
+          });
+          resolve(presignedUrl);
+        }); // end get creds
+      } else {
+        AWS.config.credentials.refresh((error) => {
+          if (error) {
+            console.error(error);
+          } else {
+            console.log("Successfully logged!");
+            console.log(AWS.config.credentials);
+            var s3 = new AWS.S3();
+            var presignedUrl = s3.getSignedUrl("getObject", {
+            Bucket: "m-musiciq-audio-files",
+            Key: filePath,
+            Expires: 60000,
         });
         resolve(presignedUrl);
-        //resolve('https://m-musiciq-audio-files.s3.us-east-1.amazonaws.com/1000020.mp3?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIFvcJtzjn%2BO1Addj4Q%2Fc3x7o%2BFlbs%2F8efqT52TvWZRJQAiBL5ZNezq%2BroGIJ20VF4wGVhVaNpqhaOL1OguefRZeGmCqeAgjE%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDA0NDAyNDE1NDQyMyIM3p%2FephE4ea2Ex4qkKvIBercePatN9aBh5FvRaxve6B904%2BlJ834V%2B9RHdAbzHqw2FOsq%2F2JsflzdDVXaNyzpejQfiGF3kP91QZbazU2weUk85Q9S0bOzdLCXmP16EW9mJ5TldqFR2dQofJvGrXZczOMhpnI4vb2D%2FfwFeOFNay%2FQGFtZ2YFd%2BhYWDC5RjKbdKwkmcJ7nA3437uYBf0XrRXdeSi7m0zdIVNbSAb%2ByXGD6Tgt%2FgUZsPd7LbY3i94UeGRqOusBDcUnk2JrV8IFk8Nw%2BkqPRt3LMuomdqqyGjpiTob2sela34F0ZU2%2BODkoZt04ByoIpYDdtYq%2BXC7q9ItIwxfHakwY64AEW7%2F4fdPkou4DxTjGxL%2FXy6dh0AUkg0Og9vdRPgeA7dKZ89VjZ8QyoPB2Q5QrFtW6mMy1Dr0mIK%2BKW1XXtu0oMNaqs9NaminKfHg4ZmHCdNFtF3DuincBpuYSHToYh3T9pr0WLCYxdCh%2FqirWD4jK0yT4A%2FXypPrgq2wcn8HUWW1x3JswPSf2J3GHoADQQdK0e5YSV%2BbCasRhqpP9c63ehiGn521KgRz%2BY2ILhjW628fc%2FpeRP7zER64Xmaj5PDGehrlmJmV2CNgDBAKFeR2z4rReP503Px35vVG3RteLiSw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220508T014457Z&X-Amz-SignedHeaders=host&X-Amz-Expires=14400&X-Amz-Credential=ASIAQUQALJE3VM6LHGP3%2F20220508%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=85c3ecb2275bd046a7ee2933d018a61063100da2b4083f665232ee68583fbbdc')
-        //resolve('https://s3.amazonaws.com/craig.markowitz.stuff/1000020.wav');
-      });
+          }
+        });
+        
+      }
+
+      //resolve('https://m-musiciq-audio-files.s3.us-east-1.amazonaws.com/1000020.mp3?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIFvcJtzjn%2BO1Addj4Q%2Fc3x7o%2BFlbs%2F8efqT52TvWZRJQAiBL5ZNezq%2BroGIJ20VF4wGVhVaNpqhaOL1OguefRZeGmCqeAgjE%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDA0NDAyNDE1NDQyMyIM3p%2FephE4ea2Ex4qkKvIBercePatN9aBh5FvRaxve6B904%2BlJ834V%2B9RHdAbzHqw2FOsq%2F2JsflzdDVXaNyzpejQfiGF3kP91QZbazU2weUk85Q9S0bOzdLCXmP16EW9mJ5TldqFR2dQofJvGrXZczOMhpnI4vb2D%2FfwFeOFNay%2FQGFtZ2YFd%2BhYWDC5RjKbdKwkmcJ7nA3437uYBf0XrRXdeSi7m0zdIVNbSAb%2ByXGD6Tgt%2FgUZsPd7LbY3i94UeGRqOusBDcUnk2JrV8IFk8Nw%2BkqPRt3LMuomdqqyGjpiTob2sela34F0ZU2%2BODkoZt04ByoIpYDdtYq%2BXC7q9ItIwxfHakwY64AEW7%2F4fdPkou4DxTjGxL%2FXy6dh0AUkg0Og9vdRPgeA7dKZ89VjZ8QyoPB2Q5QrFtW6mMy1Dr0mIK%2BKW1XXtu0oMNaqs9NaminKfHg4ZmHCdNFtF3DuincBpuYSHToYh3T9pr0WLCYxdCh%2FqirWD4jK0yT4A%2FXypPrgq2wcn8HUWW1x3JswPSf2J3GHoADQQdK0e5YSV%2BbCasRhqpP9c63ehiGn521KgRz%2BY2ILhjW628fc%2FpeRP7zER64Xmaj5PDGehrlmJmV2CNgDBAKFeR2z4rReP503Px35vVG3RteLiSw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220508T014457Z&X-Amz-SignedHeaders=host&X-Amz-Expires=14400&X-Amz-Credential=ASIAQUQALJE3VM6LHGP3%2F20220508%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=85c3ecb2275bd046a7ee2933d018a61063100da2b4083f665232ee68583fbbdc')
+      //resolve('https://s3.amazonaws.com/craig.markowitz.stuff/1000020.wav');
     });
     return promise;
   };
@@ -515,7 +548,7 @@ const GameScreen = ({ navigation }) => {
       interval = setInterval(() => {
         setSeconds((seconds) => seconds - 1);
         //setMemorySeconds(0);
-        console.log(memory_seconds);
+        //console.log(memory_seconds);
       }, 1000);
     } else if (seconds == 0) {
       setShowAnimatedGif(false);
@@ -630,7 +663,8 @@ const GameScreen = ({ navigation }) => {
             console.log("Error " + err);
           });
       } else {
-        url = apiUriGetAudioApiUri + rndm_game_questions[question_count].File_Path;
+        url =
+          apiUriGetAudioApiUri + rndm_game_questions[question_count].File_Path;
         playSound(url);
       }
       //setQuestionCount(question_count + 1);
@@ -672,6 +706,7 @@ const GameScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeview}>
+      <ScrollView>
       <View style={styles.container}>
         <Image
           style={styles.image}
@@ -688,7 +723,7 @@ const GameScreen = ({ navigation }) => {
           </Text>
         </View>
 
-        <View style={{ paddingBottom: 15 }}>
+        <View style={{ paddingBottom: 20 }}>
           <Image
             style={{ height: 70, width: 300 }}
             source={
@@ -1004,6 +1039,7 @@ const GameScreen = ({ navigation }) => {
           <StatusBar style="auto" />
         </View>
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -1031,13 +1067,13 @@ const styles = StyleSheet.create({
 
   questionText: {
     color: "white",
-    fontSize: 20,
+    fontSize: 15,
     marginLeft: 4,
   },
 
   statusTextCorrect: {
     color: "green",
-    fontSize: 28,
+    fontSize: 15,
     paddingTop: 10,
     textAlign: "center",
     fontWeight: "bold",
@@ -1046,7 +1082,7 @@ const styles = StyleSheet.create({
 
   statusTextIncorrect: {
     color: "red",
-    fontSize: 28,
+    fontSize: 15,
     paddingTop: 10,
     textAlign: "center",
     fontWeight: "bold",
@@ -1059,7 +1095,7 @@ const styles = StyleSheet.create({
 
   timer: {
     color: "purple",
-    fontSize: 20,
+    fontSize: 14,
     marginLeft: 1,
     paddingBottom: 15,
     textAlign: "left",
@@ -1071,7 +1107,7 @@ const styles = StyleSheet.create({
   hint: {
     color: "white",
     marginLeft: 6,
-    fontSize: 16,
+    fontSize: 14,
   },
 
   next_button: {

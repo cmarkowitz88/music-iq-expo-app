@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
     width:"85%"
   },
   text: {
-    fontSize: 16,
-    lineHeight: 21,
+    fontSize: 15,
+    lineHeight: 16,
     fontWeight: 'bold',
     letterSpacing: 0.25,
     color: 'white',

@@ -132,7 +132,6 @@ const LogInTest = ({navigation}) => {
           />
           <TextInput
             style={styles.inputStyle}
-            placeholder="Enter Your Password Here"
             underlineColorAndroid="transparent"
             autoCapitalize="none"
             onChangeText={(newPassword) => setUserPassword(newPassword)}
@@ -141,10 +140,10 @@ const LogInTest = ({navigation}) => {
             secureTextEntry={secure}
           />
         </View>
-      </View>
-      <View
+        <View
         style={{
           flexDirection: "row",
+          paddingTop:40,
           justifyContent: "center",
         }}
       >
@@ -154,19 +153,21 @@ const LogInTest = ({navigation}) => {
         >
           <Text style={styles.buttonTextStyle}>Sign In</Text>
         </TouchableOpacity>
+        </View>
       </View>
+      
       <View
         style={{
           flexDirection: "row",
           justifyContent: "center",
         }}
       >
-        <Text style={{ color: "#fff", fontSize: 20, paddingBottom: 25 }}>
-          Don't have an account?{" "}
+        <Text style={{ color: "#fff", fontSize: 16, paddingBottom: 25 }}>
+          Don't have an account?{" "}</Text>
           <TouchableOpacity onPress={handleNewUser}>
-            <Text style={{ color: "green", fontSize: 20 }}>Sign up here.</Text>
+            <Text style={{ color: "#7DE24E", fontSize: 16 }}>Sign up here.</Text>
           </TouchableOpacity>
-        </Text>
+       
       </View>
     </SafeAreaView>
   );
@@ -235,7 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     height: 38,
     margin: 12,
-    fontSize: 20,
+    fontSize: 16,
     flexDirection: "row",
     flex: 1,
   },
@@ -255,8 +256,8 @@ const styles = StyleSheet.create({
   },
   buttonTextStyle: {
     color: "#FFFFFF",
-    paddingVertical: 10,
-    fontSize: 20,
+    paddingVertical: 5,
+    fontSize: 18,
   },
 });
 
