@@ -1,3 +1,4 @@
+import { LogBox } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import { Audio } from "expo-av";
@@ -28,14 +29,20 @@ import {
   CognitoUserAttribute,
   CognitoUser,
   AuthenticationDetails,
+  CognitoRefreshToken,
 } from "amazon-cognito-identity-js";
 
 import AWS from "aws-sdk";
+
+LogBox.ignoreLogs([
+  "Non-serializable values were found in the navigation state",
+]);
 
 let useMockData = "";
 let apiUriGetQuestions = "";
 let apiUriGetAudioApiUri = "";
 let tmpIdToken = "";
+let tmpRefreshToken = "";
 
 const envObj = getEnvVars();
 console.log(envObj);
@@ -44,8 +51,11 @@ console.log(envObj);
 //const { localGetQuestionsApi} = getEnvVars();
 console.log("Using Mock Data: " + useMockData);
 
-const GameScreen = ({ navigation }) => {
+const GameScreen = ({ route, navigation }) => {
   // All state variables
+  let tmp = route.params;
+
+  let [logged_in_user, setLoggedInUser] = useState(tmp);
   let [timer_started, setTimerStarted] = useState(false);
   let [level, setLevel] = useState();
   let [game_questions, setGameQuestions] = useState();
@@ -97,6 +107,7 @@ const GameScreen = ({ navigation }) => {
   let [memory_answer_selected_button, setMemoryAnswerSelectedButton] =
     useState(0);
   let [idToken, setIdToken] = useState();
+  let [refreshToken, setRefreshToken] = useState();
   let [gotUserCreds, setGotUserCreds] = useState(false);
 
   // Temp variables
@@ -285,8 +296,7 @@ const GameScreen = ({ navigation }) => {
           console.log("Error " + err);
         });
     } else {
-      url =
-        apiUriGetAudioApiUri + filepath;
+      url = apiUriGetAudioApiUri + filepath;
       playSound(url, "memory");
     }
     setShowAnimatedGif(true);
@@ -329,6 +339,10 @@ const GameScreen = ({ navigation }) => {
   useEffect(() => {
     console.log("In useEffect");
     setUpVars(envObj);
+    getLocalStorage("refreshToken").then((token) => {
+      tmpRefreshToken = token;
+      setRefreshToken(token);
+    });
     getLocalStorage("idToken").then((token) => {
       tmpIdToken = token;
       setIdToken(token);
@@ -417,13 +431,15 @@ const GameScreen = ({ navigation }) => {
 
       //console.log(data);
       if (!envObj.useLocalApis) {
-        generatePreSignedURL(rndm_game_questions[question_count].File_Path)
-          .then((url) => {
-            playSound(url);
-          })
-          .catch((err) => {
-            console.log("Error " + err);
-          });
+        
+          generatePreSignedURL(rndm_game_questions[question_count].File_Path)
+            .then((url) => {
+              playSound(url);
+            })
+            .catch((err) => {
+              console.log("Error " + err);
+            });
+        
       } else {
         url =
           apiUriGetAudioApiUri + rndm_game_questions[question_count].File_Path;
@@ -454,76 +470,153 @@ const GameScreen = ({ navigation }) => {
     };
   }, []);
 
+  let goRefreshToken = () => {
+    var promise = new Promise((resolve, reject) => {
+    const poolData = {
+      UserPoolId: "us-east-1_smGpwOWnD",
+      ClientId: "383pg349j8s1m42kavf0ta7i4r",
+    };
+    let userPool = new CognitoUserPool(poolData);
+   
+    var tmpCognitoUser = userPool.getCurrentUser();
+    console.log(tmpCognitoUser);
+    var currentSession = null;
+
+    tmpCognitoUser.getSession(function (err, session) {
+      if (err) {
+        console.log(err.message);
+        //reject('err');
+      }
+      currentSession = session;
+      another_refresh_token = session.getRefreshToken();
+      console.log(currentSession);
+    });
+
+    if (!currentSession) {
+      console.log("Failuter getting session");
+      //reject('err');
+    }
+
+    AWS.config.region = "us-east-1";
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+      IdentityPoolId: "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",
+      Logins: {
+        "cognito-idp.us-east-1.amazonaws.com/us-east-1_smGpwOWnD":
+          currentSession.getIdToken().getJwtToken(),
+      },
+    });
+
+    //var refresh_token = currentSession.getRefreshToken();
+    let t = refreshToken ? refreshToken : tmpRefreshToken;
+    var refresh_token = new CognitoRefreshToken({
+      RefreshToken: currentSession.getRefreshToken(),
+    });
+    console.log(refresh_token);
+    tmpCognitoUser.refreshSession(currentSession.refreshToken, (err, session) => {
+      if (err) {
+        console.log(err);
+      } else {
+        var myAwsConfig = AWS.config;
+        myAwsConfig.credentials.sessionToken = session
+          .getIdToken()
+          .getJwtToken();
+        //resolve(tmpIdToken);
+        AWS.config.credentials.refresh((error) => {
+          if (error) {
+            console.error(error);
+          } else {
+            console.log("Successfully logged!");
+            tmpIdToken = session.getIdToken().getJwtToken();
+            setIdToken(session.getIdToken().getJwtToken());
+            resolve(tmpIdToken);
+          }
+        });
+      }
+    });
+
+    });
+    return promise;
+  };
+
   let generatePreSignedURL = (filePath) => {
     var promise = new Promise((resolve, reject) => {
-      
-      if (!gotUserCreds || AWS.config.credentials.expired) {
-        let token = idToken ? idToken : tmpIdToken;
-        AWS.config.region = "us-east-1";
-        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-          IdentityPoolId: "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",
+      let token = idToken ? idToken : tmpIdToken;
+      AWS.config.region = "us-east-1";
+      AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",
+        region: "us-east-1",
+        Logins: {
+          "cognito-idp.us-east-1.amazonaws.com/us-east-1_smGpwOWnD": token,
+        },
+      });
+      console.log(AWS.config.credentials);
+
+      // AWS.config.credentials.refresh((error) => {
+      //   if (error) {
+      //     console.error(error);
+      //   } else {
+      //     console.log("Successfully logged!");
+      //   }
+      // });
+      console.log(
+        "Token Status =  " + console.log(AWS.config.credentials.expired)
+      );
+
+      AWS.config.credentials.get(function () {
+        var accessKeyId = AWS.config.credentials.accessKeyId;
+        var secretAccessKey = AWS.config.credentials.secretAccessKey;
+        var sessionToken = AWS.config.credentials.sessionToken;
+        setGotUserCreds(true);
+        console.log(accessKeyId + " " + secretAccessKey);
+        AWS.config.update({
+          accessKeyId: accessKeyId,
+          secretAccessKey: secretAccessKey,
+          sessionToken: sessionToken,
           region: "us-east-1",
-          Logins: {
-            "cognito-idp.us-east-1.amazonaws.com/us-east-1_smGpwOWnD": token,
-          },
         });
-        console.log(AWS.config.credentials);
 
-        AWS.config.credentials.refresh((error) => {
-          if (error) {
-            console.error(error);
-          } else {
-            console.log("Successfully logged!");
-          }
-        });
-        console.log("Token Status =  " + console.log(AWS.config.credentials.expired));
-
-        AWS.config.credentials.get(function () {
-          var accessKeyId = AWS.config.credentials.accessKeyId;
-          var secretAccessKey = AWS.config.credentials.secretAccessKey;
-          var sessionToken = AWS.config.credentials.sessionToken;
-          setGotUserCreds(true);
-          console.log(accessKeyId + " " + secretAccessKey);
-          AWS.config.update({
-            accessKeyId: accessKeyId,
-            secretAccessKey: secretAccessKey,
-            sessionToken: sessionToken,
-            region: "us-east-1",
-          });
-
-          console.log("Creds = " + AWS.config.credentials);
-          //filePath = "1000020.mp3";
-          var s3 = new AWS.S3();
-          var presignedUrl = s3.getSignedUrl("getObject", {
-            Bucket: "m-musiciq-audio-files",
-            Key: filePath,
-            Expires: 60000,
-          });
-          resolve(presignedUrl);
-        }); // end get creds
-      } else {
-        AWS.config.credentials.refresh((error) => {
-          if (error) {
-            console.error(error);
-          } else {
-            console.log("Successfully logged!");
-            console.log(AWS.config.credentials);
-            var s3 = new AWS.S3();
-            var presignedUrl = s3.getSignedUrl("getObject", {
-            Bucket: "m-musiciq-audio-files",
-            Key: filePath,
-            Expires: 60000,
+        console.log("Creds = " + AWS.config.credentials);
+        //filePath = "1000020.mp3";
+        var s3 = new AWS.S3();
+        var presignedUrl = s3.getSignedUrl("getObject", {
+          Bucket: "m-musiciq-audio-files",
+          Key: filePath,
+          Expires: 60000,
         });
         resolve(presignedUrl);
-          }
-        });
-        
-      }
+      }); // end get creds
 
       //resolve('https://m-musiciq-audio-files.s3.us-east-1.amazonaws.com/1000020.mp3?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIFvcJtzjn%2BO1Addj4Q%2Fc3x7o%2BFlbs%2F8efqT52TvWZRJQAiBL5ZNezq%2BroGIJ20VF4wGVhVaNpqhaOL1OguefRZeGmCqeAgjE%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDA0NDAyNDE1NDQyMyIM3p%2FephE4ea2Ex4qkKvIBercePatN9aBh5FvRaxve6B904%2BlJ834V%2B9RHdAbzHqw2FOsq%2F2JsflzdDVXaNyzpejQfiGF3kP91QZbazU2weUk85Q9S0bOzdLCXmP16EW9mJ5TldqFR2dQofJvGrXZczOMhpnI4vb2D%2FfwFeOFNay%2FQGFtZ2YFd%2BhYWDC5RjKbdKwkmcJ7nA3437uYBf0XrRXdeSi7m0zdIVNbSAb%2ByXGD6Tgt%2FgUZsPd7LbY3i94UeGRqOusBDcUnk2JrV8IFk8Nw%2BkqPRt3LMuomdqqyGjpiTob2sela34F0ZU2%2BODkoZt04ByoIpYDdtYq%2BXC7q9ItIwxfHakwY64AEW7%2F4fdPkou4DxTjGxL%2FXy6dh0AUkg0Og9vdRPgeA7dKZ89VjZ8QyoPB2Q5QrFtW6mMy1Dr0mIK%2BKW1XXtu0oMNaqs9NaminKfHg4ZmHCdNFtF3DuincBpuYSHToYh3T9pr0WLCYxdCh%2FqirWD4jK0yT4A%2FXypPrgq2wcn8HUWW1x3JswPSf2J3GHoADQQdK0e5YSV%2BbCasRhqpP9c63ehiGn521KgRz%2BY2ILhjW628fc%2FpeRP7zER64Xmaj5PDGehrlmJmV2CNgDBAKFeR2z4rReP503Px35vVG3RteLiSw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220508T014457Z&X-Amz-SignedHeaders=host&X-Amz-Expires=14400&X-Amz-Credential=ASIAQUQALJE3VM6LHGP3%2F20220508%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=85c3ecb2275bd046a7ee2933d018a61063100da2b4083f665232ee68583fbbdc')
       //resolve('https://s3.amazonaws.com/craig.markowitz.stuff/1000020.wav');
+
+      return promise;
     });
-    return promise;
+
+    //if(AWS.config.region != null){
+    //  console.log("Needs Refresh: " + AWS.config.credentials.needsRefresh());
+    //  if (AWS.config.credentials.needsRefresh()) {
+    //   var rtoken = new CognitoRefreshToken({ RefreshToken: refreshToken })
+    //   logged_in_user.cognitoUser.refreshSession(rtoken, (err, session) => {
+    //     if (err) {
+    //       console.log(err);
+    //     } else {
+
+    //       AWS.config.credentials.params.Logins[
+    //         'cognito-idp.us-east-1.amazonaws.com/us-east-1_smGpwOWnD'
+    //       ] = logged_in_user.CognitoUsser.getIdToken().getJwtToken();
+    //       AWS.config.credentials.refresh(err => {
+    //         if (err) {
+    //           console.log(err);
+    //         } else {
+    //           console.log('TOKEN SUCCESSFULLY UPDATED');
+    //         }
+    //       });
+    //     }
+    //   });
+    // }
+    //}
+
+    // First Time Through need to get temporary creds
   };
 
   // useEffect(() => {
@@ -707,338 +800,340 @@ const GameScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.safeview}>
       <ScrollView>
-      <View style={styles.container}>
-        <Image
-          style={styles.image}
-          source={require("../../assets/MusicIQ-Logo_2.jpg")}
-        />
-        <View>
-          <ScoreText text={score}></ScoreText>
-        </View>
-
-        <View>
-          <Text style={styles.timer}>
-            Time Remaining: 0:{seconds < 10 ? "0" : ""}
-            {seconds}{" "}
-          </Text>
-        </View>
-
-        <View style={{ paddingBottom: 20 }}>
+        <View style={styles.container}>
           <Image
-            style={{ height: 70, width: 300 }}
-            source={
-              showAnimatedGif
-                ? require("../../assets/5uwq.gif")
-                : require("../../assets/5uwq_Still.png")
-            }
+            style={styles.image}
+            source={require("../../assets/MusicIQ-Logo_2.jpg")}
           />
-        </View>
-
-        <View>
-          <QuestionText questionText={question_text}></QuestionText>
-        </View>
-
-        {question_type && out_of_time && question_type == "music-memory" && (
-          <>
-            <View
-              style={[
-                { flexDirection: "row", alignItems: "center", marginLeft: 5 },
-              ]}
-            >
-              <View
-                style={[
-                  { flex: 1, flexDirection: "row", justifyContent: "left" },
-                ]}
-              >
-                <CustomPlayButton
-                  color="red"
-                  onPress={() =>
-                    playNextMemoryAnswer(file_path1, answer1_track_length, 1)
-                  }
-                />
-              </View>
-              <Text style={styles.memory_seconds}>
-                {!memory_seconds || memory_answer_selected_button != 1
-                  ? "0:00 "
-                  : ""}
-                {memory_answer_selected_button == 1 &&
-                memory_seconds &&
-                memory_seconds <= 9
-                  ? "0:0" + memory_seconds + " "
-                  : ""}
-                {memory_answer_selected_button == 1 &&
-                memory_seconds &&
-                memory_seconds > 9
-                  ? "0:" + memory_seconds + " "
-                  : ""}
-                / 0:{answer1_track_length}
-              </Text>
-              <View
-                style={[
-                  {
-                    flex: 6,
-                    justifyContent: "left",
-                    flexDirection: "row",
-                    backgroundColor: "black",
-                  },
-                ]}
-              >
-                <CustomButton
-                  name="button1"
-                  text={answer1_text}
-                  color={btn1_color}
-                  disabled_status={btn_disabled_status}
-                  onPress={() => guessAnswer({ answer1_text })}
-                />
-              </View>
-            </View>
-
-            <View
-              style={[
-                { flexDirection: "row", alignItems: "center", marginLeft: 5 },
-              ]}
-            >
-              <View
-                style={[
-                  { flex: 1, flexDirection: "row", justifyContent: "left" },
-                ]}
-              >
-                <CustomPlayButton
-                  color="green"
-                  onPress={() =>
-                    playNextMemoryAnswer(file_path2, answer2_track_length, 2)
-                  }
-                />
-              </View>
-              <Text style={styles.memory_seconds}>
-                {!memory_seconds || memory_answer_selected_button != 2
-                  ? "0:00 "
-                  : ""}
-                {memory_answer_selected_button == 2 &&
-                memory_seconds &&
-                memory_seconds <= 9
-                  ? "0:0" + memory_seconds + " "
-                  : ""}
-                {memory_answer_selected_button == 2 &&
-                memory_seconds &&
-                memory_seconds > 9
-                  ? "0:" + memory_seconds + " "
-                  : ""}
-                / 0:{answer2_track_length}
-              </Text>
-              <View
-                style={[
-                  {
-                    flex: 6,
-                    justifyContent: "left",
-                    flexDirection: "row",
-                    backgroundColor: "black",
-                  },
-                ]}
-              >
-                <CustomButton
-                  name="button2"
-                  text={answer2_text}
-                  color={btn2_color}
-                  disabled_status={btn_disabled_status}
-                  onPress={() => guessAnswer({ answer2_text })}
-                />
-              </View>
-            </View>
-
-            <View
-              style={[
-                { flexDirection: "row", alignItems: "center", marginLeft: 5 },
-              ]}
-            >
-              <View
-                style={[
-                  { flex: 1, flexDirection: "row", justifyContent: "left" },
-                ]}
-              >
-                <CustomPlayButton
-                  color="yellow"
-                  onPress={() =>
-                    playNextMemoryAnswer(file_path3, answer3_track_length, 3)
-                  }
-                />
-              </View>
-              <Text style={styles.memory_seconds}>
-                {!memory_seconds || memory_answer_selected_button != 3
-                  ? "0:00 "
-                  : ""}
-                {memory_answer_selected_button == 3 &&
-                memory_seconds &&
-                memory_seconds <= 9
-                  ? "0:0" + memory_seconds + " "
-                  : ""}
-                {memory_answer_selected_button == 3 &&
-                memory_seconds &&
-                memory_seconds > 9
-                  ? "0:" + memory_seconds + " "
-                  : ""}
-                / 0:{answer3_track_length}
-              </Text>
-              <View
-                style={[
-                  {
-                    flex: 6,
-                    justifyContent: "left",
-                    flexDirection: "row",
-                    backgroundColor: "black",
-                  },
-                ]}
-              >
-                <CustomButton
-                  name="button3"
-                  text={answer3_text}
-                  color={btn3_color}
-                  disabled_status={btn_disabled_status}
-                  onPress={() => guessAnswer({ answer3_text })}
-                />
-              </View>
-            </View>
-
-            <View
-              style={[
-                { flexDirection: "row", alignItems: "center", marginLeft: 5 },
-              ]}
-            >
-              <View
-                style={[
-                  { flex: 1, flexDirection: "row", justifyContent: "left" },
-                ]}
-              >
-                <CustomPlayButton
-                  color="blue"
-                  onPress={() =>
-                    playNextMemoryAnswer(file_path4, answer4_track_length, 4)
-                  }
-                />
-              </View>
-              <Text style={styles.memory_seconds}>
-                {!memory_seconds || memory_answer_selected_button != 4
-                  ? "0:00 "
-                  : ""}
-                {memory_answer_selected_button == 4 &&
-                memory_seconds &&
-                memory_seconds <= 9
-                  ? "0:0" + memory_seconds + " "
-                  : ""}
-                {memory_answer_selected_button == 4 &&
-                memory_seconds &&
-                memory_seconds > 9
-                  ? "0:" + memory_seconds + " "
-                  : ""}
-                / 0:{answer4_track_length}
-              </Text>
-              <View
-                style={[
-                  {
-                    flex: 6,
-                    justifyContent: "left",
-                    flexDirection: "row",
-                    backgroundColor: "black",
-                  },
-                ]}
-              >
-                <CustomButton
-                  name="button4"
-                  text={answer4_text}
-                  color={btn4_color}
-                  disabled_status={btn_disabled_status}
-                  onPress={() => guessAnswer({ answer4_text })}
-                />
-              </View>
-            </View>
-          </>
-        )}
-
-        {question_type && question_type == "music-knowledge" && (
-          <View
-            style={[
-              {
-                width: "100%",
-                margin: 5,
-                textAlign: "center",
-                alignItems: "center",
-              },
-            ]}
-          >
-            <CustomButton
-              name="button1"
-              text={answer1_text}
-              color={btn1_color}
-              disabled_status={btn_disabled_status}
-              onPress={() => guessAnswer({ answer1_text })}
-            />
-            <CustomButton
-              name="button2"
-              text={answer2_text}
-              color={btn2_color}
-              disabled_status={btn_disabled_status}
-              onPress={() => guessAnswer({ answer2_text })}
-            />
-            <CustomButton
-              name="button3"
-              text={answer3_text}
-              color={btn3_color}
-              disabled_status={btn_disabled_status}
-              onPress={() => guessAnswer({ answer3_text })}
-            />
-            <CustomButton
-              name="button4"
-              text={answer4_text}
-              color={btn4_color}
-              disabled_status={btn_disabled_status}
-              onPress={() => guessAnswer({ answer4_text })}
-            />
-          </View>
-        )}
-
-        {question_type == "music-knowledge" && (
-          <CustomButton
-            name="hint"
-            text="Give Me a Hint!"
-            onPress={showHint}
-            title="Show Me a Hint"
-          />
-        )}
-
-        {question_type == "music-memory" && out_of_time && (
-          <CustomButton
-            name="hint"
-            text="Give Me a Hint!"
-            onPress={showHint}
-            title="Show Me a Hint"
-          />
-        )}
-
-        {showHintView ? (
           <View>
-            <Text style={styles.hint}>{hint}</Text>
+            <ScoreText text={score}></ScoreText>
           </View>
-        ) : null}
-        <View style={[{ width: "90%", margin: 5, textAlign: "center" }]}>
-          <Text
-            style={
-              is_correct ? styles.statusTextCorrect : styles.statusTextIncorrect
-            }
-          >
-            {status_text}
-          </Text>
-          {showNextBtn ? (
-            <CustomButton
-              name="next"
-              text="Next -->"
-              onPress={nextQuestion}
-              title="Next-->"
-            />
-          ) : null}
 
-          <StatusBar style="auto" />
+          <View>
+            <Text style={styles.timer}>
+              Time Remaining: 0:{seconds < 10 ? "0" : ""}
+              {seconds}{" "}
+            </Text>
+          </View>
+
+          <View style={{ paddingBottom: 20 }}>
+            <Image
+              style={{ height: 70, width: 300 }}
+              source={
+                showAnimatedGif
+                  ? require("../../assets/5uwq.gif")
+                  : require("../../assets/5uwq_Still.png")
+              }
+            />
+          </View>
+
+          <View>
+            <QuestionText questionText={question_text}></QuestionText>
+          </View>
+
+          {question_type && out_of_time && question_type == "music-memory" && (
+            <>
+              <View
+                style={[
+                  { flexDirection: "row", alignItems: "center", marginLeft: 5 },
+                ]}
+              >
+                <View
+                  style={[
+                    { flex: 1, flexDirection: "row", justifyContent: "left" },
+                  ]}
+                >
+                  <CustomPlayButton
+                    color="red"
+                    onPress={() =>
+                      playNextMemoryAnswer(file_path1, answer1_track_length, 1)
+                    }
+                  />
+                </View>
+                <Text style={styles.memory_seconds}>
+                  {!memory_seconds || memory_answer_selected_button != 1
+                    ? "0:00 "
+                    : ""}
+                  {memory_answer_selected_button == 1 &&
+                  memory_seconds &&
+                  memory_seconds <= 9
+                    ? "0:0" + memory_seconds + " "
+                    : ""}
+                  {memory_answer_selected_button == 1 &&
+                  memory_seconds &&
+                  memory_seconds > 9
+                    ? "0:" + memory_seconds + " "
+                    : ""}
+                  / 0:{answer1_track_length}
+                </Text>
+                <View
+                  style={[
+                    {
+                      flex: 6,
+                      justifyContent: "left",
+                      flexDirection: "row",
+                      backgroundColor: "black",
+                    },
+                  ]}
+                >
+                  <CustomButton
+                    name="button1"
+                    text={answer1_text}
+                    color={btn1_color}
+                    disabled_status={btn_disabled_status}
+                    onPress={() => guessAnswer({ answer1_text })}
+                  />
+                </View>
+              </View>
+
+              <View
+                style={[
+                  { flexDirection: "row", alignItems: "center", marginLeft: 5 },
+                ]}
+              >
+                <View
+                  style={[
+                    { flex: 1, flexDirection: "row", justifyContent: "left" },
+                  ]}
+                >
+                  <CustomPlayButton
+                    color="green"
+                    onPress={() =>
+                      playNextMemoryAnswer(file_path2, answer2_track_length, 2)
+                    }
+                  />
+                </View>
+                <Text style={styles.memory_seconds}>
+                  {!memory_seconds || memory_answer_selected_button != 2
+                    ? "0:00 "
+                    : ""}
+                  {memory_answer_selected_button == 2 &&
+                  memory_seconds &&
+                  memory_seconds <= 9
+                    ? "0:0" + memory_seconds + " "
+                    : ""}
+                  {memory_answer_selected_button == 2 &&
+                  memory_seconds &&
+                  memory_seconds > 9
+                    ? "0:" + memory_seconds + " "
+                    : ""}
+                  / 0:{answer2_track_length}
+                </Text>
+                <View
+                  style={[
+                    {
+                      flex: 6,
+                      justifyContent: "left",
+                      flexDirection: "row",
+                      backgroundColor: "black",
+                    },
+                  ]}
+                >
+                  <CustomButton
+                    name="button2"
+                    text={answer2_text}
+                    color={btn2_color}
+                    disabled_status={btn_disabled_status}
+                    onPress={() => guessAnswer({ answer2_text })}
+                  />
+                </View>
+              </View>
+
+              <View
+                style={[
+                  { flexDirection: "row", alignItems: "center", marginLeft: 5 },
+                ]}
+              >
+                <View
+                  style={[
+                    { flex: 1, flexDirection: "row", justifyContent: "left" },
+                  ]}
+                >
+                  <CustomPlayButton
+                    color="yellow"
+                    onPress={() =>
+                      playNextMemoryAnswer(file_path3, answer3_track_length, 3)
+                    }
+                  />
+                </View>
+                <Text style={styles.memory_seconds}>
+                  {!memory_seconds || memory_answer_selected_button != 3
+                    ? "0:00 "
+                    : ""}
+                  {memory_answer_selected_button == 3 &&
+                  memory_seconds &&
+                  memory_seconds <= 9
+                    ? "0:0" + memory_seconds + " "
+                    : ""}
+                  {memory_answer_selected_button == 3 &&
+                  memory_seconds &&
+                  memory_seconds > 9
+                    ? "0:" + memory_seconds + " "
+                    : ""}
+                  / 0:{answer3_track_length}
+                </Text>
+                <View
+                  style={[
+                    {
+                      flex: 6,
+                      justifyContent: "left",
+                      flexDirection: "row",
+                      backgroundColor: "black",
+                    },
+                  ]}
+                >
+                  <CustomButton
+                    name="button3"
+                    text={answer3_text}
+                    color={btn3_color}
+                    disabled_status={btn_disabled_status}
+                    onPress={() => guessAnswer({ answer3_text })}
+                  />
+                </View>
+              </View>
+
+              <View
+                style={[
+                  { flexDirection: "row", alignItems: "center", marginLeft: 5 },
+                ]}
+              >
+                <View
+                  style={[
+                    { flex: 1, flexDirection: "row", justifyContent: "left" },
+                  ]}
+                >
+                  <CustomPlayButton
+                    color="blue"
+                    onPress={() =>
+                      playNextMemoryAnswer(file_path4, answer4_track_length, 4)
+                    }
+                  />
+                </View>
+                <Text style={styles.memory_seconds}>
+                  {!memory_seconds || memory_answer_selected_button != 4
+                    ? "0:00 "
+                    : ""}
+                  {memory_answer_selected_button == 4 &&
+                  memory_seconds &&
+                  memory_seconds <= 9
+                    ? "0:0" + memory_seconds + " "
+                    : ""}
+                  {memory_answer_selected_button == 4 &&
+                  memory_seconds &&
+                  memory_seconds > 9
+                    ? "0:" + memory_seconds + " "
+                    : ""}
+                  / 0:{answer4_track_length}
+                </Text>
+                <View
+                  style={[
+                    {
+                      flex: 6,
+                      justifyContent: "left",
+                      flexDirection: "row",
+                      backgroundColor: "black",
+                    },
+                  ]}
+                >
+                  <CustomButton
+                    name="button4"
+                    text={answer4_text}
+                    color={btn4_color}
+                    disabled_status={btn_disabled_status}
+                    onPress={() => guessAnswer({ answer4_text })}
+                  />
+                </View>
+              </View>
+            </>
+          )}
+
+          {question_type && question_type == "music-knowledge" && (
+            <View
+              style={[
+                {
+                  width: "100%",
+                  margin: 5,
+                  textAlign: "center",
+                  alignItems: "center",
+                },
+              ]}
+            >
+              <CustomButton
+                name="button1"
+                text={answer1_text}
+                color={btn1_color}
+                disabled_status={btn_disabled_status}
+                onPress={() => guessAnswer({ answer1_text })}
+              />
+              <CustomButton
+                name="button2"
+                text={answer2_text}
+                color={btn2_color}
+                disabled_status={btn_disabled_status}
+                onPress={() => guessAnswer({ answer2_text })}
+              />
+              <CustomButton
+                name="button3"
+                text={answer3_text}
+                color={btn3_color}
+                disabled_status={btn_disabled_status}
+                onPress={() => guessAnswer({ answer3_text })}
+              />
+              <CustomButton
+                name="button4"
+                text={answer4_text}
+                color={btn4_color}
+                disabled_status={btn_disabled_status}
+                onPress={() => guessAnswer({ answer4_text })}
+              />
+            </View>
+          )}
+
+          {question_type == "music-knowledge" && (
+            <CustomButton
+              name="hint"
+              text="Give Me a Hint!"
+              onPress={showHint}
+              title="Show Me a Hint"
+            />
+          )}
+
+          {question_type == "music-memory" && out_of_time && (
+            <CustomButton
+              name="hint"
+              text="Give Me a Hint!"
+              onPress={showHint}
+              title="Show Me a Hint"
+            />
+          )}
+
+          {showHintView ? (
+            <View>
+              <Text style={styles.hint}>{hint}</Text>
+            </View>
+          ) : null}
+          <View style={[{ width: "90%", margin: 5, textAlign: "center" }]}>
+            <Text
+              style={
+                is_correct
+                  ? styles.statusTextCorrect
+                  : styles.statusTextIncorrect
+              }
+            >
+              {status_text}
+            </Text>
+            {showNextBtn ? (
+              <CustomButton
+                name="next"
+                text="Next -->"
+                onPress={nextQuestion}
+                title="Next-->"
+              />
+            ) : null}
+
+            <StatusBar style="auto" />
+          </View>
         </View>
-      </View>
       </ScrollView>
     </SafeAreaView>
   );

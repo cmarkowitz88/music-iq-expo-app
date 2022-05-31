@@ -26,6 +26,7 @@ const LogInTest = ({navigation}) => {
   const [secure, setSecure] = useState(true);
   const [loginMessage, setLoginMessage] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
+  const [m_cognitoUser, m_setCognitoUser] = useState({});
 
   const setLocalStorage =  async (key, value) => {
     await SecureStore.setItemAsync("idToken", idToken).catch((error) =>
@@ -63,7 +64,10 @@ const LogInTest = ({navigation}) => {
       onSuccess: function (result) {
         let accessToken = result.getAccessToken().getJwtToken();
         let idToken = result.getIdToken().getJwtToken();
-        setLocalStorage2("idToken", idToken).then(() => {navigation.navigate("Game")
+        let refreshToken = result.getRefreshToken();
+        setLocalStorage2("accessToken", accessToken);
+        setLocalStorage2("refreshToken", refreshToken.token);
+        setLocalStorage2("idToken", idToken).then(() => {navigation.navigate("Game", {cognitoUser: cognitoUser})
         console.log("Wrote to storage");});
         // SecureStore.setItemAsync("idToken", idToken).catch((error) =>
         //       console.log("Could not save user info ", error)
