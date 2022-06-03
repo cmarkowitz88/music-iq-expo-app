@@ -456,6 +456,26 @@ const GameScreen = ({ navigation }) => {
     };
   }, []);
 
+  let getJwt = () => {
+    let idToken = '';
+    const poolData = {
+      UserPoolId: "us-east-1_smGpwOWnD",
+      ClientId: "383pg349j8s1m42kavf0ta7i4r",
+    };
+    let userPool = new CognitoUserPool(poolData);
+    var tmpCognitoUser = userPool.getCurrentUser();
+
+    tmpCognitoUser.getSession(function (err, session) {
+      if (err) {
+        console.log(err.message);
+        reject(err.message);
+      }
+      console.log(session.getIdToken().getJwtToken());
+      idToken = session.getIdToken().getJwtToken();
+    });
+    return idToken;
+  };
+
   let goRefreshToken = () => {
     var promise = new Promise((resolve, reject) => {
       // First time through credentials will be null
@@ -468,7 +488,7 @@ const GameScreen = ({ navigation }) => {
             ClientId: "383pg349j8s1m42kavf0ta7i4r",
           };
           let userPool = new CognitoUserPool(poolData);
-         
+
           var tmpCognitoUser = userPool.getCurrentUser();
           console.log(tmpCognitoUser);
           var currentSession = null;
@@ -488,7 +508,7 @@ const GameScreen = ({ navigation }) => {
             console.log("Failuter getting session");
             //reject('err');
           }
-      
+
           // AWS.config.region = "us-east-1";
           // AWS.config.credentials = new AWS.CognitoIdentityCredentials({
           //   IdentityPoolId: "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",
@@ -498,52 +518,51 @@ const GameScreen = ({ navigation }) => {
           //   },
           // });
 
-          
-    var refresh_token = new CognitoRefreshToken({
-      RefreshToken: currentSession.getRefreshToken(),
-    });
-    console.log(refresh_token);
-    tmpCognitoUser.refreshSession(currentSession.refreshToken, (err, session) => {
-      if (err) {
-        console.log(err);
-      } else {
-        
-        AWS.config.credentials.refresh((error) => {
-          if (error) {
-            console.error(error);
-          } else {
-            console.log("Successfully logged!");
-            tmpIdToken = session.getIdToken().getJwtToken();
-            setIdToken(session.getIdToken().getJwtToken());
-            console.log(AWS.config.credentials);
-            // AWS.config.credentials.get(function () {
-            //   var accessKeyId = AWS.config.credentials.accessKeyId;
-            //   var secretAccessKey = AWS.config.credentials.secretAccessKey;
-            //   var sessionToken = AWS.config.credentials.sessionToken;
-            //   setGotUserCreds(true);
-            //   console.log(accessKeyId + " " + secretAccessKey);
-            //   AWS.config.update({
-            //     accessKeyId: accessKeyId,
-            //     secretAccessKey: secretAccessKey,
-            //     sessionToken: sessionToken,
-            //     region: "us-east-1",
-            //   });
-            // });
-            resolve(tmpIdToken);
-
-            
-            
-          }
-        });
-      }
-    });
-
-    
-
+          var refresh_token = new CognitoRefreshToken({
+            RefreshToken: currentSession.getRefreshToken(),
+          });
+          console.log(refresh_token);
+          tmpCognitoUser.refreshSession(
+            currentSession.refreshToken,
+            (err, session) => {
+              if (err) {
+                console.log(err);
+              } else {
+                AWS.config.credentials.refresh((error) => {
+                  if (error) {
+                    console.error(error);
+                  } else {
+                    console.log("Successfully logged!");
+                    tmpIdToken = session.getIdToken().getJwtToken();
+                    setIdToken(session.getIdToken().getJwtToken());
+                    console.log(AWS.config.credentials);
+                    // AWS.config.credentials.get(function () {
+                    //   var accessKeyId = AWS.config.credentials.accessKeyId;
+                    //   var secretAccessKey = AWS.config.credentials.secretAccessKey;
+                    //   var sessionToken = AWS.config.credentials.sessionToken;
+                    //   setGotUserCreds(true);
+                    //   console.log(accessKeyId + " " + secretAccessKey);
+                    //   AWS.config.update({
+                    //     accessKeyId: accessKeyId,
+                    //     secretAccessKey: secretAccessKey,
+                    //     sessionToken: sessionToken,
+                    //     region: "us-east-1",
+                    //   });
+                    // });
+                    resolve(tmpIdToken);
+                  }
+                });
+              }
+            }
+          );
         } else {
           console.log("Creds don't need a refresh");
+          resolve('done');
         }
         //resolve("Done");
+      }
+      else{
+        resolve("Firs Time In");
       }
     });
 
@@ -563,7 +582,8 @@ const GameScreen = ({ navigation }) => {
       }
 
       if (!gotUserCreds || AWS.config.credentials.expired) {
-        let token = idToken ? idToken : tmpIdToken;
+        //let token = idToken ? idToken : tmpIdToken;
+        let token = getJwt();
         AWS.config.region = "us-east-1";
         AWS.config.credentials = new AWS.CognitoIdentityCredentials({
           IdentityPoolId: "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",

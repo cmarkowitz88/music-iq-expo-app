@@ -118,6 +118,7 @@ const LogInTest = ({navigation}) => {
             underlineColorAndroid="transparent"
             autoCapitalize="none"
             onChangeText={(newText) => setUserEmail(newText)}
+           
           />
         </View>
         <View>
@@ -137,6 +138,7 @@ const LogInTest = ({navigation}) => {
             onChangeText={(newPassword) => setUserPassword(newPassword)}
             defaultValue={userPassword}
             placeholder="Enter Your Password"
+            
             secureTextEntry={secure}
           />
         </View>
