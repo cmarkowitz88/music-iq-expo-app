@@ -190,6 +190,7 @@ const GameScreen = ({ navigation }) => {
     }
 
     if (!envObj.useLocalApis) {
+      goRefreshToken().then(() => {
       generatePreSignedURL(soundFxFile)
         .then((url) => {
           playSoundFX(url);
@@ -197,6 +198,7 @@ const GameScreen = ({ navigation }) => {
         .catch((err) => {
           console.log("Error " + err);
         });
+      });
     } else {
       url = "http://localhost:4566/m-musiciq-audio-files/" + soundFxFile;
       playSoundFX(url);
@@ -338,6 +340,7 @@ const GameScreen = ({ navigation }) => {
     async function getData() {
       setLevel(1);
       let data = {};
+      let token = getJwt();
 
       if (useMockData) {
         //data = require("json!../../../MockData.json");
@@ -358,7 +361,7 @@ const GameScreen = ({ navigation }) => {
           {
             withCredentials: true,
             credentials: "include",
-            headers: { Authorization: `Bearer ${tmpIdToken}` },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
@@ -457,7 +460,7 @@ const GameScreen = ({ navigation }) => {
   }, []);
 
   let getJwt = () => {
-    let idToken = '';
+    let idToken = "";
     const poolData = {
       UserPoolId: "us-east-1_smGpwOWnD",
       ClientId: "383pg349j8s1m42kavf0ta7i4r",
@@ -509,15 +512,6 @@ const GameScreen = ({ navigation }) => {
             //reject('err');
           }
 
-          // AWS.config.region = "us-east-1";
-          // AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-          //   IdentityPoolId: "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",
-          //   Logins: {
-          //     "cognito-idp.us-east-1.amazonaws.com/us-east-1_smGpwOWnD":
-          //       currentSession.getIdToken().getJwtToken(),
-          //   },
-          // });
-
           var refresh_token = new CognitoRefreshToken({
             RefreshToken: currentSession.getRefreshToken(),
           });
@@ -536,19 +530,6 @@ const GameScreen = ({ navigation }) => {
                     tmpIdToken = session.getIdToken().getJwtToken();
                     setIdToken(session.getIdToken().getJwtToken());
                     console.log(AWS.config.credentials);
-                    // AWS.config.credentials.get(function () {
-                    //   var accessKeyId = AWS.config.credentials.accessKeyId;
-                    //   var secretAccessKey = AWS.config.credentials.secretAccessKey;
-                    //   var sessionToken = AWS.config.credentials.sessionToken;
-                    //   setGotUserCreds(true);
-                    //   console.log(accessKeyId + " " + secretAccessKey);
-                    //   AWS.config.update({
-                    //     accessKeyId: accessKeyId,
-                    //     secretAccessKey: secretAccessKey,
-                    //     sessionToken: sessionToken,
-                    //     region: "us-east-1",
-                    //   });
-                    // });
                     resolve(tmpIdToken);
                   }
                 });
@@ -557,11 +538,10 @@ const GameScreen = ({ navigation }) => {
           );
         } else {
           console.log("Creds don't need a refresh");
-          resolve('done');
+          resolve("done");
         }
         //resolve("Done");
-      }
-      else{
+      } else {
         resolve("Firs Time In");
       }
     });
@@ -571,15 +551,15 @@ const GameScreen = ({ navigation }) => {
 
   let generatePreSignedURL = (filePath) => {
     var promise = new Promise((resolve, reject) => {
-      if (AWS.config.region != null) {
-        console.log("Region was already set...");
-        console.log(AWS.config.credentials.needsRefresh());
-        if (AWS.config.credentials.needsRefresh()) {
-          console.log("Creds need refresh");
-        } else {
-          console.log("Creds don't need a refresh");
-        }
-      }
+      // if (AWS.config.region != null) {
+      //   console.log("Region was already set...");
+      //   console.log(AWS.config.credentials.needsRefresh());
+      //   if (AWS.config.credentials.needsRefresh()) {
+      //     console.log("Creds need refresh");
+      //   } else {
+      //     console.log("Creds don't need a refresh");
+      //   }
+      // }
 
       if (!gotUserCreds || AWS.config.credentials.expired) {
         //let token = idToken ? idToken : tmpIdToken;
