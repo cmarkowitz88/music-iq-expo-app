@@ -30,7 +30,7 @@ import {
   AuthenticationDetails,
   CognitoRefreshToken,
 } from "amazon-cognito-identity-js";
-
+import { Auth, Storage } from "aws-amplify";
 import AWS from "aws-sdk";
 
 let useMockData = "";
@@ -99,6 +99,7 @@ const GameScreen = ({ navigation }) => {
     useState(0);
   let [idToken, setIdToken] = useState();
   let [gotUserCreds, setGotUserCreds] = useState(false);
+  let [refreshToken, setRefreshToken] = useState({});
 
   // Temp variables
   let tmpCnt = 0;
@@ -191,13 +192,13 @@ const GameScreen = ({ navigation }) => {
 
     if (!envObj.useLocalApis) {
       goRefreshToken().then(() => {
-      generatePreSignedURL(soundFxFile)
-        .then((url) => {
-          playSoundFX(url);
-        })
-        .catch((err) => {
-          console.log("Error " + err);
-        });
+        generatePreSignedURL(soundFxFile)
+          .then((url) => {
+            playSoundFX(url);
+          })
+          .catch((err) => {
+            console.log("Error " + err);
+          });
       });
     } else {
       url = "http://localhost:4566/m-musiciq-audio-files/" + soundFxFile;
@@ -331,16 +332,13 @@ const GameScreen = ({ navigation }) => {
   useEffect(() => {
     console.log("In useEffect");
     setUpVars(envObj);
-    getLocalStorage("idToken").then((token) => {
-      tmpIdToken = token;
-      setIdToken(token);
-      getData();
-    });
+    getData();
 
     async function getData() {
       setLevel(1);
       let data = {};
-      let token = getJwt();
+      //let token = await getJwt();
+      let token = (await Auth.currentSession()).getIdToken().getJwtToken();
 
       if (useMockData) {
         //data = require("json!../../../MockData.json");
@@ -459,177 +457,31 @@ const GameScreen = ({ navigation }) => {
     };
   }, []);
 
-  let getJwt = () => {
-    let idToken = "";
-    const poolData = {
-      UserPoolId: "us-east-1_smGpwOWnD",
-      ClientId: "383pg349j8s1m42kavf0ta7i4r",
-    };
-    let userPool = new CognitoUserPool(poolData);
-    var tmpCognitoUser = userPool.getCurrentUser();
+  async function getJwt() {
+    ses = await Auth.currentSession();
 
-    tmpCognitoUser.getSession(function (err, session) {
-      if (err) {
-        console.log(err.message);
-        reject(err.message);
-      }
-      console.log(session.getIdToken().getJwtToken());
-      idToken = session.getIdToken().getJwtToken();
-    });
     return idToken;
-  };
+  }
 
-  let goRefreshToken = () => {
-    var promise = new Promise((resolve, reject) => {
-      // First time through credentials will be null
-      if (AWS.config.region != null) {
-        AWS.config.credentials.expired = true;
-        if (AWS.config.credentials.needsRefresh()) {
-          console.log("Creds need refresh");
-          const poolData = {
-            UserPoolId: "us-east-1_smGpwOWnD",
-            ClientId: "383pg349j8s1m42kavf0ta7i4r",
-          };
-          let userPool = new CognitoUserPool(poolData);
+  async function goRefreshToken() {
+    ses = await Auth.currentSession();
+  }
 
-          var tmpCognitoUser = userPool.getCurrentUser();
-          console.log(tmpCognitoUser);
-          var currentSession = null;
-
-          tmpCognitoUser.getSession(function (err, session) {
-            if (err) {
-              console.log(err.message);
-              //reject('err');
-            }
-            currentSession = session;
-            let another_refresh_token = session.getRefreshToken();
-            console.log(another_refresh_token);
-            console.log(currentSession);
-          });
-
-          if (!currentSession) {
-            console.log("Failuter getting session");
-            //reject('err');
-          }
-
-          var refresh_token = new CognitoRefreshToken({
-            RefreshToken: currentSession.getRefreshToken(),
-          });
-          console.log(refresh_token);
-          tmpCognitoUser.refreshSession(
-            currentSession.refreshToken,
-            (err, session) => {
-              if (err) {
-                console.log(err);
-              } else {
-                AWS.config.credentials.refresh((error) => {
-                  if (error) {
-                    console.error(error);
-                  } else {
-                    console.log("Successfully logged!");
-                    tmpIdToken = session.getIdToken().getJwtToken();
-                    setIdToken(session.getIdToken().getJwtToken());
-                    console.log(AWS.config.credentials);
-                    resolve(tmpIdToken);
-                  }
-                });
-              }
-            }
-          );
-        } else {
-          console.log("Creds don't need a refresh");
-          resolve("done");
-        }
-        //resolve("Done");
-      } else {
-        resolve("Firs Time In");
-      }
-    });
-
-    return promise;
-  };
-
-  let generatePreSignedURL = (filePath) => {
-    var promise = new Promise((resolve, reject) => {
-      // if (AWS.config.region != null) {
-      //   console.log("Region was already set...");
-      //   console.log(AWS.config.credentials.needsRefresh());
-      //   if (AWS.config.credentials.needsRefresh()) {
-      //     console.log("Creds need refresh");
-      //   } else {
-      //     console.log("Creds don't need a refresh");
-      //   }
-      // }
-
-      if (!gotUserCreds || AWS.config.credentials.expired) {
-        //let token = idToken ? idToken : tmpIdToken;
-        let token = getJwt();
-        AWS.config.region = "us-east-1";
-        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-          IdentityPoolId: "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",
-          region: "us-east-1",
-          Logins: {
-            "cognito-idp.us-east-1.amazonaws.com/us-east-1_smGpwOWnD": token,
-          },
-        });
-        console.log(AWS.config.credentials);
-
-        AWS.config.credentials.refresh((error) => {
-          if (error) {
-            console.error(error);
-          } else {
-            console.log("Successfully logged!");
-          }
-        });
-        console.log(
-          "Token Status =  " + console.log(AWS.config.credentials.expired)
-        );
-
-        AWS.config.credentials.get(function () {
-          var accessKeyId = AWS.config.credentials.accessKeyId;
-          var secretAccessKey = AWS.config.credentials.secretAccessKey;
-          var sessionToken = AWS.config.credentials.sessionToken;
-          setGotUserCreds(true);
-          console.log(accessKeyId + " " + secretAccessKey);
-          AWS.config.update({
-            accessKeyId: accessKeyId,
-            secretAccessKey: secretAccessKey,
-            sessionToken: sessionToken,
-            region: "us-east-1",
-          });
-
-          console.log("Creds = " + AWS.config.credentials);
-          //filePath = "1000020.mp3";
-          var s3 = new AWS.S3();
-          var presignedUrl = s3.getSignedUrl("getObject", {
-            Bucket: "m-musiciq-audio-files",
-            Key: filePath,
-            Expires: 60000,
-          });
-          resolve(presignedUrl);
-        }); // end get creds
-      } else {
-        AWS.config.credentials.refresh((error) => {
-          if (error) {
-            console.error(error);
-          } else {
-            console.log("Successfully logged!");
-            console.log(AWS.config.credentials);
-            var s3 = new AWS.S3();
-            var presignedUrl = s3.getSignedUrl("getObject", {
-              Bucket: "m-musiciq-audio-files",
-              Key: filePath,
-              Expires: 60000,
-            });
-            resolve(presignedUrl);
-          }
-        });
-      }
-
-      //resolve('https://m-musiciq-audio-files.s3.us-east-1.amazonaws.com/1000020.mp3?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEPv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIFvcJtzjn%2BO1Addj4Q%2Fc3x7o%2BFlbs%2F8efqT52TvWZRJQAiBL5ZNezq%2BroGIJ20VF4wGVhVaNpqhaOL1OguefRZeGmCqeAgjE%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAMaDDA0NDAyNDE1NDQyMyIM3p%2FephE4ea2Ex4qkKvIBercePatN9aBh5FvRaxve6B904%2BlJ834V%2B9RHdAbzHqw2FOsq%2F2JsflzdDVXaNyzpejQfiGF3kP91QZbazU2weUk85Q9S0bOzdLCXmP16EW9mJ5TldqFR2dQofJvGrXZczOMhpnI4vb2D%2FfwFeOFNay%2FQGFtZ2YFd%2BhYWDC5RjKbdKwkmcJ7nA3437uYBf0XrRXdeSi7m0zdIVNbSAb%2ByXGD6Tgt%2FgUZsPd7LbY3i94UeGRqOusBDcUnk2JrV8IFk8Nw%2BkqPRt3LMuomdqqyGjpiTob2sela34F0ZU2%2BODkoZt04ByoIpYDdtYq%2BXC7q9ItIwxfHakwY64AEW7%2F4fdPkou4DxTjGxL%2FXy6dh0AUkg0Og9vdRPgeA7dKZ89VjZ8QyoPB2Q5QrFtW6mMy1Dr0mIK%2BKW1XXtu0oMNaqs9NaminKfHg4ZmHCdNFtF3DuincBpuYSHToYh3T9pr0WLCYxdCh%2FqirWD4jK0yT4A%2FXypPrgq2wcn8HUWW1x3JswPSf2J3GHoADQQdK0e5YSV%2BbCasRhqpP9c63ehiGn521KgRz%2BY2ILhjW628fc%2FpeRP7zER64Xmaj5PDGehrlmJmV2CNgDBAKFeR2z4rReP503Px35vVG3RteLiSw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20220508T014457Z&X-Amz-SignedHeaders=host&X-Amz-Expires=14400&X-Amz-Credential=ASIAQUQALJE3VM6LHGP3%2F20220508%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=85c3ecb2275bd046a7ee2933d018a61063100da2b4083f665232ee68583fbbdc')
-      //resolve('https://s3.amazonaws.com/craig.markowitz.stuff/1000020.wav');
-    });
-    return promise;
+  async function generatePreSignedURL(filePath) {
+    //filePath = 'TubeScreamer.mp3'
+    const url = await Storage.get(filePath);
+    return url;
+    //var promise = new Promise((resolve, reject) => {
+     // console.log(AWS.config.credentials);
+    //   var s3 = new AWS.S3();
+    //   var presignedUrl = s3.getSignedUrl("getObject", {
+    //     Bucket: "m-musiciq-audio-files",
+    //     Key: filePath,
+    //     Expires: 60000,
+    //   });
+    //   resolve(presignedUrl);
+    // });
+    // return promise;
   };
 
   // useEffect(() => {

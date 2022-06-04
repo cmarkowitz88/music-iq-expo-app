@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Fontisto, AntDesign } from "@expo/vector-icons";
+import { Auth } from "aws-amplify";
 
 import {
   CognitoUserPool,
@@ -20,57 +21,61 @@ import {
 import * as SecureStore from "expo-secure-store";
 import { setLocalStorage2, getValueFor, logInUser } from "./Utils";
 
-const LogInTest = ({navigation}) => {
+const LogInTest = ({ navigation }) => {
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
   const [secure, setSecure] = useState(true);
   const [loginMessage, setLoginMessage] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
 
-  const setLocalStorage =  async (key, value) => {
-    await SecureStore.setItemAsync("idToken", idToken).catch((error) =>
-              console.log("Could not save user info ", error)
-            ).then(console.log("saved value"));
-  }
+  const setLocalStorage = async (key, value) => {
+    await SecureStore.setItemAsync(key, value)
+      .catch((error) => console.log("Could not save user info ", error))
+      .then(console.log("saved value"));
+  };
 
   const handleNewUser = () => {
     navigation.navigate("NewUser");
   };
 
   const handleSubmitPress = () => {
-    logInUser();
+    //logInUser();
+    signIn();
   };
 
+  async function signIn() {
+    try {
+      const user = await Auth.signIn(userEmail, userPassword);
+      const creds = await Auth.currentCredentials();
+      ses = await Auth.currentSession();
+      console.log(creds);
+      console.log(user);
+      console.log(ses);
+      navigation.navigate("Game");
+    } catch (error) {
+      console.log("error signing in", error);
+    }
+  }
+
   const logInUser = () => {
-    let authenticationData = {
-      Username: userEmail,
-      Password: userPassword,
-    };
-
-    let authenticationDetails = new AuthenticationDetails(authenticationData);
-
-    const poolData = {
-      UserPoolId: "us-east-1_smGpwOWnD",
-      ClientId: "383pg349j8s1m42kavf0ta7i4r",
-    };
-    let userPool = new CognitoUserPool(poolData);
-    let userData = {
-      Username: userEmail,
-      Pool: userPool,
-    };
     var cognitoUser = new CognitoUser(userData);
     cognitoUser.authenticateUser(authenticationDetails, {
       onSuccess: function (result) {
         let accessToken = result.getAccessToken().getJwtToken();
         let idToken = result.getIdToken().getJwtToken();
-        setLocalStorage2("idToken", idToken).then(() => {navigation.navigate("Game")
-        console.log("Wrote to storage");});
+        let refreshToken = result.getRefreshToken();
+        setLocalStorage2("refreshToken", refreshToken.token).then(() => {
+          setLocalStorage2("idToken", idToken).then(() => {
+            navigation.navigate("Game");
+          });
+
+          console.log("Wrote to storage");
+        });
         // SecureStore.setItemAsync("idToken", idToken).catch((error) =>
         //       console.log("Could not save user info ", error)
         //     );
         setLoginMessage("Successful.");
         setLoggedIn(true);
-        
       },
       onFailure: function (err) {
         console.log(err.message);
@@ -118,7 +123,6 @@ const LogInTest = ({navigation}) => {
             underlineColorAndroid="transparent"
             autoCapitalize="none"
             onChangeText={(newText) => setUserEmail(newText)}
-           
           />
         </View>
         <View>
@@ -138,26 +142,25 @@ const LogInTest = ({navigation}) => {
             onChangeText={(newPassword) => setUserPassword(newPassword)}
             defaultValue={userPassword}
             placeholder="Enter Your Password"
-            
             secureTextEntry={secure}
           />
         </View>
         <View
-        style={{
-          flexDirection: "row",
-          paddingTop:40,
-          justifyContent: "center",
-        }}
-      >
-        <TouchableOpacity
-          style={styles.buttonStyle}
-          onPress={handleSubmitPress}
+          style={{
+            flexDirection: "row",
+            paddingTop: 40,
+            justifyContent: "center",
+          }}
         >
-          <Text style={styles.buttonTextStyle}>Sign In</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.buttonStyle}
+            onPress={handleSubmitPress}
+          >
+            <Text style={styles.buttonTextStyle}>Sign In</Text>
+          </TouchableOpacity>
         </View>
       </View>
-      
+
       <View
         style={{
           flexDirection: "row",
@@ -165,11 +168,11 @@ const LogInTest = ({navigation}) => {
         }}
       >
         <Text style={{ color: "#fff", fontSize: 16, paddingBottom: 25 }}>
-          Don't have an account?{" "}</Text>
-          <TouchableOpacity onPress={handleNewUser}>
-            <Text style={{ color: "#7DE24E", fontSize: 16 }}>Sign up here.</Text>
-          </TouchableOpacity>
-       
+          Don't have an account?{" "}
+        </Text>
+        <TouchableOpacity onPress={handleNewUser}>
+          <Text style={{ color: "#7DE24E", fontSize: 16 }}>Sign up here.</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

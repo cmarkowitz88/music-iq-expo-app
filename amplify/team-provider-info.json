@@ -1,0 +1,38 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-musiciqexpo-dev-85426-authRole",
+      "UnauthRoleArn": "arn:aws:iam::044024154423:role/amplify-musiciqexpo-dev-85426-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::044024154423:role/amplify-musiciqexpo-dev-85426-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-musiciqexpo-dev-85426-deployment",
+      "UnauthRoleName": "amplify-musiciqexpo-dev-85426-unauthRole",
+      "StackName": "amplify-musiciqexpo-dev-85426",
+      "StackId": "arn:aws:cloudformation:us-east-1:044024154423:stack/amplify-musiciqexpo-dev-85426/78321400-e405-11ec-817b-0ad08decc1d5",
+      "AmplifyAppId": "d3e4qee11wld0p"
+    },
+    "categories": {
+      "auth": {
+        "musiciqexpo46324bd0": {
+          "userPoolId": "us-east-1_smGpwOWnD",
+          "userPoolName": "m-musiciq-cognito-pool",
+          "webClientId": "383pg349j8s1m42kavf0ta7i4r",
+          "nativeClientId": "383pg349j8s1m42kavf0ta7i4r",
+          "identityPoolId": "us-east-1:5542ddee-b233-443a-bc73-3b2658755cd8",
+          "identityPoolName": "m-musiciq-cognito-identity-pool",
+          "allowUnauthenticatedIdentities": true,
+          "authRoleArn": "arn:aws:iam::044024154423:role/m-musiciq-cognito-authenticated",
+          "authRoleName": "m-musiciq-cognito-authenticated",
+          "unauthRoleArn": "arn:aws:iam::044024154423:role/m-musiciq-cognito-unauthenticated",
+          "unauthRoleName": "m-musiciq-cognito-unauthenticated"
+        }
+      },
+      "storage": {
+        "musiciqexpo95288bfc": {
+          "bucketName": "m-musiciq-audio-files",
+          "region": "us-east-1"
+        }
+      }
+    }
+  }
+}
