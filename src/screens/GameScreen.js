@@ -17,7 +17,7 @@ import CustomPlayButton from "../../play-button";
 import api from "../GetQuestions2";
 import QuestionText from "../QuestionText";
 import ScoreText from "../ScoreText";
-import { setLocalStorage2, getLocalStorage, logInUser } from "./Utils";
+import { setLocalStorage2, getLocalStorage, logInUser, setLocalStorage } from "./Utils";
 
 import getEnvVars from "../../environment";
 import { out } from "react-native/Libraries/Animated/Easing";
@@ -48,7 +48,6 @@ console.log("Using Mock Data: " + useMockData);
 const GameScreen = ({ navigation }) => {
   // All state variables
   let [timer_started, setTimerStarted] = useState(false);
-  let [level, setLevel] = useState();
   let [game_questions, setGameQuestions] = useState();
   let [question_type, setQuestionType] = useState();
   let [question_text, setQuestionText] = useState("");
@@ -104,6 +103,7 @@ const GameScreen = ({ navigation }) => {
   // Temp variables
   let tmpCnt = 0;
   let tmpStatus = "";
+  let level;
 
   const QUESTIONS_PER_ROUND = 10;
 
@@ -201,7 +201,7 @@ const GameScreen = ({ navigation }) => {
           });
       });
     } else {
-      url = "http://localhost:4566/m-musiciq-audio-files/" + soundFxFile;
+      url = "http://localhost:4566/m-musiciq-audio-files/public/" + soundFxFile;
       playSoundFX(url);
     }
 
@@ -332,12 +332,24 @@ const GameScreen = ({ navigation }) => {
   useEffect(() => {
     console.log("In useEffect");
     setUpVars(envObj);
-    getData();
+    getLocalStorage("level").then((tmplevel) => {
+      if(tmplevel == null){
+        setLocalStorage2("level","1");
+        level = 1;
+      }
+      else{
+        level = tmplevel;
+      }
+      console.log(level);
+      getData();
+    
+     });
+    //getData();
 
     async function getData() {
-      setLevel(1);
       let data = {};
       //let token = await getJwt();
+      goRefreshToken();
       let token = (await Auth.currentSession()).getIdToken().getJwtToken();
 
       if (useMockData) {
@@ -355,7 +367,7 @@ const GameScreen = ({ navigation }) => {
         console.log(obj);
         const response = await fetch(
           //"http://127.0.0.1:3000/getQuestions?level=1"
-          apiUriGetQuestions,
+          apiUriGetQuestions + "level=" + level,
           {
             withCredentials: true,
             credentials: "include",
@@ -459,29 +471,20 @@ const GameScreen = ({ navigation }) => {
 
   async function getJwt() {
     ses = await Auth.currentSession();
-
+    console.log("in get jwt")
     return idToken;
   }
 
   async function goRefreshToken() {
     ses = await Auth.currentSession();
+    console.log("refreshed token...")
   }
 
   async function generatePreSignedURL(filePath) {
     //filePath = 'TubeScreamer.mp3'
     const url = await Storage.get(filePath);
+    console.log("got presigned url");
     return url;
-    //var promise = new Promise((resolve, reject) => {
-     // console.log(AWS.config.credentials);
-    //   var s3 = new AWS.S3();
-    //   var presignedUrl = s3.getSignedUrl("getObject", {
-    //     Bucket: "m-musiciq-audio-files",
-    //     Key: filePath,
-    //     Expires: 60000,
-    //   });
-    //   resolve(presignedUrl);
-    // });
-    // return promise;
   };
 
   // useEffect(() => {
