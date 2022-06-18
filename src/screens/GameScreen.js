@@ -346,6 +346,31 @@ const GameScreen = ({ navigation }) => {
      });
     //getData();
 
+    async function getData2(){
+      let data = {};
+      
+      goRefreshToken();
+      let token = (await Auth.currentSession()).getIdToken().getJwtToken();
+
+      if (useMockData) {
+        const response = await fetch(
+          "/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData.json"
+        );
+        data = await response.json();
+      } else if (!useMockData) {
+        const response = await fetch(
+          apiUriGetQuestions + "level=" + level,
+          {
+            withCredentials: true,
+            credentials: "include",
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        data = await response.json();
+      }
+    }
+
     async function getData() {
       let data = {};
       //let token = await getJwt();
@@ -359,12 +384,7 @@ const GameScreen = ({ navigation }) => {
         );
         data = await response.json();
       } else if (!useMockData) {
-        let obj = {
-          withCredentials: true,
-          credentials: "include",
-          headers: { Authorization: "Bearer " + { tmpIdToken } },
-        };
-        console.log(obj);
+       
         const response = await fetch(
           //"http://127.0.0.1:3000/getQuestions?level=1"
           apiUriGetQuestions + "level=" + level,
@@ -468,6 +488,7 @@ const GameScreen = ({ navigation }) => {
       return question_array;
     };
   }, []);
+  //************** END Initial Entry Point for GameScreen component  ****************/
 
   async function getJwt() {
     ses = await Auth.currentSession();
@@ -631,11 +652,11 @@ const GameScreen = ({ navigation }) => {
           apiUriGetAudioApiUri + rndm_game_questions[question_count].File_Path;
         playSound(url);
       }
-      //setQuestionCount(question_count + 1);
-      //setTimer();
+      
     } else {
       console.log("No More Questions.");
       setStatusText("Level Completed. Nice Job.");
+      setShowNextBtnBln(true);
     }
   };
 
@@ -667,6 +688,34 @@ const GameScreen = ({ navigation }) => {
         console.log(error);
       });
   }
+
+  async function getData2(){
+    let data = {};
+    
+    goRefreshToken();
+    let token = (await Auth.currentSession()).getIdToken().getJwtToken();
+
+    if (useMockData) {
+      const response = await fetch(
+        "/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData.json"
+      );
+      data = await response.json();
+    } else if (!useMockData) {
+      const response = await fetch(
+        apiUriGetQuestions + "level=" + level,
+        {
+          withCredentials: true,
+          credentials: "include",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      data = await response.json();
+      return data;
+    }
+  }
+
+  
 
   return (
     <SafeAreaView style={styles.safeview}>
