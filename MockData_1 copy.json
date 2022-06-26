@@ -1,5 +1,23 @@
 [
   {
+    "Answer4": "Surf",
+    "Answer3": "Techno",
+    "Answer2": "Latin",
+    "Score": "3",
+    "Answer1": "Soul",
+    "File_Location": "SurfDrumBeat.mp3",
+    "Question": "This drumbeat is likely to be found in which musical genre?",
+    "Track_Length": "23",
+    "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
+    "Level": "1",
+    "File_Path": "SurfDrumBeat.mp3",
+    "Correct_Answer": "Surf",
+    "Hint": "This type of drumbeat can be found on early 1950s recordings and was popularized in the 1960s by several bands from Southern California.",
+    "ID": "mk-748495851",
+    "Type": "music-knowledge",
+    "Active": "true"
+  },
+  {
     "Answer4": "Slapping",
     "Answer3": "Octaves",
     "Answer2": "Tapping",
@@ -187,7 +205,7 @@
   {
     "Answer4": "Select Answer 4",
     "Answer4_File_Path": "mq2-drum-bass-4.mp3",
-    "Answer4_Track_Length": "24",
+    "Answer4_Track_Length": "17",
     "Answer2": "Select Answer 2",
     "Answer2_File_Path": "mq2-drum-bass-2.mp3",
     "Answer2_Track_Length": "24",
@@ -204,7 +222,7 @@
     "Score": "2",
     "Type": "music-memory",
     "Correct_Answer": "Select Answer 4",
-    "Track_Length": "21",
+    "Track_Length": "17",
     "Question": "Listen carefully to this track, then click the play button next to each of the potential answers, then select the answer that's identical to what you first heard.",
     "Level": "1",
     "ID": "mm10000"

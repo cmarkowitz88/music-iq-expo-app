@@ -17,12 +17,16 @@ import CustomPlayButton from "../../play-button";
 import api from "../GetQuestions2";
 import QuestionText from "../QuestionText";
 import ScoreText from "../ScoreText";
-import { setLocalStorage2, getLocalStorage, logInUser, setLocalStorage } from "./Utils";
+import {
+  setLocalStorage2,
+  getLocalStorage,
+  deleteLocalStorageItem,
+  logInUser,
+  setLocalStorage,
+} from "./Utils";
 
 import getEnvVars from "../../environment";
-import { out } from "react-native/Libraries/Animated/Easing";
-import { backgroundColor } from "react-native/Libraries/Components/View/ReactNativeStyleAttributes";
-import * as SecureStore from "expo-secure-store";
+
 import {
   CognitoUserPool,
   CognitoUserAttribute,
@@ -32,6 +36,7 @@ import {
 } from "amazon-cognito-identity-js";
 import { Auth, Storage } from "aws-amplify";
 import AWS from "aws-sdk";
+import GetQuestions2 from "../GetQuestions2";
 
 let useMockData = "";
 let apiUriGetQuestions = "";
@@ -328,50 +333,158 @@ const GameScreen = ({ navigation }) => {
     }
   }
 
-  //************** Initial Entry Point for GameScreen component  ****************/
-  useEffect(() => {
-    console.log("In useEffect");
-    setUpVars(envObj);
-    getLocalStorage("level").then((tmplevel) => {
-      if(tmplevel == null){
-        setLocalStorage2("level","1");
-        level = 1;
+  const setGameLevel = (inLevel) => {
+    var promise = new Promise((resolve, reject) => {
+      try {
+        setLocalStorage2("level", inLevel).then(() => {
+          console.log("Wrote to storage");
+          resolve("Set Local Storage");
+        });
+      } catch {
+        reject("Failed setting Game Level.");
       }
-      else{
-        level = tmplevel;
-      }
-      console.log(level);
-      getData();
-    
-     });
-    //getData();
+    });
+    return promise;
+  };
 
-    async function getData2(){
-      let data = {};
-      
-      goRefreshToken();
-      let token = (await Auth.currentSession()).getIdToken().getJwtToken();
-
-      if (useMockData) {
-        const response = await fetch(
-          "/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData.json"
-        );
-        data = await response.json();
-      } else if (!useMockData) {
-        const response = await fetch(
-          apiUriGetQuestions + "level=" + level,
-          {
-            withCredentials: true,
-            credentials: "include",
-            headers: { Authorization: `Bearer ${token}` },
+  const getGameLevel = () => {
+    var promise = new Promise((resolve, reject) => {
+      try {
+        getLocalStorage("level").then((tmplevel) => {
+          if (tmplevel == null) {
+            setLocalStorage2("level", "1");
+            level = 1;
+          } else {
+            level = tmplevel;
           }
-        );
-
-        data = await response.json();
+          console.log(level);
+          resolve(level);
+        });
+      } catch {
+        reject("Error getting local storage.");
       }
+    });
+    return promise;
+  };
+
+  async function initializeData(inLevel) {
+    let data = {};
+    //let token = await getJwt();
+    goRefreshToken();
+    let token = (await Auth.currentSession()).getIdToken().getJwtToken();
+
+    if (useMockData) {
+      //data = require("json!../../../MockData.json");
+      mockDataUrl = `/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData_${inLevel}.json`;
+      const response = await fetch(mockDataUrl);
+      data = await response.json();
+    } else if (!useMockData) {
+      const response = await fetch(
+        //"http://127.0.0.1:3000/getQuestions?level=1"
+        apiUriGetQuestions + "level=" + inLevel,
+        {
+          withCredentials: true,
+          credentials: "include",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      data = await response.json();
     }
 
-    async function getData() {
+    rndm_game_questions = go_randomize_questions(data);
+
+    // First time app is loaded we get the json payload and store it in state object for later use
+    //setGameQuestions(data);
+    setGameQuestions(rndm_game_questions);
+
+    // First time app is loaded we need immediate access to data so we'll directly use data object
+    // For future requests we'll use game_questions array
+    setQuestionType(rndm_game_questions[question_count].Type);
+    setQuestionText(rndm_game_questions[question_count].Question);
+    setAnswer1Text(rndm_game_questions[question_count].Answer1);
+    setAnswer2Text(rndm_game_questions[question_count].Answer2);
+    setAnswer3Text(rndm_game_questions[question_count].Answer3);
+    setAnswer4Text(rndm_game_questions[question_count].Answer4);
+    setCorrectAnswer(rndm_game_questions[question_count].Correct_Answer);
+    setFilePath(rndm_game_questions[question_count].File_Path);
+    if (rndm_game_questions[question_count].Type == "music-memory") {
+      setFilePath1(rndm_game_questions[question_count].Answer1_File_Path);
+      setFilePath2(rndm_game_questions[question_count].Answer2_File_Path);
+      setFilePath3(rndm_game_questions[question_count].Answer3_File_Path);
+      setFilePath4(rndm_game_questions[question_count].Answer4_File_Path);
+    }
+
+    setTrackLength(rndm_game_questions[question_count].Track_Length);
+    setAnswer1TrackLength(
+      rndm_game_questions[question_count].Answer1_Track_Length
+    );
+    setAnswer2TrackLength(
+      rndm_game_questions[question_count].Answer2_Track_Length
+    );
+    setAnswer3TrackLength(
+      rndm_game_questions[question_count].Answer3_Track_Length
+    );
+    setAnswer4TrackLength(
+      rndm_game_questions[question_count].Answer4_Track_Length
+    );
+    setHint(rndm_game_questions[question_count].Hint);
+    setTimeLeft(rndm_game_questions[question_count].Track_Length);
+    setSeconds(rndm_game_questions[question_count].Track_Length);
+    setTimerStarted(true);
+    setScoreWeightMultiplier(rndm_game_questions[question_count].Score);
+    setRound(1);
+    setCorrectAnswerButton(
+      rndm_game_questions[question_count].Answer1,
+      rndm_game_questions[question_count].Answer2,
+      rndm_game_questions[question_count].Answer3,
+      rndm_game_questions[question_count].Answer4,
+      rndm_game_questions[question_count].Correct_Answer
+    );
+
+    //console.log(data);
+    if (!envObj.useLocalApis) {
+      goRefreshToken().then(() => {
+        generatePreSignedURL(rndm_game_questions[question_count].File_Path)
+          .then((url) => {
+            playSound(url);
+          })
+          .catch((err) => {
+            console.log("Error " + err);
+          });
+      });
+    } else {
+      url =
+        apiUriGetAudioApiUri + rndm_game_questions[question_count].File_Path;
+      playSound(url);
+    }
+  }
+
+  //************** Initial Entry Point for GameScreen component  ****************/
+  useEffect(() => {
+    deleteLocalStorageItem("level");
+    console.log("In useEffect");
+    setUpVars(envObj);
+    getGameLevel().then((lvl) => {
+      //getData(lvl);
+      initializeData(lvl);
+    });
+    // getLocalStorage("level").then((tmplevel) => {
+    //   if(tmplevel == null){
+    //     setLocalStorage2("level","1");
+    //     level = 1;
+    //   }
+    //   else{
+    //     level = tmplevel;
+    //   }
+    //   console.log(level);
+    //   getData();
+
+    //  });
+    //getData();
+
+    
+    async function getData(inLevel) {
       let data = {};
       //let token = await getJwt();
       goRefreshToken();
@@ -379,15 +492,13 @@ const GameScreen = ({ navigation }) => {
 
       if (useMockData) {
         //data = require("json!../../../MockData.json");
-        const response = await fetch(
-          "/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData.json"
-        );
+        mockDataUrl = `/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData_${inLevel}.json`;
+        const response = await fetch(mockDataUrl);
         data = await response.json();
       } else if (!useMockData) {
-       
         const response = await fetch(
           //"http://127.0.0.1:3000/getQuestions?level=1"
-          apiUriGetQuestions + "level=" + level,
+          apiUriGetQuestions + "level=" + inLevel,
           {
             withCredentials: true,
             credentials: "include",
@@ -490,15 +601,37 @@ const GameScreen = ({ navigation }) => {
   }, []);
   //************** END Initial Entry Point for GameScreen component  ****************/
 
+  const go_randomize_questions = (in_array) => {
+    const num_questions = in_array.length;
+    let ary_list_of_indicies = [];
+    let question_array = [];
+    let new_index = -1;
+
+    for (let x = 0; x < num_questions; x++) {
+      new_index = Math.floor(Math.random() * num_questions);
+
+      let t = ary_list_of_indicies.indexOf(new_index);
+
+      while (ary_list_of_indicies.indexOf(new_index) > -1) {
+        new_index = Math.floor(Math.random() * num_questions);
+      }
+
+      ary_list_of_indicies.push(new_index);
+      question_array[new_index] = in_array[x];
+    }
+
+    return question_array;
+  };
+
   async function getJwt() {
     ses = await Auth.currentSession();
-    console.log("in get jwt")
+    console.log("in get jwt");
     return idToken;
   }
 
   async function goRefreshToken() {
     ses = await Auth.currentSession();
-    console.log("refreshed token...")
+    console.log("refreshed token...");
   }
 
   async function generatePreSignedURL(filePath) {
@@ -506,7 +639,7 @@ const GameScreen = ({ navigation }) => {
     const url = await Storage.get(filePath);
     console.log("got presigned url");
     return url;
-  };
+  }
 
   // useEffect(() => {
   //   let oneSecInterval = null;
@@ -652,11 +785,19 @@ const GameScreen = ({ navigation }) => {
           apiUriGetAudioApiUri + rndm_game_questions[question_count].File_Path;
         playSound(url);
       }
-      
     } else {
       console.log("No More Questions.");
       setStatusText("Level Completed. Nice Job.");
       setShowNextBtnBln(true);
+      getGameLevel().then((level) => {
+        let newlevel = parseInt(level);
+        newlevel +=1;
+        newlevel = newlevel.toString();
+        setGameLevel(newlevel).then(() => {
+          let tmpData = initializeData(newlevel);
+          setGameQuestions(tmpData);
+        });
+      });
     }
   };
 
@@ -689,33 +830,28 @@ const GameScreen = ({ navigation }) => {
       });
   }
 
-  async function getData2(){
+  async function getData2(inlevel) {
     let data = {};
-    
+
     goRefreshToken();
     let token = (await Auth.currentSession()).getIdToken().getJwtToken();
 
     if (useMockData) {
       const response = await fetch(
-        "/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData.json"
+        `/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData_${inlevel}.json`
       );
       data = await response.json();
     } else if (!useMockData) {
-      const response = await fetch(
-        apiUriGetQuestions + "level=" + level,
-        {
-          withCredentials: true,
-          credentials: "include",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(apiUriGetQuestions + "level=" + inlevel, {
+        withCredentials: true,
+        credentials: "include",
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       data = await response.json();
       return data;
     }
   }
-
-  
 
   return (
     <SafeAreaView style={styles.safeview}>
@@ -1122,7 +1258,7 @@ const styles = StyleSheet.create({
   hint: {
     color: "white",
     marginLeft: 6,
-    fontSize: 14,
+    fontSize: 17,
   },
 
   next_button: {

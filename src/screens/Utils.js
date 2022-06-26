@@ -23,6 +23,12 @@ export const setLocalStorage = (key, value) => {
   }
 };
 
+export async function deleteLocalStorageItem(key) {
+  await SecureStore.deleteItemAsync(key).then(() => {
+    console.log(`Deleted Key: ${key}`);
+  });
+}
+
 export async function setLocalStorage2(key, value) {
   await SecureStore.setItemAsync(key, value).then(() => {
     console.log("wrote to storage");
@@ -30,9 +36,9 @@ export async function setLocalStorage2(key, value) {
 }
 
 export async function getLocalStorage(key) {
-  result = await SecureStore.getItemAsync(key)
+  result = await SecureStore.getItemAsync(key);
   // let result = await SecureStore.getItemAsync(key);
-   return result;
+  return result;
 }
 export function logInUser(userName, userPassword) {
   var promise = new Promise((resolve, reject) => {

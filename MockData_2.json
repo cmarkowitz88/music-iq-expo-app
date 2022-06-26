@@ -1,0 +1,38 @@
+[
+  {
+    "Answer4": "Surf",
+    "Answer3": "Techno",
+    "Answer2": "Latin",
+    "Score": "3",
+    "Answer1": "Soul",
+    "File_Location": "SurfDrumBeat.mp3",
+    "Question": "This drumbeat is likely to be found in which musical genre?",
+    "Track_Length": "23",
+    "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
+    "Level": "2",
+    "File_Path": "SurfDrumBeat.mp3",
+    "Correct_Answer": "Surf",
+    "Hint": "This type of drumbeat can be found on early 1950s recordings and was popularized in the 1960s by several bands from Southern California.",
+    "ID": "mk-748495851",
+    "Type": "music-knowledge",
+    "Active": "true"
+  },
+  {
+    "Answer4": "Slapping",
+    "Answer3": "Octaves",
+    "Answer2": "Tapping",
+    "Score": "3",
+    "Answer1": "Shredding",
+    "File_Location": "Flatwound-2-Full.mp3",
+    "Question": "The bass line in this track is employing which technique?",
+    "Track_Length": "21",
+    "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
+    "Level": "2",
+    "File_Path": "Flatwound-2-Full.mp3",
+    "Correct_Answer": "Octaves",
+    "Hint": "This technique utilizes playing the same note one adjacent strings and can be heard on countless disco records.",
+    "ID": "mk-74849585",
+    "Type": "music-knowledge",
+    "Active": "true"
+  }
+]
