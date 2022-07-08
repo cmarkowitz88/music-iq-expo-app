@@ -4,7 +4,7 @@ import { Text,  StyleSheet} from 'react-native';
 export default function LevelText(props) {
     
   return (
-      <Text style={styles.levelText}>Level:{props.text}</Text>
+      <Text style={styles.levelText}>Level: {props.text}</Text>
   );
 }
 

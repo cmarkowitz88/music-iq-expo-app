@@ -54,6 +54,8 @@ const LogInTest = ({ navigation }) => {
       navigation.navigate("Game");
     } catch (error) {
       console.log("error signing in", error);
+      console.log(error);
+      setLoginMessage(error.message);
     }
   }
 

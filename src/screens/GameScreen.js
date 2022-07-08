@@ -106,6 +106,7 @@ const GameScreen = ({ navigation }) => {
   let [gotUserCreds, setGotUserCreds] = useState(false);
   let [refreshToken, setRefreshToken] = useState({});
   let [current_level, setCurrentLevel] = useState(1);
+  let [hide_button_1, setHideButton1] = useState(false);
 
   // Temp variables
   let tmpCnt = 0;
@@ -903,7 +904,7 @@ const GameScreen = ({ navigation }) => {
                   ]}
                 >
                   <CustomPlayButton
-                    color="red"
+                    color="green"
                     onPress={() =>
                       playNextMemoryAnswer(file_path1, answer1_track_length, 1)
                     }
@@ -1009,7 +1010,7 @@ const GameScreen = ({ navigation }) => {
                   ]}
                 >
                   <CustomPlayButton
-                    color="yellow"
+                    color="green"
                     onPress={() =>
                       playNextMemoryAnswer(file_path3, answer3_track_length, 3)
                     }
@@ -1062,7 +1063,7 @@ const GameScreen = ({ navigation }) => {
                   ]}
                 >
                   <CustomPlayButton
-                    color="blue"
+                    color="green"
                     onPress={() =>
                       playNextMemoryAnswer(file_path4, answer4_track_length, 4)
                     }
@@ -1116,7 +1117,7 @@ const GameScreen = ({ navigation }) => {
                   alignItems: "center",
                 },
               ]}
-            >
+            > 
               <CustomButton
                 name="button1"
                 text={answer1_text}
@@ -1124,6 +1125,7 @@ const GameScreen = ({ navigation }) => {
                 disabled_status={btn_disabled_status}
                 onPress={() => guessAnswer({ answer1_text })}
               />
+            
               <CustomButton
                 name="button2"
                 text={answer2_text}
@@ -1227,7 +1229,7 @@ const styles = StyleSheet.create({
 
   statusTextCorrect: {
     color: "green",
-    fontSize: 15,
+    fontSize: 17,
     paddingTop: 10,
     textAlign: "center",
     fontWeight: "bold",
@@ -1236,7 +1238,7 @@ const styles = StyleSheet.create({
 
   statusTextIncorrect: {
     color: "red",
-    fontSize: 15,
+    fontSize: 17,
     paddingTop: 10,
     textAlign: "center",
     fontWeight: "bold",
