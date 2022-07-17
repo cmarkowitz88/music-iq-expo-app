@@ -1,0 +1,38 @@
+[
+  {
+    "Answer4": "I-IV-V",
+    "Answer3": "I-V-vi-IV",
+    "Answer2": "ii-V-I",
+    "Score": "5",
+    "Answer1": "vi-IV-I-V",
+    "File_Location": "2-5-1-ChordProgression.mp3",
+    "Question": "This is which type of chord progression?",
+    "Track_Length": "26",
+    "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
+    "Level": "3",
+    "File_Path": "2-5-1-ChordProgression.mp3",
+    "Correct_Answer": "ii-V-I",
+    "Hint": "This chord progression is commonly found in jazz music.",
+    "ID": "mm993049485",
+    "Type": "music-knowledge",
+    "Active": "true"
+  },
+  {
+    "Answer4": "Mambo",
+    "Answer3": "Samba",
+    "Answer2": "Rhumba",
+    "Score": "1",
+    "Answer1": "Bossa Nova",
+    "File_Location": "Mambo-Drum-Beat.mp3",
+    "Question": "What is the name of this type of drum-beat?",
+    "Track_Length": "16",
+    "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
+    "Level": "3",
+    "File_Path": "Mambo-Drum-Beat.mp3",
+    "Correct_Answer": "Mambo",
+    "Hint": "This type of Cuban drum-beat originaged as a ballroom dance and can be traced back to the later 1930s.",
+    "ID": "mm-dlkadieljfj",
+    "Type": "music-knowledge",
+    "Active": "true"
+  }
+]

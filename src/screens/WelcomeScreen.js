@@ -14,7 +14,7 @@ function WelcomeScreen({route, navigation}){
                 <Image style={styles.image} source={require('../../assets/MusicIQ-Logo_2.jpg')} />
                 <CustomButton  text="Play Game" onPress={() => navigation.navigate('Game')}/>
                 <CustomButton  text="Log In" onPress={() => navigation.navigate('LogIn')}/>
-               
+                <CustomButton  text="Password Reset Page 2" onPress={() => navigation.navigate('ForgotPassword2')}/>
         </ImageBackground>
        <Text></Text>
         </View>

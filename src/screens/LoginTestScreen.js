@@ -28,10 +28,8 @@ const LogInTest = ({ navigation }) => {
   const [loginMessage, setLoginMessage] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
 
-  const setLocalStorage = async (key, value) => {
-    await SecureStore.setItemAsync(key, value)
-      .catch((error) => console.log("Could not save user info ", error))
-      .then(console.log("saved value"));
+  const handleForgotPassword = () => {
+    navigation.navigate("ForgotPassword");
   };
 
   const handleNewUser = () => {
@@ -102,7 +100,7 @@ const LogInTest = ({ navigation }) => {
           <Text
             style={{
               color: "red",
-              fontSize: 25,
+              fontSize: 20,
               margin: 12,
             }}
           >
@@ -147,6 +145,7 @@ const LogInTest = ({ navigation }) => {
             secureTextEntry={secure}
           />
         </View>
+
         <View
           style={{
             flexDirection: "row",
@@ -161,6 +160,19 @@ const LogInTest = ({ navigation }) => {
             <Text style={styles.buttonTextStyle}>Sign In</Text>
           </TouchableOpacity>
         </View>
+      </View>
+
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "center",
+        }}
+      >
+        <TouchableOpacity onPress={handleForgotPassword}>
+          <Text style={{ paddingBottom: 30, color: "#7DE24E", fontSize: 18 }}>
+            Forgot Password?
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View
