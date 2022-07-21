@@ -107,11 +107,13 @@ const GameScreen = ({ navigation }) => {
   let [refreshToken, setRefreshToken] = useState({});
   let [current_level, setCurrentLevel] = useState(1);
   let [hide_button_1, setHideButton1] = useState(false);
+  let [game_finished, setGameFinished] = useState(false);
 
   // Temp variables
   let tmpCnt = 0;
   let tmpStatus = "";
   let level;
+  let tmpGameFinished = "";
 
   const QUESTIONS_PER_ROUND = 10;
 
@@ -380,10 +382,16 @@ const GameScreen = ({ navigation }) => {
     let token = (await Auth.currentSession()).getIdToken().getJwtToken();
 
     if (useMockData) {
-      //data = require("json!../../../MockData.json");
-      mockDataUrl = `/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData_${inLevel}.json`;
-      const response = await fetch(mockDataUrl);
-      data = await response.json();
+      try {
+        //data = require("json!../../../MockData.json");
+        mockDataUrl = `/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData_${inLevel}.json`;
+        const response = await fetch(mockDataUrl);
+        data = await response.json();
+      } catch {
+        console.log(`Error loading mock data file: MockData_${inLevel}.json`);
+        setGameFinished(true);
+        tmpGameFinished = true;
+      }
     } else if (!useMockData) {
       const response = await fetch(
         //"http://127.0.0.1:3000/getQuestions?level=1"
@@ -398,71 +406,74 @@ const GameScreen = ({ navigation }) => {
       data = await response.json();
     }
 
-    rndm_game_questions = go_randomize_questions(data);
+    if (!tmpGameFinished) {
+      rndm_game_questions = go_randomize_questions(data);
 
-    // First time app is loaded we get the json payload and store it in state object for later use
-    //setGameQuestions(data);
-    setGameQuestions(rndm_game_questions);
+      // First time app is loaded we get the json payload and store it in state object for later use
+      //setGameQuestions(data);
+      setGameQuestions(rndm_game_questions);
 
-    // First time app is loaded we need immediate access to data so we'll directly use data object
-    // For future requests we'll use game_questions array
-    setQuestionType(rndm_game_questions[tmpQuestionCount].Type);
-    setQuestionText(rndm_game_questions[tmpQuestionCount].Question);
-    setAnswer1Text(rndm_game_questions[tmpQuestionCount].Answer1);
-    setAnswer2Text(rndm_game_questions[tmpQuestionCount].Answer2);
-    setAnswer3Text(rndm_game_questions[tmpQuestionCount].Answer3);
-    setAnswer4Text(rndm_game_questions[tmpQuestionCount].Answer4);
-    setCorrectAnswer(rndm_game_questions[tmpQuestionCount].Correct_Answer);
-    setFilePath(rndm_game_questions[tmpQuestionCount].File_Path);
-    if (rndm_game_questions[tmpQuestionCount].Type == "music-memory") {
-      setFilePath1(rndm_game_questions[tmpQuestionCount].Answer1_File_Path);
-      setFilePath2(rndm_game_questions[tmpQuestionCount].Answer2_File_Path);
-      setFilePath3(rndm_game_questions[tmpQuestionCount].Answer3_File_Path);
-      setFilePath4(rndm_game_questions[tmpQuestionCount].Answer4_File_Path);
-    }
+      // First time app is loaded we need immediate access to data so we'll directly use data object
+      // For future requests we'll use game_questions array
+      setQuestionType(rndm_game_questions[tmpQuestionCount].Type);
+      setQuestionText(rndm_game_questions[tmpQuestionCount].Question);
+      setAnswer1Text(rndm_game_questions[tmpQuestionCount].Answer1);
+      setAnswer2Text(rndm_game_questions[tmpQuestionCount].Answer2);
+      setAnswer3Text(rndm_game_questions[tmpQuestionCount].Answer3);
+      setAnswer4Text(rndm_game_questions[tmpQuestionCount].Answer4);
+      setCorrectAnswer(rndm_game_questions[tmpQuestionCount].Correct_Answer);
+      setFilePath(rndm_game_questions[tmpQuestionCount].File_Path);
+      if (rndm_game_questions[tmpQuestionCount].Type == "music-memory") {
+        setFilePath1(rndm_game_questions[tmpQuestionCount].Answer1_File_Path);
+        setFilePath2(rndm_game_questions[tmpQuestionCount].Answer2_File_Path);
+        setFilePath3(rndm_game_questions[tmpQuestionCount].Answer3_File_Path);
+        setFilePath4(rndm_game_questions[tmpQuestionCount].Answer4_File_Path);
+      }
 
-    setTrackLength(rndm_game_questions[tmpQuestionCount].Track_Length);
-    setAnswer1TrackLength(
-      rndm_game_questions[tmpQuestionCount].Answer1_Track_Length
-    );
-    setAnswer2TrackLength(
-      rndm_game_questions[tmpQuestionCount].Answer2_Track_Length
-    );
-    setAnswer3TrackLength(
-      rndm_game_questions[tmpQuestionCount].Answer3_Track_Length
-    );
-    setAnswer4TrackLength(
-      rndm_game_questions[tmpQuestionCount].Answer4_Track_Length
-    );
-    setHint(rndm_game_questions[tmpQuestionCount].Hint);
-    setTimeLeft(rndm_game_questions[tmpQuestionCount].Track_Length);
-    setSeconds(rndm_game_questions[tmpQuestionCount].Track_Length);
-    setTimerStarted(true);
-    setScoreWeightMultiplier(rndm_game_questions[tmpQuestionCount].Score);
-    setRound(1);
-    setCorrectAnswerButton(
-      rndm_game_questions[tmpQuestionCount].Answer1,
-      rndm_game_questions[tmpQuestionCount].Answer2,
-      rndm_game_questions[tmpQuestionCount].Answer3,
-      rndm_game_questions[tmpQuestionCount].Answer4,
-      rndm_game_questions[tmpQuestionCount].Correct_Answer
-    );
+      setTrackLength(rndm_game_questions[tmpQuestionCount].Track_Length);
+      setAnswer1TrackLength(
+        rndm_game_questions[tmpQuestionCount].Answer1_Track_Length
+      );
+      setAnswer2TrackLength(
+        rndm_game_questions[tmpQuestionCount].Answer2_Track_Length
+      );
+      setAnswer3TrackLength(
+        rndm_game_questions[tmpQuestionCount].Answer3_Track_Length
+      );
+      setAnswer4TrackLength(
+        rndm_game_questions[tmpQuestionCount].Answer4_Track_Length
+      );
+      setHint(rndm_game_questions[tmpQuestionCount].Hint);
+      setTimeLeft(rndm_game_questions[tmpQuestionCount].Track_Length);
+      setSeconds(rndm_game_questions[tmpQuestionCount].Track_Length);
+      setTimerStarted(true);
+      setScoreWeightMultiplier(rndm_game_questions[tmpQuestionCount].Score);
+      setRound(1);
+      setCorrectAnswerButton(
+        rndm_game_questions[tmpQuestionCount].Answer1,
+        rndm_game_questions[tmpQuestionCount].Answer2,
+        rndm_game_questions[tmpQuestionCount].Answer3,
+        rndm_game_questions[tmpQuestionCount].Answer4,
+        rndm_game_questions[tmpQuestionCount].Correct_Answer
+      );
 
-    //console.log(data);
-    if (!envObj.useLocalApis) {
-      goRefreshToken().then(() => {
-        generatePreSignedURL(rndm_game_questions[tmpQuestionCount].File_Path)
-          .then((url) => {
-            playSound(url);
-          })
-          .catch((err) => {
-            console.log("Error " + err);
-          });
-      });
-    } else {
-      url =
-        apiUriGetAudioApiUri + rndm_game_questions[tmpQuestionCount].File_Path;
-      playSound(url);
+      //console.log(data);
+      if (!envObj.useLocalApis) {
+        goRefreshToken().then(() => {
+          generatePreSignedURL(rndm_game_questions[tmpQuestionCount].File_Path)
+            .then((url) => {
+              playSound(url);
+            })
+            .catch((err) => {
+              console.log("Error " + err);
+            });
+        });
+      } else {
+        url =
+          apiUriGetAudioApiUri +
+          rndm_game_questions[tmpQuestionCount].File_Path;
+        playSound(url);
+      }
     }
   }
 
@@ -866,7 +877,11 @@ const GameScreen = ({ navigation }) => {
             source={require("../../assets/MusicIQ-Logo_2.jpg")}
           />
           <View>
-            <Text><LevelText text={current_level}></LevelText> <Text style={styles.separator}>  | </Text>  <ScoreText text={score}></ScoreText></Text>
+            <Text>
+              <LevelText text={current_level}></LevelText>{" "}
+              <Text style={styles.separator}> | </Text>{" "}
+              <ScoreText text={score}></ScoreText>
+            </Text>
           </View>
 
           <View>
@@ -1117,7 +1132,7 @@ const GameScreen = ({ navigation }) => {
                   alignItems: "center",
                 },
               ]}
-            > 
+            >
               <CustomButton
                 name="button1"
                 text={answer1_text}
@@ -1125,7 +1140,7 @@ const GameScreen = ({ navigation }) => {
                 disabled_status={btn_disabled_status}
                 onPress={() => guessAnswer({ answer1_text })}
               />
-            
+
               <CustomButton
                 name="button2"
                 text={answer2_text}
@@ -1282,7 +1297,7 @@ const styles = StyleSheet.create({
   separator: {
     color: "purple",
     fontWeight: "bold",
-  }
+  },
 });
 
 export default GameScreen;
