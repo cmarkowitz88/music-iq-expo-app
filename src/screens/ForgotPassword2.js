@@ -23,7 +23,8 @@ const ForgotPassword2 = ({ route, navigation }) => {
 
   const handleSubmitPress = () => {
    Auth.forgotPasswordSubmit(userEmail, code, password).then(data =>{
-        console.log(`Forgot Password Successful: ${data} `)
+        console.log(`Forgot Password Successful: ${data} `);
+        navigation.navigate("Home");
     }).catch(err => {
         console.log(err.message);
     })
@@ -92,6 +93,7 @@ const ForgotPassword2 = ({ route, navigation }) => {
             autoCapitalize="none"
             onChangeText={(newPassword) => setPassword(newPassword)}
             placeholder="Enter Your Password"
+            secureTextEntry="True"
           />
         </View>
         <View>
@@ -110,6 +112,7 @@ const ForgotPassword2 = ({ route, navigation }) => {
             autoCapitalize="none"
             onChangeText={(newConfirmPassword) => setConfirmPassword(newConfirmPassword)}
             placeholder="Enter Your Password"
+            secureTextEntry="True"
           />
         </View>
         <View

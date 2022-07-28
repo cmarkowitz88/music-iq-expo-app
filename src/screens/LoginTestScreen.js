@@ -143,6 +143,7 @@ const LogInTest = ({ navigation }) => {
             defaultValue={userPassword}
             placeholder="Enter Your Password"
             secureTextEntry={secure}
+           
           />
         </View>
 

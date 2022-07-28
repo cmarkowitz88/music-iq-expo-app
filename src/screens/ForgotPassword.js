@@ -11,8 +11,6 @@ import {
 
 import { Fontisto, AntDesign } from "@expo/vector-icons";
 import { Auth } from "aws-amplify";
-
-
 import { setLocalStorage2, getValueFor, logInUser } from "./Utils";
 
 

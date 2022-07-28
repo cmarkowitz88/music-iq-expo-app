@@ -18,6 +18,24 @@
     "Active": "true"
   },
   {
+    "Answer4": "Mid-Tempo Swing",
+    "Answer3": "Slow Shuffle",
+    "Answer2": "Half-Time Shuffle",
+    "Score": "5",
+    "Answer1": "Jazz Waltz",
+    "File_Location": "Drum-MidTempo-Swing.mp3",
+    "Question": "This drum beat is an example of which beat?",
+    "Track_Length": "22",
+    "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
+    "Level": "3",
+    "File_Path": "Drum-MidTempo-Swing.mp3",
+    "Correct_Answer": "Mid-Tempo Swing",
+    "Hint": "This pattern is a standard jazz swing beat that can be heard on countless recordings.",
+    "ID": "mm-2343drumwaltz",
+    "Type": "music-knowledge",
+    "Active": "true"
+  },
+  {
     "Answer4": "Select Answer 4",
     "Answer4_File_Path": "mq-funky-tele-1.mp3",
     "Answer4_Track_Length": "14",

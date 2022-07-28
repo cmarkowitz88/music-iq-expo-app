@@ -737,9 +737,10 @@ const GameScreen = ({ navigation }) => {
     setShowHintView(false);
     setStatusText("");
     resetButtons();
-    setTimerStarted(true);
+    
     setOutOfTime(false);
     if (question_count < game_questions.length) {
+      setTimerStarted(true);
       setQuestionType(game_questions[question_count].Type);
       setQuestionText(game_questions[question_count].Question);
       setAnswer1Text(game_questions[question_count].Answer1);
@@ -803,7 +804,7 @@ const GameScreen = ({ navigation }) => {
     } else {
       console.log("No More Questions.");
       setStatusText("Level Completed. Nice Job.");
-      setShowNextBtnBln(true);
+      //setShowNextBtnBln(true);
       getGameLevel().then((level) => {
         let newlevel = parseInt(level);
         newlevel += 1;
