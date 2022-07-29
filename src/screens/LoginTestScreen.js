@@ -2,7 +2,6 @@ import React, { Component, useState } from "react";
 import {
   StyleSheet,
   View,
-  TextInput,
   Image,
   SafeAreaView,
   Text,
@@ -10,6 +9,7 @@ import {
 } from "react-native";
 import { Fontisto, AntDesign } from "@expo/vector-icons";
 import { Auth } from "aws-amplify";
+import {TextInput} from "react-native-paper";
 
 import {
   CognitoUserPool,
@@ -122,6 +122,7 @@ const LogInTest = ({ navigation }) => {
             placeholder="Enter Your Email Here"
             underlineColorAndroid="transparent"
             autoCapitalize="none"
+            
             onChangeText={(newText) => setUserEmail(newText)}
           />
         </View>
@@ -143,6 +144,7 @@ const LogInTest = ({ navigation }) => {
             defaultValue={userPassword}
             placeholder="Enter Your Password"
             secureTextEntry={secure}
+            right={<TextInput.Icon name="eye" onPress={() => setSecure(!secure)} />}
            
           />
         </View>
