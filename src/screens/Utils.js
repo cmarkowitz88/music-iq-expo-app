@@ -23,6 +23,10 @@ export const setLocalStorage = (key, value) => {
   }
 };
 
+export const getRandomNumber = (min,max) =>{
+    return Math.floor(Math.random() *(max - min + 1)+min);
+};
+
 export async function deleteLocalStorageItem(key) {
   await SecureStore.deleteItemAsync(key).then(() => {
     console.log(`Deleted Key: ${key}`);

@@ -22,6 +22,7 @@ import {
   setLocalStorage2,
   getLocalStorage,
   deleteLocalStorageItem,
+  getRandomNumber,
   logInUser,
   setLocalStorage,
 } from "./Utils";
@@ -89,6 +90,7 @@ const GameScreen = ({ navigation }) => {
   let [btn4_color, setBtn4Color] = useState("gray");
   let [hint, setHint] = useState();
   let [showHintView, setShowHintView] = useState(false);
+  let [showHintBtn, setShowHintBtn] = useState(true);
   let [showNextBtn, setShowNextBtnBln] = useState(false);
   let [correct_answer_btn, setCorrectAnswerBtn] = useState();
   let [users_time, setUsersTime] = useState(0);
@@ -107,8 +109,10 @@ const GameScreen = ({ navigation }) => {
   let [refreshToken, setRefreshToken] = useState({});
   let [current_level, setCurrentLevel] = useState(1);
   let [hide_button_1, setHideButton1] = useState(false);
+  let [hide_button_2, setHideButton2] = useState(false);
+  let [hide_button_3, setHideButton3] = useState(false);
+  let [hide_button_4, setHideButton4] = useState(false);
   let [game_finished, setGameFinished] = useState(false);
-
   // Temp variables
   let tmpCnt = 0;
   let tmpStatus = "";
@@ -265,6 +269,11 @@ const GameScreen = ({ navigation }) => {
     setBtn2Color("gray");
     setBtn3Color("gray");
     setBtn4Color("gray");
+
+    setHideButton1(false);
+    setHideButton2(false);
+    setHideButton3(false);
+    setHideButton4(false);
   };
 
   const getSoundFXFile = (answer_status) => {
@@ -726,6 +735,27 @@ const GameScreen = ({ navigation }) => {
 
   const showHint = () => {
     setShowHintView(true);
+    setShowHintBtn(false);
+    rnd_button_to_hide = getRandomNumber(1,4);
+    while (rnd_button_to_hide == correct_answer_btn)
+    {
+      rnd_button_to_hide = getRandomNumber(1,4);
+    }    
+    switch(rnd_button_to_hide){
+      case 1:
+        setHideButton1(true);
+        break;
+      case 2:
+        setHideButton2(true);
+        break;
+      case 3:
+        setHideButton3(true);
+        break;
+      case 4:
+        setHideButton4(true);
+        break;
+    }
+    //setHideButton1(true);
   };
 
   const nextQuestion = () => {
@@ -735,6 +765,7 @@ const GameScreen = ({ navigation }) => {
     setBtn_disabled_status(false);
     setShowNextBtnBln(false);
     setShowHintView(false);
+    setShowHintBtn(true);
     setStatusText("");
     resetButtons();
     
@@ -906,14 +937,16 @@ const GameScreen = ({ navigation }) => {
           <View>
             <QuestionText questionText={question_text}></QuestionText>
           </View>
-
+          
           {question_type && out_of_time && question_type == "music-memory" && (
             <>
-              <View
+             {!hide_button_1 ?
+              <View 
                 style={[
                   { flexDirection: "row", alignItems: "center", marginLeft: 5 },
                 ]}
               >
+               
                 <View
                   style={[
                     { flex: 1, flexDirection: "row", justifyContent: "left" },
@@ -960,8 +993,9 @@ const GameScreen = ({ navigation }) => {
                     onPress={() => guessAnswer({ answer1_text })}
                   />
                 </View>
-              </View>
-
+              </View> :null}
+              
+              {!hide_button_2 ?
               <View
                 style={[
                   { flexDirection: "row", alignItems: "center", marginLeft: 5 },
@@ -1013,8 +1047,9 @@ const GameScreen = ({ navigation }) => {
                     onPress={() => guessAnswer({ answer2_text })}
                   />
                 </View>
-              </View>
+              </View> :null}
 
+              {!hide_button_3 ?
               <View
                 style={[
                   { flexDirection: "row", alignItems: "center", marginLeft: 5 },
@@ -1066,8 +1101,9 @@ const GameScreen = ({ navigation }) => {
                     onPress={() => guessAnswer({ answer3_text })}
                   />
                 </View>
-              </View>
+              </View> :null}
 
+              {! hide_button_4 ? 
               <View
                 style={[
                   { flexDirection: "row", alignItems: "center", marginLeft: 5 },
@@ -1119,7 +1155,7 @@ const GameScreen = ({ navigation }) => {
                     onPress={() => guessAnswer({ answer4_text })}
                   />
                 </View>
-              </View>
+              </View> :null}
             </>
           )}
 
@@ -1139,6 +1175,7 @@ const GameScreen = ({ navigation }) => {
                 text={answer1_text}
                 color={btn1_color}
                 disabled_status={btn_disabled_status}
+                hide={hide_button_1}
                 onPress={() => guessAnswer({ answer1_text })}
               />
 
@@ -1147,6 +1184,7 @@ const GameScreen = ({ navigation }) => {
                 text={answer2_text}
                 color={btn2_color}
                 disabled_status={btn_disabled_status}
+                hide={hide_button_2}
                 onPress={() => guessAnswer({ answer2_text })}
               />
               <CustomButton
@@ -1154,6 +1192,7 @@ const GameScreen = ({ navigation }) => {
                 text={answer3_text}
                 color={btn3_color}
                 disabled_status={btn_disabled_status}
+                hide={hide_button_3}
                 onPress={() => guessAnswer({ answer3_text })}
               />
               <CustomButton
@@ -1161,12 +1200,13 @@ const GameScreen = ({ navigation }) => {
                 text={answer4_text}
                 color={btn4_color}
                 disabled_status={btn_disabled_status}
+                hide={hide_button_4}
                 onPress={() => guessAnswer({ answer4_text })}
               />
             </View>
           )}
 
-          {question_type == "music-knowledge" && (
+          {question_type == "music-knowledge" && showHintBtn && (
             <CustomButton
               name="hint"
               text="Give Me a Hint!"
@@ -1175,7 +1215,7 @@ const GameScreen = ({ navigation }) => {
             />
           )}
 
-          {question_type == "music-memory" && out_of_time && (
+          {question_type == "music-memory" && showHintBtn && out_of_time && (
             <CustomButton
               name="hint"
               text="Give Me a Hint!"

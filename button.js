@@ -3,10 +3,13 @@ import { Text, View, StyleSheet, Pressable } from 'react-native';
 
 //export default function CustomButton(props) {
   //const CustomButton = ({text, onPress}) => {
-    const CustomButton = ({onPress, text, disabled_status,color}) => {
+    const CustomButton = ({onPress, text, disabled_status,color,hide}) => {
 
   //const btnPress = () =>{ alert(props.text) }
   
+  if(hide){
+    return null;
+  }
   
   return (
     //<Pressable style={styles.button} onPress={ ()=> setOutputText('New Text')}>
