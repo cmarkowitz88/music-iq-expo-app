@@ -11,7 +11,7 @@ export default function LevelText(props) {
 const styles = StyleSheet.create({
     levelText:{
         color:'purple',
-        fontSize:14,
+        fontSize:16,
         marginLeft:1,
         paddingBottom:2,
         textAlign:'left',

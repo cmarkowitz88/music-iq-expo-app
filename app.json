@@ -17,7 +17,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cmarkowitz88.music-iq-expo"
     },
     "android": {
       "adaptiveIcon": {

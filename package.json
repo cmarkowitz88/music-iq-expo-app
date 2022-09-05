@@ -1,9 +1,8 @@
 {
-  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
     "web": "expo start --web",
     "eject": "expo eject"
   },
@@ -28,13 +27,19 @@
     "json-loader": "^0.5.7",
     "react": "17.0.1",
     "react-dom": "17.0.1",
-    "react-native": "0.64.2",
+    "react-native": "0.64.3",
     "react-native-encrypted-storage": "^4.0.2",
     "react-native-paper": "^4.12.4",
     "react-native-screens": "~3.8.0",
     "react-native-sound": "^0.11.1",
     "react-native-web": "0.17.1",
-    "react-navigation-stack": "^2.10.4"
+    "react-navigation-stack": "^2.10.4",
+    "expo-dev-client": "~0.6.3",
+    "expo-splash-screen": "~0.13.5",
+    "expo-updates": "~0.10.13",
+    "react-native-gesture-handler": "~1.10.2",
+    "react-native-reanimated": "~2.2.0",
+    "react-native-safe-area-context": "3.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
@@ -45,5 +50,7 @@
     "eslint-plugin-react": "^7.27.1",
     "eslint-plugin-react-hooks": "^4.3.0"
   },
-  "private": true
+  "private": true,
+  "name": "music-iq-expo",
+  "version": "1.0.0"
 }
