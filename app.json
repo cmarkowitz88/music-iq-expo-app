@@ -29,6 +29,9 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "description": ""
+    "description": "",
+    "plugins": [
+      "sentry-expo"
+    ]
   }
 }

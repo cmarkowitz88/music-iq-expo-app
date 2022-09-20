@@ -111,6 +111,26 @@ const GameScreen = ({ navigation }) => {
 
   const QUESTIONS_PER_ROUND = 10;
 
+  async function downloadAndWriteMockDataFile() {
+    // Use this function to pull down MockData file from S3 that can be used when testing on a device since it can't read a local file
+    const dir = FileSystem.cacheDirectory;
+    const { exists, isDirectory, uri } = await getInfoAsync(dir);
+    console.log(
+      "exists: " + exists + " isDirectory: " + isDirectory + " uri: " + uri
+    );
+
+    FileSystem.downloadAsync(
+      "https://s3.amazonaws.com/craig.markowitz.stuff/MockData_1.json",
+      dir + "MockData_1.json"
+    )
+      .then(({ uri }) => {
+        console.log(`Finished Downloading to ${uri}`);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
   async function testReadFile() {
     // Use this function to pull down MockData file from S3 that can be used when testing on a device since it can't read a local file
     const dir = FileSystem.cacheDirectory;
@@ -119,16 +139,19 @@ const GameScreen = ({ navigation }) => {
       "exists: " + exists + " isDirectory: " + isDirectory + " uri: " + uri
     );
     //*********************************************************************************************************************************
-    // Uncomment below code to pull down the file into local storage
-    // FileSystem.downloadAsync('https://s3.amazonaws.com/craig.markowitz.stuff/MockData_1.json',dir + 'MockData_1.json')
-    //   .then(({ uri}) => {
-    //     console.log(`Finished Downloading to ${uri}`)
-    //   })
-    //   .catch(error => {
-    //     console.log(error);
-    //   });
+    //Uncomment below code to pull down the file into local storage
+    FileSystem.downloadAsync(
+      "https://s3.amazonaws.com/craig.markowitz.stuff/MockData_1.json",
+      dir + "MockData_1.json"
+    )
+      .then(({ uri }) => {
+        console.log(`Finished Downloading to ${uri}`);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     //**********************************************************************************************************************************
-    
+
     /*
     FileSystem.readAsStringAsync(dir + 'MockData_1.json')
       .then(data => {
@@ -344,7 +367,6 @@ const GameScreen = ({ navigation }) => {
   }
 
   async function playSound(filePath, question_type) {
-    testReadFile();
     if (sound_object === null || question_type == "memory") {
       const soundObj = new Audio.Sound();
       setPlayBackObject(soundObj);
@@ -398,6 +420,7 @@ const GameScreen = ({ navigation }) => {
   };
 
   async function initializeData(inLevel) {
+    //testReadFile();
     let data = {};
     let tmpQuestionCount = 0;
     setQuestionCount(tmpQuestionCount);
@@ -407,14 +430,14 @@ const GameScreen = ({ navigation }) => {
     if (useMockData) {
       try {
         //Use Code Below to read data file from S3 for debugging on device
-        const dir = FileSystem.cacheDirectory;
-        data = await FileSystem.readAsStringAsync(dir + 'MockData_1.json')
-        data = JSON.parse(data);
+        //const dir = FileSystem.cacheDirectory;
+        //data = await FileSystem.readAsStringAsync(dir + "MockData_1.json");
+        //data = JSON.parse(data);
 
         //Use Code Below to read local Json File
-        //mockDataUrl = `/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData_${inLevel}.json`;
-        //const response = await fetch(mockDataUrl);
-        //data = await response.json();
+        mockDataUrl = `/Users/craigmarkowitz/Documents/Development/music-iq-expo/MockData_${inLevel}.json`;
+        const response = await fetch(mockDataUrl);
+        data = await response.json();
       } catch {
         console.log(`Error loading mock data file: MockData_${inLevel}.json`);
         setGameFinished(true);
@@ -507,6 +530,8 @@ const GameScreen = ({ navigation }) => {
 
   //************** Initial Entry Point for GameScreen component  ****************/
   useEffect(() => {
+    console.log("Downloading S3 Mock Data File");
+    downloadAndWriteMockDataFile();
     deleteLocalStorageItem("level");
     console.log("In useEffect");
     setUpVars(envObj);
@@ -970,7 +995,11 @@ const GameScreen = ({ navigation }) => {
                 >
                   <View
                     style={[
-                      { flex: 1, flexDirection: "row", justifyContent: "left" },
+                      {
+                        flex: 1,
+                        flexDirection: "row",
+                        justifyContent: "flex-start",
+                      },
                     ]}
                   >
                     <CustomPlayButton
@@ -1004,7 +1033,7 @@ const GameScreen = ({ navigation }) => {
                     style={[
                       {
                         flex: 6,
-                        justifyContent: "left",
+                        justifyContent: "flex-start",
                         flexDirection: "row",
                         backgroundColor: "black",
                       },
@@ -1033,7 +1062,11 @@ const GameScreen = ({ navigation }) => {
                 >
                   <View
                     style={[
-                      { flex: 1, flexDirection: "row", justifyContent: "left" },
+                      {
+                        flex: 1,
+                        flexDirection: "row",
+                        justifyContent: "flex-start",
+                      },
                     ]}
                   >
                     <CustomPlayButton
@@ -1067,7 +1100,7 @@ const GameScreen = ({ navigation }) => {
                     style={[
                       {
                         flex: 6,
-                        justifyContent: "left",
+                        justifyContent: "flex-start",
                         flexDirection: "row",
                         backgroundColor: "black",
                       },
@@ -1096,7 +1129,11 @@ const GameScreen = ({ navigation }) => {
                 >
                   <View
                     style={[
-                      { flex: 1, flexDirection: "row", justifyContent: "left" },
+                      {
+                        flex: 1,
+                        flexDirection: "row",
+                        justifyContent: "flex-start",
+                      },
                     ]}
                   >
                     <CustomPlayButton
@@ -1130,7 +1167,7 @@ const GameScreen = ({ navigation }) => {
                     style={[
                       {
                         flex: 6,
-                        justifyContent: "left",
+                        justifyContent: "flex-start",
                         flexDirection: "row",
                         backgroundColor: "black",
                       },
@@ -1159,7 +1196,11 @@ const GameScreen = ({ navigation }) => {
                 >
                   <View
                     style={[
-                      { flex: 1, flexDirection: "row", justifyContent: "left" },
+                      {
+                        flex: 1,
+                        flexDirection: "row",
+                        justifyContent: "flex-start",
+                      },
                     ]}
                   >
                     <CustomPlayButton
@@ -1193,7 +1234,7 @@ const GameScreen = ({ navigation }) => {
                     style={[
                       {
                         flex: 6,
-                        justifyContent: "left",
+                        justifyContent: "flex-start",
                         flexDirection: "row",
                         backgroundColor: "black",
                       },
@@ -1332,7 +1373,7 @@ const styles = StyleSheet.create({
 
   questionText: {
     color: "white",
-    fontSize: 15,
+    fontSize: 14,
     marginLeft: 4,
   },
 
@@ -1372,7 +1413,7 @@ const styles = StyleSheet.create({
   hint: {
     color: "#c1e3a8",
     marginLeft: 6,
-    fontSize: 18,
+    fontSize: 15,
     paddingTop: 16,
     paddingBottom: 8,
   },
