@@ -24,24 +24,7 @@
     "Level": "1",
     "ID": "mm-synth-q1"
   },
-  {
-    "Answer4": "Genesis",
-    "Answer3": "Yes",
-    "Answer2": "AC/DC",
-    "Score": "5",
-    "Answer1": "Pink Floyd",
-    "File_Location": "Style-Of-AC-DC.mp3",
-    "Question": "This track is played in the style of which band?",
-    "Track_Length": "50",
-    "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
-    "Level": "2",
-    "File_Path": "Style-Of-AC-DC.mp3",
-    "Correct_Answer": "AC/DC",
-    "Hint": "This Austrialin band was one of the originators of hard-rock and heavy-metal",
-    "ID": "miq-3039494",
-    "Type": "music-knowledge",
-    "Active": "true"
-  },
+
   {
     "Answer4": "Select Answer 4",
     "Answer4_File_Path": "mm-synth-piano-pad-2.mp3",
@@ -68,24 +51,6 @@
     "ID": "mm"
   },
 
-  {
-    "Answer4": "Mid-Tempo Swing Pattern",
-    "Answer3": "Slow Shuffle Pattern",
-    "Answer2": "Half-Time Shuffle Pattern",
-    "Score": "5",
-    "Answer1": "Jazz Waltz Pattern",
-    "File_Location": "Drum-MidTempo-Swing.mp3",
-    "Question": "This audio clip features which drum pattern?",
-    "Track_Length": "22",
-    "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
-    "Level": "3",
-    "File_Path": "Drum-MidTempo-Swing.mp3",
-    "Correct_Answer": "Mid-Tempo Swing Pattern",
-    "Hint": "This pattern is a standard jazz swing beat that can be heard on countless recordings.",
-    "ID": "mm-2343drumwaltz",
-    "Type": "music-knowledge",
-    "Active": "true"
-  },
   {
     "Answer4": "Select Answer 4",
     "Answer4_File_Path": "MQ-PianoKeyThing-1.mp3",

@@ -470,41 +470,66 @@ const GameScreen = ({ navigation }) => {
 
       setQuestionType(rndm_game_questions[tmpQuestionCount].Type);
       setQuestionText(rndm_game_questions[tmpQuestionCount].Question);
-      // setAnswer1Text(rndm_game_questions[tmpQuestionCount].Answer1);
-      // setAnswer2Text(rndm_game_questions[tmpQuestionCount].Answer2);
-      // setAnswer3Text(rndm_game_questions[tmpQuestionCount].Answer3);
-      // setAnswer4Text(rndm_game_questions[tmpQuestionCount].Answer4);
 
-      if (rndm_game_questions[tmpQuestionCount].Type == "music-knowledge"){
-        // Randomize the answer text for each button   
-        setAnswerButtons(
-           rndm_game_questions[tmpQuestionCount].Answer1,
-           rndm_game_questions[tmpQuestionCount].Answer2,
-           rndm_game_questions[tmpQuestionCount].Answer3,
-           rndm_game_questions[tmpQuestionCount].Answer4,
-           rndm_game_questions[tmpQuestionCount].Correct_Answer)
-         }
-      else{
+      if (rndm_game_questions[tmpQuestionCount].Type == "music-knowledge") {
+        // Randomize the answer text for each button
+        let random_answers = setAnswerButtonsKnowledge(
+          rndm_game_questions[tmpQuestionCount].Answer1,
+          rndm_game_questions[tmpQuestionCount].Answer2,
+          rndm_game_questions[tmpQuestionCount].Answer3,
+          rndm_game_questions[tmpQuestionCount].Answer4
+        );
+
+        setAnswer1Text(random_answers[0]);
+        setAnswer2Text(random_answers[1]);
+        setAnswer3Text(random_answers[2]);
+        setAnswer4Text(random_answers[3]);
+        setCorrectAnswerButton(
+          random_answers[0],
+          random_answers[1],
+          random_answers[2],
+          random_answers[3],
+          rndm_game_questions[tmpQuestionCount].Correct_Answer
+        );
+      } else {
         setAnswer1Text(rndm_game_questions[tmpQuestionCount].Answer1);
         setAnswer2Text(rndm_game_questions[tmpQuestionCount].Answer2);
         setAnswer3Text(rndm_game_questions[tmpQuestionCount].Answer3);
         setAnswer4Text(rndm_game_questions[tmpQuestionCount].Answer4);
-        setCorrectAnswerButton(
+
+        let random_file_paths = setAnswerButtonsMem(
+          rndm_game_questions[tmpQuestionCount].Answer1_File_Path,
+          rndm_game_questions[tmpQuestionCount].Answer2_File_Path,
+          rndm_game_questions[tmpQuestionCount].Answer3_File_Path,
+          rndm_game_questions[tmpQuestionCount].Answer4_File_Path,
           rndm_game_questions[tmpQuestionCount].Answer1,
           rndm_game_questions[tmpQuestionCount].Answer2,
           rndm_game_questions[tmpQuestionCount].Answer3,
           rndm_game_questions[tmpQuestionCount].Answer4,
-          rndm_game_questions[tmpQuestionCount].Correct_Answer
+          rndm_game_questions[tmpQuestionCount].File_Path
+        );
+
+        setFilePath1(random_file_paths[0]);
+        setFilePath2(random_file_paths[1]);
+        setFilePath3(random_file_paths[2]);
+        setFilePath4(random_file_paths[3]);
+
+        setCorrectAnswerButton(
+          random_file_paths[4],
+          random_file_paths[5],
+          random_file_paths[6],
+          random_file_paths[7],
+          random_file_paths[9]
         );
       }
       setCorrectAnswer(rndm_game_questions[tmpQuestionCount].Correct_Answer);
       setFilePath(rndm_game_questions[tmpQuestionCount].File_Path);
-      if (rndm_game_questions[tmpQuestionCount].Type == "music-memory") {
-        setFilePath1(rndm_game_questions[tmpQuestionCount].Answer1_File_Path);
-        setFilePath2(rndm_game_questions[tmpQuestionCount].Answer2_File_Path);
-        setFilePath3(rndm_game_questions[tmpQuestionCount].Answer3_File_Path);
-        setFilePath4(rndm_game_questions[tmpQuestionCount].Answer4_File_Path);
-      }
+      // if (rndm_game_questions[tmpQuestionCount].Type == "music-memory") {
+      //   setFilePath1(rndm_game_questions[tmpQuestionCount].Answer1_File_Path);
+      //   setFilePath2(rndm_game_questions[tmpQuestionCount].Answer2_File_Path);
+      //   setFilePath3(rndm_game_questions[tmpQuestionCount].Answer3_File_Path);
+      //   setFilePath4(rndm_game_questions[tmpQuestionCount].Answer4_File_Path);
+      // }
 
       setTrackLength(rndm_game_questions[tmpQuestionCount].Track_Length);
       setAnswer1TrackLength(
@@ -525,7 +550,6 @@ const GameScreen = ({ navigation }) => {
       setTimerStarted(true);
       setScoreWeightMultiplier(rndm_game_questions[tmpQuestionCount].Score);
       setRound(1);
-      
 
       //console.log(data);
       if (!envObj.useLocalApis) {
@@ -820,45 +844,84 @@ const GameScreen = ({ navigation }) => {
     //setHideButton1(true);
   };
 
-  const setAnswerButtons = (a1, a2, a3, a4, c) => {
-    
-    let ansArray = [a1,a2,a3,a4];
-    let randomAnsArray = ['','','',''];
+  const setAnswerButtonsKnowledge = (a1, a2, a3, a4) => {
+    let ansArray = [a1, a2, a3, a4];
+    let randomAnsArray = ["", "", "", ""];
     let used = [];
-    
+
     // for(x=0;x<100;x++){
     //   let i = Math.floor(Math.random() * 4);
     //   console.log(i)
     // }
     console.log(ansArray.length);
-    for(x=0;x<ansArray.length;x++){
-      console.log(`loop counter x is ${x}`)
-      console.log(ansArray[x])
+    for (x = 0; x < ansArray.length; x++) {
+      console.log(`loop counter x is ${x}`);
+      console.log(ansArray[x]);
       let i = Math.floor(Math.random() * 4);
       console.log(`Random # is ${i}`);
-    
+
       dupNum = true;
-      while(dupNum == true){
-        if(!used.includes(i)){
+      while (dupNum == true) {
+        if (!used.includes(i)) {
           used[x] = i;
           randomAnsArray[x] = ansArray[i];
           console.log(randomAnsArray);
           console.log(used);
           dupNum = false;
-        }
-        else{
+        } else {
           i = Math.floor(Math.random() * 4);
           console.log(`Random # is ${i}`);
         }
       }
-     }
-      setAnswer1Text(randomAnsArray[0]);
-      setAnswer2Text(randomAnsArray[1]);
-      setAnswer3Text(randomAnsArray[2]);
-      setAnswer4Text(randomAnsArray[3]);
-
-      setCorrectAnswerButton(randomAnsArray[0],randomAnsArray[1],randomAnsArray[2],randomAnsArray[3],c);
     }
+    // setAnswer1Text(randomAnsArray[0]);
+    // setAnswer2Text(randomAnsArray[1]);
+    // setAnswer3Text(randomAnsArray[2]);
+    // setAnswer4Text(randomAnsArray[3]);
+
+    // setCorrectAnswerButton(randomAnsArray[0],randomAnsArray[1],randomAnsArray[2],randomAnsArray[3],c);
+    return randomAnsArray;
+  };
+
+  const setAnswerButtonsMem = (a1, a2, a3, a4, t1, t2, t3, t4, c) => {
+    let ansArray = [a1, a2, a3, a4, t1, t2, t3, t4];
+    let randomAnsArray = ["", "", "", "", "", "", "", "", "", ""];
+    let used = [];
+
+    // for(x=0;x<100;x++){
+    //   let i = Math.floor(Math.random() * 4);
+    //   console.log(i)
+    // }
+    console.log(ansArray.length);
+    for (x = 0; x < ansArray.length / 2; x++) {
+      console.log(`loop counter x is ${x}`);
+      console.log(ansArray[x]);
+      let i = Math.floor(Math.random() * 4);
+      console.log(`Random # is ${i}`);
+
+      dupNum = true;
+      while (dupNum == true) {
+        if (!used.includes(i)) {
+          used[x] = i;
+          randomAnsArray[x] = ansArray[i];
+          randomAnsArray[x + 4] = ansArray[i + 4];
+          // Need to identify the new correct answer location
+          if (randomAnsArray[x] == c) {
+            randomAnsArray[8] = randomAnsArray[x];
+            button = x + 1;
+            randomAnsArray[9] = `Select Answer ${button}`;
+          }
+          console.log(randomAnsArray);
+          console.log(used);
+          dupNum = false;
+        } else {
+          i = Math.floor(Math.random() * 4);
+          console.log(`Random # is ${i}`);
+        }
+      }
+    }
+    return randomAnsArray;
+  };
 
   const nextQuestion = () => {
     console.log("In game screen");
@@ -876,22 +939,22 @@ const GameScreen = ({ navigation }) => {
       setTimerStarted(true);
       setQuestionType(game_questions[question_count].Type);
       setQuestionText(game_questions[question_count].Question);
-      
-      if(game_questions[question_count].Type == "music-knowledge"){
-         setAnswerButtons(
+
+      if (game_questions[question_count].Type == "music-knowledge") {
+        setAnswerButtonsKnowledge(
           game_questions[question_count].Answer1,
           game_questions[question_count].Answer2,
           game_questions[question_count].Answer3,
           game_questions[question_count].Answer4,
-          game_questions[question_count].Correct_Answer);
-         }
-      else{
-            setAnswer1Text(game_questions[question_count].Answer1);
-            setAnswer2Text(game_questions[question_count].Answer2);
-            setAnswer3Text(game_questions[question_count].Answer3);
-            setAnswer4Text(game_questions[question_count].Answer4);
-         }
-     
+          game_questions[question_count].Correct_Answer
+        );
+      } else {
+        setAnswer1Text(game_questions[question_count].Answer1);
+        setAnswer2Text(game_questions[question_count].Answer2);
+        setAnswer3Text(game_questions[question_count].Answer3);
+        setAnswer4Text(game_questions[question_count].Answer4);
+      }
+
       setCorrectAnswer(game_questions[question_count].Correct_Answer);
       setFilePath(game_questions[question_count].File_Path);
       if (game_questions[question_count].Type == "music-memory") {
