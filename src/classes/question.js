@@ -1,6 +1,5 @@
-export class question{
-    constructor() {
-        this.type = '';
-
-    }
+export class Question {
+  constructor(type) {
+    this.type = type;
+  }
 }
