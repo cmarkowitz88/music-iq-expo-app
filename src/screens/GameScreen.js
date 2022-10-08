@@ -30,6 +30,7 @@ import { Auth, Storage } from "aws-amplify";
 import * as FileSystem from "expo-file-system";
 const { documentDirectory, getInfoAsync } = FileSystem;
 const storagePath = `${documentDirectory}`;
+import question from "../classes/question"
 
 let useMockData = "";
 let apiUriGetQuestions = "";
@@ -466,12 +467,39 @@ const GameScreen = ({ navigation }) => {
 
       // First time app is loaded we need immediate access to data so we'll directly use data object
       // For future requests we'll use game_questions array
+
+      let q = new question();
+      q.type = rndm_game_questions[tmpQuestionCount].Type
+
       setQuestionType(rndm_game_questions[tmpQuestionCount].Type);
       setQuestionText(rndm_game_questions[tmpQuestionCount].Question);
-      setAnswer1Text(rndm_game_questions[tmpQuestionCount].Answer1);
-      setAnswer2Text(rndm_game_questions[tmpQuestionCount].Answer2);
-      setAnswer3Text(rndm_game_questions[tmpQuestionCount].Answer3);
-      setAnswer4Text(rndm_game_questions[tmpQuestionCount].Answer4);
+      // setAnswer1Text(rndm_game_questions[tmpQuestionCount].Answer1);
+      // setAnswer2Text(rndm_game_questions[tmpQuestionCount].Answer2);
+      // setAnswer3Text(rndm_game_questions[tmpQuestionCount].Answer3);
+      // setAnswer4Text(rndm_game_questions[tmpQuestionCount].Answer4);
+
+      if (rndm_game_questions[tmpQuestionCount].Type == "music-knowledge"){
+        // Randomize the answer text for each button   
+        setAnswerButtons(
+           rndm_game_questions[tmpQuestionCount].Answer1,
+           rndm_game_questions[tmpQuestionCount].Answer2,
+           rndm_game_questions[tmpQuestionCount].Answer3,
+           rndm_game_questions[tmpQuestionCount].Answer4,
+           rndm_game_questions[tmpQuestionCount].Correct_Answer)
+         }
+      else{
+        setAnswer1Text(rndm_game_questions[tmpQuestionCount].Answer1);
+        setAnswer2Text(rndm_game_questions[tmpQuestionCount].Answer2);
+        setAnswer3Text(rndm_game_questions[tmpQuestionCount].Answer3);
+        setAnswer4Text(rndm_game_questions[tmpQuestionCount].Answer4);
+        setCorrectAnswerButton(
+          rndm_game_questions[tmpQuestionCount].Answer1,
+          rndm_game_questions[tmpQuestionCount].Answer2,
+          rndm_game_questions[tmpQuestionCount].Answer3,
+          rndm_game_questions[tmpQuestionCount].Answer4,
+          rndm_game_questions[tmpQuestionCount].Correct_Answer
+        );
+      }
       setCorrectAnswer(rndm_game_questions[tmpQuestionCount].Correct_Answer);
       setFilePath(rndm_game_questions[tmpQuestionCount].File_Path);
       if (rndm_game_questions[tmpQuestionCount].Type == "music-memory") {
@@ -500,13 +528,7 @@ const GameScreen = ({ navigation }) => {
       setTimerStarted(true);
       setScoreWeightMultiplier(rndm_game_questions[tmpQuestionCount].Score);
       setRound(1);
-      setCorrectAnswerButton(
-        rndm_game_questions[tmpQuestionCount].Answer1,
-        rndm_game_questions[tmpQuestionCount].Answer2,
-        rndm_game_questions[tmpQuestionCount].Answer3,
-        rndm_game_questions[tmpQuestionCount].Answer4,
-        rndm_game_questions[tmpQuestionCount].Correct_Answer
-      );
+      
 
       //console.log(data);
       if (!envObj.useLocalApis) {
@@ -588,10 +610,10 @@ const GameScreen = ({ navigation }) => {
       // For future requests we'll use game_questions array
       setQuestionType(rndm_game_questions[question_count].Type);
       setQuestionText(rndm_game_questions[question_count].Question);
-      setAnswer1Text(rndm_game_questions[question_count].Answer1);
-      setAnswer2Text(rndm_game_questions[question_count].Answer2);
-      setAnswer3Text(rndm_game_questions[question_count].Answer3);
-      setAnswer4Text(rndm_game_questions[question_count].Answer4);
+      // setAnswer1Text(rndm_game_questions[question_count].Answer1);
+      // setAnswer2Text(rndm_game_questions[question_count].Answer2);
+      // setAnswer3Text(rndm_game_questions[question_count].Answer3);
+      // setAnswer4Text(rndm_game_questions[question_count].Answer4);
       setCorrectAnswer(rndm_game_questions[question_count].Correct_Answer);
       setFilePath(rndm_game_questions[question_count].File_Path);
       if (rndm_game_questions[question_count].Type == "music-memory") {
@@ -801,6 +823,46 @@ const GameScreen = ({ navigation }) => {
     //setHideButton1(true);
   };
 
+  const setAnswerButtons = (a1, a2, a3, a4, c) => {
+    
+    let ansArray = [a1,a2,a3,a4];
+    let randomAnsArray = ['','','',''];
+    let used = [];
+    
+    // for(x=0;x<100;x++){
+    //   let i = Math.floor(Math.random() * 4);
+    //   console.log(i)
+    // }
+    console.log(ansArray.length);
+    for(x=0;x<ansArray.length;x++){
+      console.log(`loop counter x is ${x}`)
+      console.log(ansArray[x])
+      let i = Math.floor(Math.random() * 4);
+      console.log(`Random # is ${i}`);
+    
+      dupNum = true;
+      while(dupNum == true){
+        if(!used.includes(i)){
+          used[x] = i;
+          randomAnsArray[x] = ansArray[i];
+          console.log(randomAnsArray);
+          console.log(used);
+          dupNum = false;
+        }
+        else{
+          i = Math.floor(Math.random() * 4);
+          console.log(`Random # is ${i}`);
+        }
+      }
+     }
+      setAnswer1Text(randomAnsArray[0]);
+      setAnswer2Text(randomAnsArray[1]);
+      setAnswer3Text(randomAnsArray[2]);
+      setAnswer4Text(randomAnsArray[3]);
+
+      setCorrectAnswerButton(randomAnsArray[0],randomAnsArray[1],randomAnsArray[2],randomAnsArray[3],c);
+    }
+
   const nextQuestion = () => {
     console.log("In game screen");
     console.log(question_count);
@@ -817,10 +879,22 @@ const GameScreen = ({ navigation }) => {
       setTimerStarted(true);
       setQuestionType(game_questions[question_count].Type);
       setQuestionText(game_questions[question_count].Question);
-      setAnswer1Text(game_questions[question_count].Answer1);
-      setAnswer2Text(game_questions[question_count].Answer2);
-      setAnswer3Text(game_questions[question_count].Answer3);
-      setAnswer4Text(game_questions[question_count].Answer4);
+      
+      if(game_questions[question_count].Type == "music-knowledge"){
+         setAnswerButtons(
+          game_questions[question_count].Answer1,
+          game_questions[question_count].Answer2,
+          game_questions[question_count].Answer3,
+          game_questions[question_count].Answer4,
+          game_questions[question_count].Correct_Answer);
+         }
+      else{
+            setAnswer1Text(game_questions[question_count].Answer1);
+            setAnswer2Text(game_questions[question_count].Answer2);
+            setAnswer3Text(game_questions[question_count].Answer3);
+            setAnswer4Text(game_questions[question_count].Answer4);
+         }
+     
       setCorrectAnswer(game_questions[question_count].Correct_Answer);
       setFilePath(game_questions[question_count].File_Path);
       if (game_questions[question_count].Type == "music-memory") {
