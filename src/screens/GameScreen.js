@@ -30,7 +30,6 @@ import { Auth, Storage } from "aws-amplify";
 import * as FileSystem from "expo-file-system";
 const { documentDirectory, getInfoAsync } = FileSystem;
 const storagePath = `${documentDirectory}`;
-//import Question from "../classes/question"
 
 let useMockData = "";
 let apiUriGetQuestions = "";
@@ -459,7 +458,7 @@ const GameScreen = ({ navigation }) => {
     }
 
     if (!tmpGameFinished) {
-      rndm_game_questions = go_randomize_questions(data);
+      let rndm_game_questions = go_randomize_questions(data);
 
       // First time app is loaded we get the json payload and store it in state object for later use
       //setGameQuestions(data);
@@ -491,6 +490,7 @@ const GameScreen = ({ navigation }) => {
           random_answers[3],
           rndm_game_questions[tmpQuestionCount].Correct_Answer
         );
+        setCorrectAnswer(rndm_game_questions[tmpQuestionCount].Correct_Answer);
       } else {
         setAnswer1Text(rndm_game_questions[tmpQuestionCount].Answer1);
         setAnswer2Text(rndm_game_questions[tmpQuestionCount].Answer2);
@@ -515,14 +515,15 @@ const GameScreen = ({ navigation }) => {
         setFilePath4(random_file_paths[3]);
 
         setCorrectAnswerButton(
-          random_file_paths[4],
-          random_file_paths[5],
-          random_file_paths[6],
-          random_file_paths[7],
+          rndm_game_questions[tmpQuestionCount].Answer1,
+          rndm_game_questions[tmpQuestionCount].Answer2,
+          rndm_game_questions[tmpQuestionCount].Answer3,
+          rndm_game_questions[tmpQuestionCount].Answer4,
           random_file_paths[9]
         );
+        setCorrectAnswer(random_file_paths[9]);
       }
-      setCorrectAnswer(rndm_game_questions[tmpQuestionCount].Correct_Answer);
+
       setFilePath(rndm_game_questions[tmpQuestionCount].File_Path);
       // if (rndm_game_questions[tmpQuestionCount].Type == "music-memory") {
       //   setFilePath1(rndm_game_questions[tmpQuestionCount].Answer1_File_Path);
@@ -939,54 +940,91 @@ const GameScreen = ({ navigation }) => {
       setTimerStarted(true);
       setQuestionType(game_questions[question_count].Type);
       setQuestionText(game_questions[question_count].Question);
+      setFilePath(game_questions[question_count].File_Path);
 
       if (game_questions[question_count].Type == "music-knowledge") {
-        setAnswerButtonsKnowledge(
+        let random_answers = setAnswerButtonsKnowledge(
           game_questions[question_count].Answer1,
           game_questions[question_count].Answer2,
           game_questions[question_count].Answer3,
-          game_questions[question_count].Answer4,
+          game_questions[question_count].Answer4
+        );
+        setAnswer1Text(random_answers[0]);
+        setAnswer2Text(random_answers[1]);
+        setAnswer3Text(random_answers[2]);
+        setAnswer4Text(random_answers[3]);
+
+        setCorrectAnswerButton(
+          random_answers[0],
+          random_answers[1],
+          random_answers[2],
+          random_answers[3],
           game_questions[question_count].Correct_Answer
         );
+        setCorrectAnswer(game_questions[question_count].Correct_Answer);
       } else {
         setAnswer1Text(game_questions[question_count].Answer1);
         setAnswer2Text(game_questions[question_count].Answer2);
         setAnswer3Text(game_questions[question_count].Answer3);
         setAnswer4Text(game_questions[question_count].Answer4);
+
+        let random_file_paths = setAnswerButtonsMem(
+          game_questions[question_count].Answer1_File_Path,
+          game_questions[question_count].Answer2_File_Path,
+          game_questions[question_count].Answer3_File_Path,
+          game_questions[question_count].Answer4_File_Path,
+          game_questions[question_count].Answer1,
+          game_questions[question_count].Answer2,
+          game_questions[question_count].Answer3,
+          game_questions[question_count].Answer4,
+          game_questions[question_count].File_Path
+        );
+
+        setFilePath1(random_file_paths[0]);
+        setFilePath2(random_file_paths[1]);
+        setFilePath3(random_file_paths[2]);
+        setFilePath4(random_file_paths[3]);
+
+        setCorrectAnswerButton(
+          game_questions[question_count].Answer1,
+          game_questions[question_count].Answer2,
+          game_questions[question_count].Answer3,
+          game_questions[question_count].Answer4,
+          random_file_paths[9]
+        );
+        setCorrectAnswer(random_file_paths[9]);
       }
 
-      setCorrectAnswer(game_questions[question_count].Correct_Answer);
-      setFilePath(game_questions[question_count].File_Path);
-      if (game_questions[question_count].Type == "music-memory") {
-        setFilePath1(game_questions[question_count].Answer1_File_Path);
-        setFilePath2(game_questions[question_count].Answer2_File_Path);
-        setFilePath3(game_questions[question_count].Answer3_File_Path);
-        setFilePath4(game_questions[question_count].Answer4_File_Path);
-      }
+      // if (game_questions[question_count].Type == "music-memory") {
+      //   setFilePath1(game_questions[question_count].Answer1_File_Path);
+      //   setFilePath2(game_questions[question_count].Answer2_File_Path);
+      //   setFilePath3(game_questions[question_count].Answer3_File_Path);
+      //   setFilePath4(game_questions[question_count].Answer4_File_Path);
+      // }
       setTrackLength(game_questions[question_count].Track_Length);
       setAnswer1TrackLength(
-        rndm_game_questions[question_count].Answer1_Track_Length
+        game_questions[question_count].Answer1_Track_Length
       );
       setAnswer2TrackLength(
-        rndm_game_questions[question_count].Answer2_Track_Length
+        game_questions[question_count].Answer2_Track_Length
       );
       setAnswer3TrackLength(
-        rndm_game_questions[question_count].Answer3_Track_Length
+        game_questions[question_count].Answer3_Track_Length
       );
       setAnswer4TrackLength(
-        rndm_game_questions[question_count].Answer4_Track_Length
+        game_questions[question_count].Answer4_Track_Length
       );
       setSeconds(game_questions[question_count].Track_Length);
       setMemorySeconds(null);
       setHint(game_questions[question_count].Hint);
 
-      setCorrectAnswerButton(
-        game_questions[question_count].Answer1,
-        game_questions[question_count].Answer2,
-        game_questions[question_count].Answer3,
-        game_questions[question_count].Answer4,
-        game_questions[question_count].Correct_Answer
-      );
+      // setCorrectAnswerButton(
+      //   game_questions[question_count].Answer1,
+      //   game_questions[question_count].Answer2,
+      //   game_questions[question_count].Answer3,
+      //   game_questions[question_count].Answer4,
+      //   game_questions[question_count].Correct_Answer
+      // );
 
       // Increment counter for current question for this round
       //setRoundQuestionCount(round_question_cnt + 1);
@@ -996,7 +1034,7 @@ const GameScreen = ({ navigation }) => {
       if (!envObj.useLocalApis) {
         goRefreshToken().then((val) => {
           console.log(val);
-          generatePreSignedURL(rndm_game_questions[question_count].File_Path)
+          generatePreSignedURL(game_questions[question_count].File_Path)
             .then((url) => {
               playSound(url);
             })
@@ -1006,7 +1044,7 @@ const GameScreen = ({ navigation }) => {
         });
       } else {
         url =
-          apiUriGetAudioApiUri + rndm_game_questions[question_count].File_Path;
+          apiUriGetAudioApiUri + game_questions[question_count].File_Path;
         playSound(url);
       }
     } else {

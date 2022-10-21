@@ -18,6 +18,24 @@
     "Active": "true"
   },
   {
+    "Answer4": "Shuffle",
+    "Answer3": "One Drop",
+    "Answer2": "Samba",
+    "Score": "1",
+    "Answer1": "16th Note Groove",
+    "File_Location": "Drums-Basic-Shuffle.mp3",
+    "Question": "Which drum pattern is featured in this audio track?",
+    "Track_Length": "16",
+    "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
+    "Level": "3",
+    "File_Path": "Drums-Basic-Shuffle.mp3",
+    "Correct_Answer": "Shuffle",
+    "Hint": "This drum pattern has a triplet feel and is commonly heard in blues, jazz, and rock music.",
+    "ID": "mk-shuffle-beat",
+    "Type": "music-knowledge",
+    "Active": "true"
+  },
+  {
     "Answer4": "Ruff",
     "Answer3": "Tap",
     "Answer2": "Ghost Note",
@@ -29,7 +47,7 @@
     "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
     "Level": "3",
     "File_Path": "Drums-Ghost_notes.mp3",
-    "Correct_Answer": "Ghost Notes",
+    "Correct_Answer": "Ghost Note",
     "Hint": "This type of note has a musical value, but has no discernible pitch. It is sometimes also called a dead or muted note.",
     "ID": "miq-ghostnotes",
     "Type": "music-knowledge",
