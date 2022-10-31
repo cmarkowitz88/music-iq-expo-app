@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Amplify from 'aws-amplify';
 import config from "./src/aws-exports";
 import RootNavigator from "./src/navigation/RootNavigator";
+import BottomNavigator from "./src/navigation/BottomNavigator";
 import 'expo-dev-client'  
 import * as Sentry from 'sentry-expo'
 
@@ -16,7 +17,11 @@ Sentry.init({
 
 //export default function App() {
 const IndexPage = () => {
-  return <RootNavigator />;
+  return( 
+  <>
+  
+  <RootNavigator />
+  </>)
 };
 
 export default IndexPage;

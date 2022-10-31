@@ -1585,7 +1585,7 @@ const styles = StyleSheet.create({
   hint: {
     color: "#c1e3a8",
     marginLeft: 6,
-    fontSize: 15,
+    fontSize: 16,
     paddingTop: 16,
     paddingBottom: 8,
   },

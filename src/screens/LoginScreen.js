@@ -22,12 +22,15 @@ import {
 import { Fontisto } from "@expo/vector-icons";
 
 
+
 const LogInScreen = ({ navigation }) => {
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
   const [secure, setSecure] = useState(true);
   const [loginMessage, setLoginMessage] = useState("");
   const [loggedIn, setLoggedIn] = useState(false);
+
+  
 
   const logInUser = () => {
     let authenticationData = {

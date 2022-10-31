@@ -18,6 +18,24 @@
     "Active": "true"
   },
   {
+    "Answer4": "Hammer On",
+    "Answer3": "Tremolo Picking",
+    "Answer2": "Palm Muting",
+    "Score": "2",
+    "Answer1": "Dive Bomb",
+    "File_Location": "DiveBomb.mp3",
+    "Question": "This audio clip is an example of which? guitar technique?",
+    "Track_Length": "17",
+    "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
+    "Level": "2",
+    "File_Path": "DiveBomb.mp3",
+    "Correct_Answer": "Dive Bomb",
+    "Hint": "This is a guitar technique where the tremolo bar is depressed to gradually lower the pitch of a note.",
+    "ID": "mk-loop-1726374",
+    "Type": "music-knowledge",
+    "Active": "true"
+  },
+  {
     "Answer4": "The 1990's",
     "Answer3": "The 1970's",
     "Answer2": "The 2000's",
