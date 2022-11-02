@@ -12,6 +12,7 @@ import NewUser from "../screens/NewUser";
 import NewUserConfirmEmail from "../screens/NewUserEmailConfirm";
 import ForgotPassword from "../screens/ForgotPassword";
 import ForgotPassword2 from "../screens/ForgotPassword2";
+import BottomNavigator from "./BottomNavigator";
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +20,7 @@ const RootNavigator = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+      
         <Stack.Screen name="Home" component={WelcomeScreen} />
         <Stack.Screen name="Game" component={GameScreen} />
         <Stack.Screen name="RoundReview" component={RoundReview} />
@@ -30,6 +32,7 @@ const RootNavigator = () => {
         />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
         <Stack.Screen name="ForgotPassword2" component={ForgotPassword2} />
+        <Stack.Screen name="Tabs" component={BottomNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );

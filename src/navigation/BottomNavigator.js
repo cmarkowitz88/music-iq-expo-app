@@ -3,13 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text } from 'react-native';
 import WelcomeScreen from "../screens/WelcomeScreen";
-
-
-
-
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
-
 import GameScreen from "../screens/GameScreen";
 import RoundReview from "../screens/RoundReview";
 import LoginScreen from "../screens/LoginScreen";
@@ -34,7 +28,7 @@ function HomeScreen() {
   
   function SettingsScreen() {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' , color:'white'}}>
         <Text>Settings!</Text>
       </View>
     );
@@ -43,30 +37,10 @@ function HomeScreen() {
 const BottomNavigator = () => {
     return (
         <>
-        <NavigationContainer>
         <Tab.Navigator>
-            <Tab.Screen name="Welcome" component={WelcomeScreen} />
-            
+            <Tab.Screen name="GameScreen" component={GameScreen} />
+            <Tab.Screen name="Welcome" component={SettingsScreen} />
       </Tab.Navigator>
-      
-    </NavigationContainer>
-    <NavigationContainer>
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={WelcomeScreen} />
-        <Stack.Screen name="Game" component={GameScreen} />
-        <Stack.Screen name="RoundReview" component={RoundReview} />
-        <Stack.Screen name="LogIn" component={LoginTest} />
-        <Stack.Screen name="NewUser" component={NewUser} />
-        <Stack.Screen
-          name="NewUserConfirmEmail"
-          component={NewUserConfirmEmail}
-        />
-        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-        <Stack.Screen name="ForgotPassword2" component={ForgotPassword2} />
-      </Stack.Navigator>
-    </NavigationContainer>
-    
-    
     </>
     );
 };
