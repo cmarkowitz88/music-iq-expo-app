@@ -3,10 +3,13 @@ import { Text, View, StyleSheet, Pressable } from 'react-native';
 
 //export default function CustomButton(props) {
   //const CustomButton = ({text, onPress}) => {
-    const CustomButton = ({onPress, text, disabled_status,color}) => {
+    const CustomButton = ({onPress, text, disabled_status,color,hide}) => {
 
   //const btnPress = () =>{ alert(props.text) }
   
+  if(hide){
+    return null;
+  }
   
   return (
     //<Pressable style={styles.button} onPress={ ()=> setOutputText('New Text')}>
@@ -25,11 +28,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     elevation: 3,
     //backgroundColor: {color},
-    margin:10
+    margin:10,
+    width:"85%"
   },
   text: {
-    fontSize: 16,
-    lineHeight: 21,
+    fontSize: 15,
+    lineHeight: 16,
     fontWeight: 'bold',
     letterSpacing: 0.25,
     color: 'white',

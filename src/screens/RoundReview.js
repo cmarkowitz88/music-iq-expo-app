@@ -60,7 +60,7 @@ const RoundReview = ({ route, navigation }) => {
   );
 
   console.log(data);
-  console.log("h");
+  
 
   return (
     <SafeAreaView style={styles.container}>
