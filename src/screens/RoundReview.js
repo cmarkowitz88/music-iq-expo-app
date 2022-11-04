@@ -78,7 +78,7 @@ const RoundReview = ({ route, navigation }) => {
           )}
         </View>
 
-        <CustomButton text="Back" onPress={() => navigation.navigate("Game")} />
+        <CustomButton text="Back" onPress={() => navigation.navigate("Tabs")} />
       </View>
     </SafeAreaView>
   );
