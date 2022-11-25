@@ -228,13 +228,12 @@ const GameScreen = ({ navigation }) => {
 
       //playSoundFX();
       highlightButtons("correct", btn_selected);
-      if(question_type == 'music-memory'){
+      if (question_type == "music-knowledge") {
         calcScore(track_length, seconds, score_weight_multiplier);
-      }
-      else{
+      } else {
         calcMemoryScore();
       }
-      
+
       setIsCorrect(true);
       console.log("Correct!");
     } else {
@@ -294,7 +293,7 @@ const GameScreen = ({ navigation }) => {
 
   const calcMemoryScore = () => {
     console.log("In Memory Score");
-  }
+  };
 
   const highlightButtons = (status, in_btn_selected) => {
     if (status == "correct") {
@@ -1053,8 +1052,7 @@ const GameScreen = ({ navigation }) => {
             });
         });
       } else {
-        url =
-          apiUriGetAudioApiUri + game_questions[question_count].File_Path;
+        url = apiUriGetAudioApiUri + game_questions[question_count].File_Path;
         playSound(url);
       }
     } else {
