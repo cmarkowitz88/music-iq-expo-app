@@ -228,7 +228,13 @@ const GameScreen = ({ navigation }) => {
 
       //playSoundFX();
       highlightButtons("correct", btn_selected);
-      calcScore(track_length, seconds, score_weight_multiplier);
+      if(question_type == 'music-memory'){
+        calcScore(track_length, seconds, score_weight_multiplier);
+      }
+      else{
+        calcMemoryScore();
+      }
+      
       setIsCorrect(true);
       console.log("Correct!");
     } else {
@@ -285,6 +291,10 @@ const GameScreen = ({ navigation }) => {
     x = Math.round(x / 10) * 10;
     setScore((prevScore) => prevScore + x);
   };
+
+  const calcMemoryScore = () => {
+    console.log("In Memory Score");
+  }
 
   const highlightButtons = (status, in_btn_selected) => {
     if (status == "correct") {

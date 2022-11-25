@@ -37,7 +37,7 @@ function HomeScreen() {
 const BottomNavigator = () => {
     return (
         <>
-        <Tab.Navigator>
+        <Tab.Navigator initialRouteName='Home' screenOptions={ { headerShown: false, tabBarStyle:{backgroundColor:'#000', borderTopWidth:0,}} }>
             <Tab.Screen name="GameScreen" component={GameScreen} />
             <Tab.Screen name="Welcome" component={SettingsScreen} />
       </Tab.Navigator>
