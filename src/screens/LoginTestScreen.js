@@ -49,7 +49,7 @@ const LogInTest = ({ navigation }) => {
       console.log(creds);
       console.log(user);
       console.log(ses);
-      navigation.navigate("Game");
+      navigation.navigate("Tabs");
     } catch (error) {
       console.log("error signing in", error);
       console.log(error);

@@ -22,7 +22,7 @@ const separator = () => (
     />
 );
 
-const RoundReview = ({ route, navigation }) => {
+const RoundReview = ({ route,navigation }) => {
   const { data } = route.params;
   const header_wording = "Round Review";
   const header_answer = "Your Answer: ";

@@ -1,5 +1,23 @@
 [
   {
+    "Answer4": "4/4",
+    "Answer3": "6/8",
+    "Answer2": "7/4",
+    "Score": "1",
+    "Answer1": "12/8",
+    "File_Location": "Drums-Afro-Cuban-6-8.mp3",
+    "Question": "What is the correct time signature for this sound clip?",
+    "Track_Length": "16",
+    "Created": "IfAtQ-QVoNKt^4fquAf!nKY)^i.irQGFEalJFQEQJKavSJG%F",
+    "Level": "3",
+    "File_Path": "Drums-Afro-Cuban-6-8.mp3",
+    "Correct_Answer": "6/8",
+    "Hint": "This afro-cuban pattern contains six eighth notes in each measure.",
+    "ID": "mk-6-6-afro-cuban-drums",
+    "Type": "music-knowledge",
+    "Active": "true"
+  },
+  {
     "Answer4": "Samba Pattern",
     "Answer3": "Reggae Pattern",
     "Answer2": "Shuffle Pattern",

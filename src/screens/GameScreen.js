@@ -28,9 +28,10 @@ import {
 import getEnvVars from "../../environment";
 import { Auth, Storage } from "aws-amplify";
 import * as FileSystem from "expo-file-system";
+
+// Declare local variables
 const { documentDirectory, getInfoAsync } = FileSystem;
 const storagePath = `${documentDirectory}`;
-
 let useMockData = "";
 let apiUriGetQuestions = "";
 let apiUriGetAudioApiUri = "";
@@ -60,8 +61,8 @@ const GameScreen = ({ navigation }) => {
   let [file_path3, setFilePath3] = useState();
   let [file_path4, setFilePath4] = useState();
   let [score, setScore] = useState(0);
-  let [round, setRound] = useState(0);
   let [round_question_cnt, setRoundQuestionCount] = useState(0);
+  let [round, setRound] = useState(1);
   let [question_count, setQuestionCount] = useState(0);
   let [track_length, setTrackLength] = useState(0);
   let [answer1_track_length, setAnswer1TrackLength] = useState(0);
@@ -98,11 +99,13 @@ const GameScreen = ({ navigation }) => {
   let [gotUserCreds, setGotUserCreds] = useState(false);
   let [refreshToken, setRefreshToken] = useState({});
   let [current_level, setCurrentLevel] = useState(1);
+  let [currentRound, setCurrentRound] = useState(0);
   let [hide_button_1, setHideButton1] = useState(false);
   let [hide_button_2, setHideButton2] = useState(false);
   let [hide_button_3, setHideButton3] = useState(false);
   let [hide_button_4, setHideButton4] = useState(false);
   let [game_finished, setGameFinished] = useState(false);
+  
   // Temp variables
   let tmpCnt = 0;
   let tmpStatus = "";
@@ -231,7 +234,8 @@ const GameScreen = ({ navigation }) => {
       if (question_type == "music-knowledge") {
         calcScore(track_length, seconds, score_weight_multiplier);
       } else {
-        calcMemoryScore();
+        let t = track_length - memory_seconds;
+        calcScore(track_length, t, score_weight_multiplier);
       }
 
       setIsCorrect(true);
@@ -285,15 +289,12 @@ const GameScreen = ({ navigation }) => {
   };
 
   const calcScore = (in_track_length, user_time, score_weight_multiplier) => {
-    let x =
-      Math.ceil((user_time / track_length) * 100) * score_weight_multiplier;
+    let x = Math.ceil((user_time / track_length) * 100) * score_weight_multiplier;
     x = Math.round(x / 10) * 10;
     setScore((prevScore) => prevScore + x);
   };
 
-  const calcMemoryScore = () => {
-    console.log("In Memory Score");
-  };
+  
 
   const highlightButtons = (status, in_btn_selected) => {
     if (status == "correct") {
@@ -1135,7 +1136,7 @@ const GameScreen = ({ navigation }) => {
             <Text>
               <LevelText text={current_level}></LevelText>{" "}
               <Text style={styles.separator}> | </Text>{" "}
-              <ScoreText text={score}></ScoreText>
+              <ScoreText text={score.toLocaleString()}></ScoreText>
             </Text>
           </View>
 
@@ -1581,9 +1582,10 @@ const styles = StyleSheet.create({
 
   timer: {
     color: "purple",
-    fontSize: 16,
+    fontSize: 18,
     marginLeft: 1,
     paddingBottom: 15,
+    paddingTop: 8,
     textAlign: "left",
     flexDirection: "row",
     fontWeight: "bold",

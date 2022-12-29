@@ -11,7 +11,7 @@ export default function ScoreText(props) {
 const styles = StyleSheet.create({
     scoreText:{
         color:'purple',
-        fontSize:16,
+        fontSize:18,
         marginLeft:1,
         paddingBottom:4,
         textAlign:'left',
