@@ -44,6 +44,33 @@ export async function getLocalStorage(key) {
   // let result = await SecureStore.getItemAsync(key);
   return result;
 }
+
+export async function getAllUserData(fields){
+  let userData = {'level':'', 'round':''};
+  for (key of fields){
+    userData[key] = await SecureStore.getItemAsync(key);
+  }
+  return userData;
+}
+
+export async function getAllUserData2(fields){
+  var promise = new Promise((resolve, reject) => {
+  let userData = {"level":'', "round":''};
+  
+  fields.map(field => {
+    console.log(field);
+    res = SecureStore.getItemAsync(field);
+      console.log(res);
+      userData[field] = res;
+      
+  console.log(`User Data: ${userData}`);
+  });
+  resolve(userData);
+  
+  return promise;
+});
+}
+
 export function logInUser(userName, userPassword) {
   var promise = new Promise((resolve, reject) => {
     let rtn = "success";

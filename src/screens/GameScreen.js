@@ -23,6 +23,8 @@ import {
   getLocalStorage,
   deleteLocalStorageItem,
   getRandomNumber,
+  getAllUserData,
+  getAllUsersData,
 } from "./Utils";
 
 import getEnvVars from "../../environment";
@@ -62,7 +64,7 @@ const GameScreen = ({ navigation }) => {
   let [file_path4, setFilePath4] = useState();
   let [score, setScore] = useState(0);
   let [round_question_cnt, setRoundQuestionCount] = useState(0);
-  let [round, setRound] = useState(1);
+  //let [round, setRound] = useState(1);
   let [question_count, setQuestionCount] = useState(0);
   let [track_length, setTrackLength] = useState(0);
   let [answer1_track_length, setAnswer1TrackLength] = useState(0);
@@ -105,11 +107,12 @@ const GameScreen = ({ navigation }) => {
   let [hide_button_3, setHideButton3] = useState(false);
   let [hide_button_4, setHideButton4] = useState(false);
   let [game_finished, setGameFinished] = useState(false);
-  
+
   // Temp variables
   let tmpCnt = 0;
   let tmpStatus = "";
   let level;
+  let round;
   let tmpGameFinished = "";
 
   const QUESTIONS_PER_ROUND = 10;
@@ -289,12 +292,11 @@ const GameScreen = ({ navigation }) => {
   };
 
   const calcScore = (in_track_length, user_time, score_weight_multiplier) => {
-    let x = Math.ceil((user_time / track_length) * 100) * score_weight_multiplier;
+    let x =
+      Math.ceil((user_time / track_length) * 100) * score_weight_multiplier;
     x = Math.round(x / 10) * 10;
     setScore((prevScore) => prevScore + x);
   };
-
-  
 
   const highlightButtons = (status, in_btn_selected) => {
     if (status == "correct") {
@@ -414,12 +416,43 @@ const GameScreen = ({ navigation }) => {
         getLocalStorage("level").then((tmplevel) => {
           if (tmplevel == null) {
             setLocalStorage2("level", "1");
+            setLocalStorage2("round", "1");
             setCurrentLevel("1");
+            setCurrentRound("1");
             level = 1;
           } else {
             level = tmplevel;
           }
           console.log(level);
+          resolve(level);
+        });
+      } catch {
+        reject("Error getting local storage.");
+      }
+    });
+    return promise;
+  };
+
+  const getUserData = () => {
+    var promise = new Promise((resolve, reject) => {
+      try {
+        getAllUserData(["level", "round"]).then((userData) => {
+          if (userData.level == null) {
+            setLocalStorage2("level", "1");
+            setCurrentLevel("1");
+            level = 1;
+          } else {
+            level = userData.level;
+          }
+          if (userData.round == null) {
+            setLocalStorage2("round", "1");
+            setCurrentRound("1");
+            round = 1;
+          } else {
+            round = userData.round;
+          }
+          console.log(`Level: ${level}`);
+          console.log(`Round: ${round}`);
           resolve(level);
         });
       } catch {
@@ -560,7 +593,7 @@ const GameScreen = ({ navigation }) => {
       setSeconds(rndm_game_questions[tmpQuestionCount].Track_Length);
       setTimerStarted(true);
       setScoreWeightMultiplier(rndm_game_questions[tmpQuestionCount].Score);
-      setRound(1);
+      //setRound(1);
 
       //console.log(data);
       if (!envObj.useLocalApis) {
@@ -584,13 +617,19 @@ const GameScreen = ({ navigation }) => {
 
   //************** Initial Entry Point for GameScreen component  ****************/
   useEffect(() => {
-    console.log("Downloading S3 Mock Data File");
-    downloadAndWriteMockDataFile();
-    deleteLocalStorageItem("level");
+    //console.log("Downloading S3 Mock Data File");
+    //downloadAndWriteMockDataFile();
+    //deleteLocalStorageItem("level");
     console.log("In useEffect");
     setUpVars(envObj);
+    // getAllUserData(["level", "round"]).then((userData) => {
+    //   console.log(userData.level);
+    //   console.log(userData.round);
+    // });
+    getUserData().then((lvl) => {
+      initializeData(lvl);
+    });
     getGameLevel().then((lvl) => {
-      //getData(lvl);
       initializeData(lvl);
     });
     // getLocalStorage("level").then((tmplevel) => {
