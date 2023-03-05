@@ -77,10 +77,10 @@ const GameScreen = ({ navigation }) => {
   let [btn_disabled_status, setBtn_disabled_status] = useState(false);
   let [playback_object, setPlayBackObject] = useState(null);
   let [sound_object, setSoundObject] = useState(null);
-  let [btn1_color, setBtn1Color] = useState("gray");
-  let [btn2_color, setBtn2Color] = useState("gray");
-  let [btn3_color, setBtn3Color] = useState("gray");
-  let [btn4_color, setBtn4Color] = useState("gray");
+  let [btn1_color, setBtn1Color] = useState("black");
+  let [btn2_color, setBtn2Color] = useState("black");
+  let [btn3_color, setBtn3Color] = useState("black");
+  let [btn4_color, setBtn4Color] = useState("black");
   let [hint, setHint] = useState();
   let [showHintView, setShowHintView] = useState(false);
   let [showHintBtn, setShowHintBtn] = useState(true);
@@ -313,10 +313,10 @@ const GameScreen = ({ navigation }) => {
   };
 
   const resetButtons = () => {
-    setBtn1Color("gray");
-    setBtn2Color("gray");
-    setBtn3Color("gray");
-    setBtn4Color("gray");
+    setBtn1Color("black");
+    setBtn2Color("black");
+    setBtn3Color("black");
+    setBtn4Color("black");
 
     setHideButton1(false);
     setHideButton2(false);
@@ -440,14 +440,14 @@ const GameScreen = ({ navigation }) => {
           if (userData.level == null) {
             setLocalStorage2("level", "1");
             setCurrentLevel("1");
-            level = 1;
+            level = "1";
           } else {
             level = userData.level;
           }
           if (userData.round == null) {
             setLocalStorage2("round", "1");
             setCurrentRound("1");
-            round = 1;
+            round = "1";
           } else {
             round = userData.round;
           }
@@ -629,9 +629,9 @@ const GameScreen = ({ navigation }) => {
     getUserData().then((lvl) => {
       initializeData(lvl);
     });
-    getGameLevel().then((lvl) => {
-      initializeData(lvl);
-    });
+    // getGameLevel().then((lvl) => {
+    //   initializeData(lvl);
+    // });
     // getLocalStorage("level").then((tmplevel) => {
     //   if(tmplevel == null){
     //     setLocalStorage2("level","1");
@@ -1526,6 +1526,8 @@ const GameScreen = ({ navigation }) => {
               text="Give Me a Hint!"
               onPress={showHint}
               title="Show Me a Hint"
+              color="#1FE0AB"
+              text_color="#190602"
             />
           )}
 
@@ -1535,6 +1537,8 @@ const GameScreen = ({ navigation }) => {
               text="Give Me a Hint!"
               onPress={showHint}
               title="Show Me a Hint"
+              color="#1FE0AB"
+              text_color="#190602"
             />
           )}
 
